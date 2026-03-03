@@ -11,7 +11,7 @@ import com.google.common.reflect.TypeToken;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -151,14 +151,14 @@ public final class UsernameCache {
         }
         catch (JsonSyntaxException | IOException e)
         {
-            LOGGER.error(USRCACHE, MohistMC.i18n.as("mohist.i18n.106", saveFile), e);
+            LOGGER.error(USRCACHE, OneWorldCore.i18n.as("mohist.i18n.106", saveFile), e);
             try
             {
                 Files.delete(saveFile);
             }
             catch (IOException e1)
             {
-                LOGGER.error(USRCACHE, MohistMC.i18n.as("mohist.i18n.107", saveFile.toString()));
+                LOGGER.error(USRCACHE, OneWorldCore.i18n.as("mohist.i18n.107", saveFile.toString()));
             }
         }
         finally
@@ -198,8 +198,9 @@ public final class UsernameCache {
             }
             catch (IOException e)
             {
-                LOGGER.error(USRCACHE, MohistMC.i18n.as("mohist.i18n.108"), e);
+                LOGGER.error(USRCACHE, OneWorldCore.i18n.as("mohist.i18n.108"), e);
             }
         }
     }
 }
+

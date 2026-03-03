@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -40,3 +40,4 @@ public class Libraries {
         return new Libraries(file.getAbsolutePath(), SHA256.as(file), file.length());
     }
 }
+

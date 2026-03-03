@@ -4,7 +4,7 @@ import java.util.List;
 import org.bukkit.plugin.Plugin;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/9/12 2:52:18
  */
 public class PluginDynamicRegistrFix {
@@ -24,3 +24,4 @@ public class PluginDynamicRegistrFix {
         }
     }
 }
+

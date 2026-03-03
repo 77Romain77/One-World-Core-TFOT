@@ -2,7 +2,7 @@ package org.bukkit.inventory;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.paper.inventory.ItemRarity;
 import java.util.List;
 import org.bukkit.Bukkit;
@@ -511,7 +511,7 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
         }
 
         if (type == null) {
-            MohistMC.LOGGER.error(MohistMC.i18n.as("bukkit.ItemStack.typenull", args.get("type")));
+            OneWorldCore.LOGGER.error(OneWorldCore.i18n.as("bukkit.ItemStack.typenull", args.get("type")));
             type = Material.BROWN_MUSHROOM;
         }
         ItemStack result = new ItemStack(type, amount, damage);
@@ -963,3 +963,4 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
     }
     // Paper end
 }
+

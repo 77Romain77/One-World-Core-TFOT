@@ -12,7 +12,7 @@ import org.bukkit.craftbukkit.v1_20_R1.enchantments.CraftEnchantment;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/27 15:30:06
  */
 public class EnchantmentAPI {
@@ -44,3 +44,4 @@ public class EnchantmentAPI {
         return ForgeInjectBukkit.normalizeName(EnchantmentHelper.getEnchantmentId(nms).toString());
     }
 }
+

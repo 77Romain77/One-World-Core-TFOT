@@ -6,7 +6,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.JukeboxInventory;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/3/26 4:56:10
  */
 public class CraftInventoryJukebox extends CraftInventory implements JukeboxInventory {
@@ -34,3 +34,4 @@ public class CraftInventoryJukebox extends CraftInventory implements JukeboxInve
         return (Jukebox) inventory.getOwner();
     }
 }
+

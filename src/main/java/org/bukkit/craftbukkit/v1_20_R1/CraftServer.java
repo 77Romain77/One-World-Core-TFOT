@@ -7,7 +7,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterators;
 import com.google.common.collect.Lists;
 import com.google.common.collect.MapMaker;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.api.ServerAPI;
 import com.oneworldstudiomc.bukkit.pluginfix.PluginDynamicRegistrFix;
 import com.oneworldstudiomc.forge.ForgeEventHandler;
@@ -312,6 +312,10 @@ public final class CraftServer implements Server {
     }
 
     public CraftServer(DedicatedServer console, PlayerList playerList) {
+        if (OneWorldCore.classLoader != null) {
+            Thread.currentThread().setContextClassLoader(OneWorldCore.classLoader);
+        }
+
         this.console = console;
         this.playerList = (DedicatedPlayerList) playerList;
         this.playerView = Collections.unmodifiableList(Lists.transform(playerList.players, new Function<ServerPlayer, CraftPlayer>() {
@@ -320,7 +324,7 @@ public final class CraftServer implements Server {
                 return player.getBukkitEntity();
             }
         }));
-        this.serverVersion = MohistMC.versionInfo.oneworldstudio();
+        this.serverVersion = OneWorldCore.versionInfo.oneworldstudio();
         this.structureManager = new CraftStructureManager(console.getStructureManager());
         this.scoreboardManager = new CraftScoreboardManager(console, new ServerScoreboard(console));
         this.dataPackManager = new CraftDataPackManager(this.getServer().getPackRepository());
@@ -432,24 +436,32 @@ public final class CraftServer implements Server {
     }
 
     public void loadPlugins() {
-        ForgeEventHandler.init();
-        pluginManager.registerInterface(JavaPluginLoader.class);
-        File pluginFolder = (File) console.options.valueOf("plugins");
+        ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
+        if (OneWorldCore.classLoader != null) {
+            Thread.currentThread().setContextClassLoader(OneWorldCore.classLoader);
+        }
+        try {
+            ForgeEventHandler.init();
+            pluginManager.registerInterface(JavaPluginLoader.class);
+            File pluginFolder = (File) console.options.valueOf("plugins");
 
-        if (pluginFolder.exists()) {
-            Plugin[] plugins = pluginManager.loadPlugins(pluginFolder);
-            for (Plugin plugin : plugins) {
-                try {
-                    String message = String.format("Loading %s", plugin.getDescription().getFullName());
-                    plugin.getLogger().info(message);
-                    plugin.onLoad();
-                    PluginDynamicRegistrFix.unlockRegistries(plugin);
-                } catch (Throwable ex) {
-                    Logger.getLogger(CraftServer.class.getName()).log(Level.SEVERE, ex.getMessage() + " initializing " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            if (pluginFolder.exists()) {
+                Plugin[] plugins = pluginManager.loadPlugins(pluginFolder);
+                for (Plugin plugin : plugins) {
+                    try {
+                        String message = String.format("Loading %s", plugin.getDescription().getFullName());
+                        plugin.getLogger().info(message);
+                        plugin.onLoad();
+                        PluginDynamicRegistrFix.unlockRegistries(plugin);
+                    } catch (Throwable ex) {
+                        Logger.getLogger(CraftServer.class.getName()).log(Level.SEVERE, ex.getMessage() + " initializing " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                    }
                 }
+            } else {
+                pluginFolder.mkdir();
             }
-        } else {
-            pluginFolder.mkdir();
+        } finally {
+            Thread.currentThread().setContextClassLoader(previousClassLoader);
         }
     }
 
@@ -537,21 +549,29 @@ public final class CraftServer implements Server {
     }
 
     private void enablePlugin(Plugin plugin) {
+        ClassLoader previousClassLoader = Thread.currentThread().getContextClassLoader();
+        if (OneWorldCore.classLoader != null) {
+            Thread.currentThread().setContextClassLoader(OneWorldCore.classLoader);
+        }
         try {
-            List<Permission> perms = plugin.getDescription().getPermissions();
+            try {
+                List<Permission> perms = plugin.getDescription().getPermissions();
 
-            for (Permission perm : perms) {
-                try {
-                    pluginManager.addPermission(perm, false);
-                } catch (IllegalArgumentException ex) {
-                    getLogger().log(Level.WARNING, "Plugin " + plugin.getDescription().getFullName() + " tried to register permission '" + perm.getName() + "' but it's already registered", ex);
+                for (Permission perm : perms) {
+                    try {
+                        pluginManager.addPermission(perm, false);
+                    } catch (IllegalArgumentException ex) {
+                        getLogger().log(Level.WARNING, "Plugin " + plugin.getDescription().getFullName() + " tried to register permission '" + perm.getName() + "' but it's already registered", ex);
+                    }
                 }
-            }
-            pluginManager.dirtyPermissibles();
+                pluginManager.dirtyPermissibles();
 
-            pluginManager.enablePlugin(plugin);
-        } catch (Throwable ex) {
-            Logger.getLogger(CraftServer.class.getName()).log(Level.SEVERE, ex.getMessage() + " loading " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+                pluginManager.enablePlugin(plugin);
+            } catch (Throwable ex) {
+                Logger.getLogger(CraftServer.class.getName()).log(Level.SEVERE, ex.getMessage() + " loading " + plugin.getDescription().getFullName() + " (Is it up to date?)", ex);
+            }
+        } finally {
+            Thread.currentThread().setContextClassLoader(previousClassLoader);
         }
     }
 
@@ -934,7 +954,7 @@ public final class CraftServer implements Server {
 
     @Override
     public void reload() {
-        MohistMC.LOGGER.warn("For your server security, Bukkit reloading is not supported by Mohist.");
+        OneWorldCore.LOGGER.warn("For your server security, Bukkit reloading is not supported by OneWorldCore.");
     }
 
     @Override
@@ -2412,7 +2432,7 @@ public final class CraftServer implements Server {
 
         @Override
         public void restart() {
-            MohistMC.LOGGER.error("Mohist Not supported yet, This causes unknown issues with the mod.");
+            OneWorldCore.LOGGER.error("OneWorldCore does not support this restart path yet; this can cause unknown issues with mods.");
         }
 
         @Override
@@ -2446,3 +2466,4 @@ public final class CraftServer implements Server {
         return net.minecraft.server.MinecraftServer.getServer().hasStopped();
     }
 }
+

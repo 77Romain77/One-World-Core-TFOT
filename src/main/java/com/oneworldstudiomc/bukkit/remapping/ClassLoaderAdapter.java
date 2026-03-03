@@ -1,7 +1,7 @@
 package com.oneworldstudiomc.bukkit.remapping;
 
 import com.google.common.collect.ImmutableMap;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.net.URLClassLoader;
 import java.util.Collection;
 import java.util.Map;
@@ -35,6 +35,7 @@ public class ClassLoaderAdapter implements PluginTransformer {
     public static final ClassLoaderAdapter INSTANCE = new ClassLoaderAdapter();
     private static final Marker MARKER = MarkerManager.getMarker("CLADAPTER");
     private static final String CLASSLOADER = "java/lang/ClassLoader";
+    private static final String PROTOCOLLIB_BYTEBUDDY_PREFIX = "com/comphenix/net/bytebuddy/";
 
     private final Map<String, String> classLoaderTypes = ImmutableMap.<String, String>builder()
             .put(Type.getInternalName(URLClassLoader.class), Type.getInternalName(RemappingURLClassLoader.class))
@@ -42,6 +43,11 @@ public class ClassLoaderAdapter implements PluginTransformer {
 
     @Override
     public void handleClass(ClassNode node, ClassLoaderRemapper remapper) {
+        // ProtocolLib shades ByteBuddy under this package. Rewriting its classloaders
+        // causes unstable runtime instrumentation and can break login packets.
+        if (node.name != null && node.name.startsWith(PROTOCOLLIB_BYTEBUDDY_PREFIX)) {
+            return;
+        }
         for (MethodNode methodNode : node.methods) {
             for (AbstractInsnNode insnNode : methodNode.instructions) {
                 if (insnNode.getOpcode() == Opcodes.NEW) {
@@ -53,7 +59,7 @@ public class ClassLoaderAdapter implements PluginTransformer {
                             next = next.getNext();
                         }
                         if (next == null) continue;
-                        MohistMC.LOGGER.debug(MARKER, "Found new {}/{} call in {} {}", typeInsnNode.desc, ((MethodInsnNode) next).name + ((MethodInsnNode) next).desc, node.name, methodNode.name + methodNode.desc);
+                        OneWorldCore.LOGGER.debug(MARKER, "Found new {}/{} call in {} {}", typeInsnNode.desc, ((MethodInsnNode) next).name + ((MethodInsnNode) next).desc, node.name, methodNode.name + methodNode.desc);
                         ((MethodInsnNode) next).owner = replace;
                         typeInsnNode.desc = replace;
                     }
@@ -62,7 +68,7 @@ public class ClassLoaderAdapter implements PluginTransformer {
         }
         ClassInfo info = classInfo(node);
         if (info == null) return;
-        MohistMC.LOGGER.debug(MARKER, "Transforming classloader class {}", node.name);
+        OneWorldCore.LOGGER.debug(MARKER, "Transforming classloader class {}", node.name);
         if (!info.remapping) {
             implementIntf(node);
         }
@@ -79,7 +85,7 @@ public class ClassLoaderAdapter implements PluginTransformer {
     }
 
     private void implementIntf(ClassNode node) {
-        MohistMC.LOGGER.debug(MARKER, "Implementing RemappingClassLoader for class {}", node.name);
+        OneWorldCore.LOGGER.debug(MARKER, "Implementing RemappingClassLoader for class {}", node.name);
         FieldNode remapper = new FieldNode(Opcodes.ACC_PRIVATE | Opcodes.ACC_SYNTHETIC, "remapper", Type.getDescriptor(ClassLoaderRemapper.class), null, null);
         MethodNode methodNode = new MethodNode(Opcodes.ACC_PUBLIC | Opcodes.ACC_SYNTHETIC, "getRemapper", Type.getMethodDescriptor(Type.getType(ClassLoaderRemapper.class)), null, null);
         InsnList list = new InsnList();
@@ -129,3 +135,4 @@ public class ClassLoaderAdapter implements PluginTransformer {
         private boolean remapping;
     }
 }
+

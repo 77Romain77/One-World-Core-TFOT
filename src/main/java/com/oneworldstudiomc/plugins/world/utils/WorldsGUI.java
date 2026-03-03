@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.bukkit.inventory.Inventory;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/6/14 14:57:28
  */
 public class WorldsGUI {
@@ -30,11 +30,11 @@ public class WorldsGUI {
             FileConfiguration config = ConfigByWorlds.config;
             if (ConfigByWorlds.f.exists() && config.getConfigurationSection("worlds.") != null) {
                 String worldtype = w.getEnvironment() == null ? "null" : w.getEnvironment().name();
-                String infos = "§7-/-";
+                String infos = "В§7-/-";
                 String name1 = w.getName();
                 String difficulty = w.getDifficulty().name();
                 if (config.get("worlds." + w.getName() + ".info") != null) {
-                    infos = config.getString("worlds." + w.getName() + ".info", "§7-/-");
+                    infos = config.getString("worlds." + w.getName() + ".info", "В§7-/-");
                 }
                 if (config.get("worlds." + w.getName() + ".environment") != null) {
                     worldtype = config.getString("worlds." + w.getName() + ".environment");
@@ -45,19 +45,19 @@ public class WorldsGUI {
                 if (config.get("worlds." + w.getName() + ".difficulty") != null) {
                     difficulty = config.getString("worlds." + w.getName() + ".difficulty");
                 }
-                infoLore.add(I18n.as("worldmanage.gui.lore0") + name1.replace("&", "§"));
-                infoLore.add(I18n.as("worldmanage.gui.lore1") + infos.replace("&", "§"));
+                infoLore.add(I18n.as("worldmanage.gui.lore0") + name1.replace("&", "В§"));
+                infoLore.add(I18n.as("worldmanage.gui.lore1") + infos.replace("&", "В§"));
                 infoLore.add(I18n.as("worldmanage.gui.lore2") + w.getWorldBorder().getSize());
                 infoLore.add(I18n.as("worldmanage.gui.lore3") + worldtype);
                 infoLore.add(I18n.as("worldmanage.gui.lore4") + difficulty);
                 if (w.isMods()) {
-                    infoLore.add("§bModid §8>> §7" + w.getModid());
+                    infoLore.add("В§bModid В§8>> В§7" + w.getModid());
                 }
                 if (w.isBukkit()) {
-                    infoLore.add("§bPluginWorld §8>> §7" + w.isBukkit());
+                    infoLore.add("В§bPluginWorld В§8>> В§7" + w.isBukkit());
                 }
             }
-            inv.setItem(pos, ItemAPI.doItem(Material.MAP, 1, "§7>> §6" + w.getName(), infoLore));
+            inv.setItem(pos, ItemAPI.doItem(Material.MAP, 1, "В§7>> В§6" + w.getName(), infoLore));
             ++pos;
             infoLore.clear();
         }
@@ -66,3 +66,4 @@ public class WorldsGUI {
         InventoryClickListener.worldInventory = worldListInventory;
     }
 }
+

@@ -2,7 +2,7 @@ package org.bukkit.craftbukkit.v1_20_R1.entity;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableSet;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.plugins.PermissionUtils;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
@@ -191,7 +191,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     @Override
     public boolean hasPermission(String name) {
         boolean is = perm.hasPermission(name);
-        if (!is && MohistConfig.permissions_debug_enable) {
+        if (!is && OneWorldCoreConfig.permissions_debug_enable) {
             PermissionUtils.debug(this, Thread.currentThread().getStackTrace(), name); // Mohist
         }
         return is;
@@ -200,7 +200,7 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
     @Override
     public boolean hasPermission(Permission perm) {
         boolean is = this.perm.hasPermission(perm);
-        if (!is && MohistConfig.permissions_debug_enable) {
+        if (!is && OneWorldCoreConfig.permissions_debug_enable) {
             PermissionUtils.debug(this, Thread.currentThread().getStackTrace(), perm.getName()); // Mohist
         }
         return is;
@@ -697,3 +697,4 @@ public class CraftHumanEntity extends CraftLivingEntity implements HumanEntity {
         return success ? (Firework) fireworks.getBukkitEntity() : null;
     }
 }
+

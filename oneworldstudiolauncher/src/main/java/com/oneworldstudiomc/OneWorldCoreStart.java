@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -80,10 +80,7 @@ public class OneWorldCoreStart {
         boolean showLogo = OneWorldCoreConfigUtil.aBoolean("oneworldcore.show_logo",
                 OneWorldCoreConfigUtil.aBoolean("oneworldstudio.show_logo", OneWorldCoreConfigUtil.aBoolean("mohist.show_logo", true)));
         if (OneWorldCoreConfigUtil.INSTALLATIONFINISHED() && showLogo) {
-            String welcomeMessage = i18n.as("mohist.launch.welcomemessage")
-                    .replace("Mohist", "OneWorldCore")
-                    .replace("OneWorldStudio", "OneWorldCore")
-                    .replace("One World Studio", "OneWorldCore");
+            String welcomeMessage = resolveWelcomeMessage();
             System.out.printf("%n%s%n%s - %s, Java(%s) %s PID: %s%n",
                     STARTUP_BANNER,
                     welcomeMessage,
@@ -234,4 +231,31 @@ public class OneWorldCoreStart {
         String term = System.getenv("TERM");
         return term != null && !term.equalsIgnoreCase("dumb");
     }
+
+    private static String resolveWelcomeMessage() {
+        String message = i18nValue("oneworldcore.launch.welcomemessage");
+        if (message == null) {
+            message = i18nValue("mohist.launch.welcomemessage");
+        }
+        if (message == null) {
+            message = "Thanks for using OneWorldCore";
+        }
+        return message
+                .replace("Mohist", "OneWorldCore")
+                .replace("OneWorldStudio", "OneWorldCore")
+                .replace("One World Studio", "OneWorldCore");
+    }
+
+    private static String i18nValue(String key) {
+        try {
+            String value = i18n.as(key);
+            if (value == null || value.isBlank() || key.equals(value)) {
+                return null;
+            }
+            return value;
+        } catch (Throwable ignored) {
+            return null;
+        }
+    }
 }
+

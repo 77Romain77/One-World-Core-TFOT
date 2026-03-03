@@ -1,7 +1,7 @@
 package com.oneworldstudiomc.plugins;
 
-import com.oneworldstudiomc.MohistConfig;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCoreConfig;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.util.I18n;
 import com.oneworldstudiomc.util.StackTraceUtil;
 import java.util.HashMap;
@@ -15,14 +15,14 @@ public class PermissionUtils {
     private static final Map<CraftHumanEntity, String> cache_player = new HashMap<>();
 
     public static void debug(CraftHumanEntity player, StackTraceElement[] elements, String permission) {
-        if (MohistConfig.permissions_debug_console) {
+        if (OneWorldCoreConfig.permissions_debug_console) {
             if (cache_console.containsKey(player) && cache_console.get(player).equals(permission)) {
                 return;
             }
             cache_console.put(player, permission);
-            MohistMC.LOGGER.warn("Permission Debug: {} {} {}", StackTraceUtil.getCallerMethodInfo(elements), permission, player.getName());
+            OneWorldCore.LOGGER.warn("Permission Debug: {} {} {}", StackTraceUtil.getCallerMethodInfo(elements), permission, player.getName());
         }
-        if (MohistConfig.permissions_send_player) {
+        if (OneWorldCoreConfig.permissions_send_player) {
             if (cache_player.containsKey(player) && cache_player.get(player).equals(permission)) {
                 return;
             }
@@ -31,3 +31,4 @@ public class PermissionUtils {
         }
     }
 }
+

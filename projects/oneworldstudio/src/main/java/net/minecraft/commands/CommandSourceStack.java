@@ -1,8 +1,8 @@
 package net.minecraft.commands;
 
 import com.google.common.collect.Lists;
-import com.oneworldstudiomc.MohistConfig;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCoreConfig;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.brigadier.ResultConsumer;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -183,14 +183,14 @@ public class CommandSourceStack implements SharedSuggestionProvider, net.minecra
       CommandNode currentCommand = this.currentCommand;
       if (currentCommand != null) {
          String cmd = VanillaCommandWrapper.getPermission(currentCommand);
-         if (MohistConfig.permissions_debug_console) {
-             MohistMC.LOGGER.error("hasPermission<CommandSourceStack>: {}", cmd);
+         if (OneWorldCoreConfig.permissions_debug_console) {
+             OneWorldCore.LOGGER.error("hasPermission<CommandSourceStack>: {}", cmd);
          }
          return hasPermission(p_81370_, cmd);
       }
       // CraftBukkit end
-      if (MohistConfig.permissions_debug_console) {
-          MohistMC.LOGGER.error("hasPermission<permissionLevel>: {}", p_81370_);
+      if (OneWorldCoreConfig.permissions_debug_console) {
+          OneWorldCore.LOGGER.error("hasPermission<permissionLevel>: {}", p_81370_);
       }
       return this.permissionLevel >= p_81370_;
    }

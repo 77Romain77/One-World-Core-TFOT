@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.util;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.lang.management.ManagementFactory;
 import java.lang.management.ThreadMXBean;
 import java.util.ArrayList;
@@ -26,9 +26,9 @@ public class MohistThreadCost {
             list.add(item);
         }
         list.sort(Comparator.comparingLong(i -> i.id));
-        MohistMC.LOGGER.info(MohistMC.i18n.as("mohist.dump.1"));
+        OneWorldCore.LOGGER.info(OneWorldCore.i18n.as("mohist.dump.1"));
         for (ThreadCpuTime threadCpuTime : list) {
-            MohistMC.LOGGER.info(String.format("%s %s %s %s", threadCpuTime.id, threadCpuTime.name, threadCpuTime.cpuTime, threadCpuTime.userTime));
+            OneWorldCore.LOGGER.info(String.format("%s %s %s %s", threadCpuTime.id, threadCpuTime.name, threadCpuTime.cpuTime, threadCpuTime.userTime));
         }
     }
 
@@ -37,3 +37,4 @@ public class MohistThreadCost {
         private String name;
     }
 }
+

@@ -3,7 +3,7 @@
 @@ -1,7 +_,10 @@
  package net.minecraft.world.level.material;
  
-+import com.oneworldstudiomc.MohistConfig;
++import com.oneworldstudiomc.OneWorldCoreConfig;
  import java.util.Optional;
  import javax.annotation.Nullable;
 +
@@ -98,7 +98,7 @@
  
     public int m_6718_(LevelReader p_76226_) {
 -      return p_76226_.m_6042_().f_63857_() ? 10 : 30;
-+      return p_76226_.m_6042_().f_63857_() ? MohistConfig.custom_lava_speed_nether : MohistConfig.custom_lava_speed_normal;
++      return p_76226_.m_6042_().f_63857_() ? OneWorldCoreConfig.custom_lava_speed_nether : OneWorldCoreConfig.custom_lava_speed_normal;
     }
  
     public int m_6886_(Level p_76203_, BlockPos p_76204_, FluidState p_76205_, FluidState p_76206_) {

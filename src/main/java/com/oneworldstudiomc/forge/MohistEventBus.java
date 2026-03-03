@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.forge;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
@@ -13,7 +13,7 @@ import net.minecraftforge.eventbus.api.IGenericEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/9/19 6:31:08
  */
 public class MohistEventBus {
@@ -75,7 +75,8 @@ public class MohistEventBus {
             ASMEventHandler asm = new ASMEventHandler(new PluginClassLoaderFactory(), target, method, IGenericEvent.class.isAssignableFrom(eventType));
             bus.addToListeners(target, eventType, asm, asm.getPriority());
         } catch (Throwable e) {
-            MohistMC.LOGGER.error("Error registering event handler: {} {}", eventType, method, e);
+            OneWorldCore.LOGGER.error("Error registering event handler: {} {}", eventType, method, e);
         }
     }
 }
+

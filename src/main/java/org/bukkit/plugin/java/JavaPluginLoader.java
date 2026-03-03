@@ -1,7 +1,7 @@
 package org.bukkit.plugin.java;
 
 import com.google.common.base.Preconditions;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.util.I18n;
 import org.bukkit.Server;
 import org.bukkit.Warning;
@@ -104,7 +104,7 @@ public final class JavaPluginLoader implements PluginLoader {
             // They are equal -- nothing needs to be done!
         } else if (dataFolder.isDirectory() && oldDataFolder.isDirectory()) {
             server.getLogger().warning(String.format(
-                MohistMC.i18n.as("mohist.i18n.16",
+                OneWorldCore.i18n.as("mohist.i18n.16",
                 description.getFullName(),
                 file,
                 oldDataFolder,
@@ -112,10 +112,10 @@ public final class JavaPluginLoader implements PluginLoader {
             )));
         } else if (oldDataFolder.isDirectory() && !dataFolder.exists()) {
             if (!oldDataFolder.renameTo(dataFolder)) {
-                throw new InvalidPluginException(MohistMC.i18n.as("mohist.i18n.17", oldDataFolder, dataFolder));
+                throw new InvalidPluginException(OneWorldCore.i18n.as("mohist.i18n.17", oldDataFolder, dataFolder));
             }
             server.getLogger().log(Level.INFO, String.format(
-                MohistMC.i18n.as( "mohist.i18n.18",
+                OneWorldCore.i18n.as( "mohist.i18n.18",
                 description.getFullName(),
                 file,
                 oldDataFolder,
@@ -125,7 +125,7 @@ public final class JavaPluginLoader implements PluginLoader {
 
         if (dataFolder.exists() && !dataFolder.isDirectory()) {
             throw new InvalidPluginException(String.format(
-                MohistMC.i18n.as("mohist.i18n.19",
+                OneWorldCore.i18n.as("mohist.i18n.19",
                 dataFolder,
                 description.getFullName(),
                 file
@@ -136,7 +136,7 @@ public final class JavaPluginLoader implements PluginLoader {
             Plugin current = server.getPluginManager().getPlugin(pluginName);
 
             if (current == null) {
-                throw new UnknownDependencyException(MohistMC.i18n.as("mohist.i18n.12", pluginName, pluginName));
+                throw new UnknownDependencyException(OneWorldCore.i18n.as("mohist.i18n.12", pluginName, pluginName));
             }
         }
 
@@ -251,7 +251,7 @@ public final class JavaPluginLoader implements PluginLoader {
                 methods.add(method);
             }
         } catch (NoClassDefFoundError e) {
-            plugin.getLogger().severe(MohistMC.i18n.as("mohist.i18n.13", plugin.getDescription().getFullName(), listener.getClass(), e.getMessage()));
+            plugin.getLogger().severe(OneWorldCore.i18n.as("mohist.i18n.13", plugin.getDescription().getFullName(), listener.getClass(), e.getMessage()));
             return ret;
         }
 
@@ -265,7 +265,7 @@ public final class JavaPluginLoader implements PluginLoader {
             }
             final Class<?> checkClass;
             if (method.getParameterTypes().length != 1 || !Event.class.isAssignableFrom(checkClass = method.getParameterTypes()[0])) {
-                plugin.getLogger().severe(MohistMC.i18n.as("mohist.i18n.14", plugin.getDescription().getFullName(), method.toGenericString(), listener.getClass()));
+                plugin.getLogger().severe(OneWorldCore.i18n.as("mohist.i18n.14", plugin.getDescription().getFullName(), method.toGenericString(), listener.getClass()));
                 continue;
             }
             final Class<? extends Event> eventClass = checkClass.asSubclass(Event.class);
@@ -287,7 +287,7 @@ public final class JavaPluginLoader implements PluginLoader {
                     plugin.getLogger().log(
                             Level.WARNING,
                             String.format(
-                                    MohistMC.i18n.as( "mohist.i18n.15",
+                                    OneWorldCore.i18n.as( "mohist.i18n.15",
                                     plugin.getDescription().getFullName(),
                                     clazz.getName(),
                                     method.toGenericString(),
@@ -327,7 +327,7 @@ public final class JavaPluginLoader implements PluginLoader {
         Preconditions.checkArgument(plugin instanceof JavaPlugin, "Plugin is not associated with this PluginLoader");
 
         if (!plugin.isEnabled()) {
-            MohistMC.LOGGER.info(I18n.as("minecraftserver.plugin.load.enabling", plugin.getDescription().getFullName()));
+            OneWorldCore.LOGGER.info(I18n.as("minecraftserver.plugin.load.enabling", plugin.getDescription().getFullName()));
 
             JavaPlugin jPlugin = (JavaPlugin) plugin;
 
@@ -335,14 +335,14 @@ public final class JavaPluginLoader implements PluginLoader {
 
             if (!loaders.contains(pluginLoader)) {
                 loaders.add(pluginLoader);
-                MohistMC.LOGGER.warn(MohistMC.i18n.as( "mohist.i18n.20", plugin.getDescription().getFullName()));
+                OneWorldCore.LOGGER.warn(OneWorldCore.i18n.as( "mohist.i18n.20", plugin.getDescription().getFullName()));
             }
 
             try {
                 jPlugin.setEnabled(true);
             } catch (Throwable ex) {
                 ex.printStackTrace();
-                MohistMC.LOGGER.error(MohistMC.i18n.as("mohist.i18n.21", plugin.getDescription().getFullName()), ex);
+                OneWorldCore.LOGGER.error(OneWorldCore.i18n.as("mohist.i18n.21", plugin.getDescription().getFullName()), ex);
                 // Mohist start - Disable plugins that fail to load
                 this.server.getPluginManager().disablePlugin(jPlugin);
                 return;
@@ -360,7 +360,7 @@ public final class JavaPluginLoader implements PluginLoader {
         Preconditions.checkArgument(plugin instanceof JavaPlugin, "Plugin is not associated with this PluginLoader");
 
         if (plugin.isEnabled()) {
-            plugin.getLogger().info(MohistMC.i18n.as("minecraftserver.plugin.load.disabling",plugin.getDescription().getFullName()));
+            plugin.getLogger().info(OneWorldCore.i18n.as("minecraftserver.plugin.load.disabling",plugin.getDescription().getFullName()));
 
             server.getPluginManager().callEvent(new PluginDisableEvent(plugin));
 
@@ -370,7 +370,7 @@ public final class JavaPluginLoader implements PluginLoader {
             try {
                 jPlugin.setEnabled(false);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE, MohistMC.i18n.as( "mohist.i18n.22", plugin.getDescription().getFullName()), ex);
+                server.getLogger().log(Level.SEVERE, OneWorldCore.i18n.as( "mohist.i18n.22", plugin.getDescription().getFullName()), ex);
             }
 
             if (cloader instanceof PluginClassLoader loader) {
@@ -391,3 +391,4 @@ public final class JavaPluginLoader implements PluginLoader {
         }
     }
 }
+

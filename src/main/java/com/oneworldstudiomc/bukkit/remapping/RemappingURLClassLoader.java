@@ -1,6 +1,7 @@
 package com.oneworldstudiomc.bukkit.remapping;
 
 import com.google.common.io.ByteStreams;
+import com.oneworldstudiomc.bukkit.pluginfix.PluginFixManager;
 import io.izzel.tools.product.Product2;
 import java.io.IOException;
 import java.io.InputStream;
@@ -66,6 +67,7 @@ public class RemappingURLClassLoader extends URLClassLoader implements Remapping
                     try (InputStream is = connection.getInputStream()) {
                         byte[] classBytes = ByteStreams.toByteArray(is);
                         classBytes = Remapper.SWITCH_TABLE_FIXER.apply(classBytes);
+                        classBytes = PluginFixManager.injectPluginFix(name, classBytes);
                         return classBytes;
                     }
                 };

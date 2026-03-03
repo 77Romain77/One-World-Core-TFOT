@@ -9,12 +9,12 @@ import javax.annotation.Nonnull;
 import net.md_5.bungee.api.ChatColor;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/2 22:10:07
  */
 public class ColorsAPI {
 
-    private static final List<String> SPECIAL_COLORS = Arrays.asList("&l", "&n", "&o", "&k", "&m", "§l", "§n", "§o", "§k", "§m");
+    private static final List<String> SPECIAL_COLORS = Arrays.asList("&l", "&n", "&o", "&k", "&m", "В§l", "В§n", "В§o", "В§k", "В§m");
 
     /**
      * Cached result of patterns.
@@ -114,7 +114,7 @@ public class ColorsAPI {
      */
     @Nonnull
     public static String stripColorFormatting(@Nonnull String string) {
-        return string.replaceAll("<#[0-9A-F]{6}>|[&§][a-f0-9lnokm]|<[/]?[A-Z]{5,8}(:[0-9A-F]{6})?[0-9]*>", "");
+        return string.replaceAll("<#[0-9A-F]{6}>|[&В§][a-f0-9lnokm]|<[/]?[A-Z]{5,8}(:[0-9A-F]{6})?[0-9]*>", "");
     }
 
     @Nonnull
@@ -124,7 +124,7 @@ public class ColorsAPI {
         String[] characters = source.split("");
         int outIndex = 0;
         for (int i = 0; i < characters.length; i++) {
-            if (characters[i].equals("&") || characters[i].equals("§")) {
+            if (characters[i].equals("&") || characters[i].equals("В§")) {
                 if (i + 1 < characters.length) {
                     if (characters[i + 1].equals("r")) {
                         specialColors.setLength(0);
@@ -202,3 +202,4 @@ public class ColorsAPI {
         return colors;
     }
 }
+

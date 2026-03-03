@@ -3,7 +3,7 @@ package com.oneworldstudiomc.forge;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.ImmutableMap;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.api.ServerAPI;
 import com.oneworldstudiomc.bukkit.entity.MohistModsEntity;
 import com.mohistmc.dynamicenum.MohistDynamEnum;
@@ -124,7 +124,7 @@ public class ForgeInjectBukkit {
 
                 CraftMagicNumbers.ITEM_MATERIAL.put(item, material);
                 CraftMagicNumbers.MATERIAL_ITEM.put(material, item);
-                MohistMC.LOGGER.debug("Save-ITEM: " + material.name() + " - " + material.key);
+                OneWorldCore.LOGGER.debug("Save-ITEM: " + material.name() + " - " + material.key);
             }
         }
     }
@@ -165,7 +165,7 @@ public class ForgeInjectBukkit {
                     } else if (block instanceof DecoratedPotBlock) {
                         CraftBlockStates.register(material, CraftDecoratedPot.class, CraftDecoratedPot::new, DecoratedPotBlockEntity::new);
                     }
-                    MohistMC.LOGGER.debug("Save-BLOCK:{} - {}", material.name(), material.key);
+                    OneWorldCore.LOGGER.debug("Save-BLOCK:{} - {}", material.name(), material.key);
                 }
             }
         }
@@ -198,7 +198,7 @@ public class ForgeInjectBukkit {
                 PotionType potionType = MohistDynamEnum.addEnum(PotionType.class, name, Arrays.asList(PotionEffectType.class, Boolean.TYPE, Boolean.TYPE), Arrays.asList(effectInstance == null ? null : PotionEffectType.getById(MobEffect.getId(effectInstance.getEffect())), false, false));
                 if (potionType != null) {
                     CraftPotionUtil.mods.put(potionType, resourceLocation.toString());
-                    MohistMC.LOGGER.debug("Save-PotionType:" + name + " - " + potionType.name());
+                    OneWorldCore.LOGGER.debug("Save-PotionType:" + name + " - " + potionType.name());
                 }
             }
         }
@@ -213,7 +213,7 @@ public class ForgeInjectBukkit {
                 Particle particle = MohistDynamEnum.addEnum(Particle.class, name);
                 if (particle != null) {
                     org.bukkit.craftbukkit.v1_20_R1.CraftParticle.putParticles(particle, resourceLocation);
-                    MohistMC.LOGGER.debug("Save-ParticleType:" + name + " - " + particle.name());
+                    OneWorldCore.LOGGER.debug("Save-ParticleType:" + name + " - " + particle.name());
                 }
             }
         }
@@ -229,7 +229,7 @@ public class ForgeInjectBukkit {
                 map.add(biomeName);
                 org.bukkit.block.Biome biomeCB = MohistDynamEnum.addEnum(org.bukkit.block.Biome.class, biomeName);
                 biomeBiomeMap.put(biome, biomeCB);
-                MohistMC.LOGGER.debug("Save-BIOME:" + biomeCB.name() + " - " + biomeName);
+                OneWorldCore.LOGGER.debug("Save-BIOME:" + biomeCB.name() + " - " + biomeName);
             }
         }
         map.clear();
@@ -248,7 +248,7 @@ public class ForgeInjectBukkit {
                 environment1 = MohistDynamEnum.addEnum(World.Environment.class, name, List.of(Integer.TYPE), List.of(id));
                 environment.put(key, environment1);
                 environment0.put(environment1, key);
-                MohistMC.LOGGER.debug("Registered forge DimensionType as environment {}", environment1);
+                OneWorldCore.LOGGER.debug("Registered forge DimensionType as environment {}", environment1);
                 i++;
             }
         }
@@ -291,7 +291,7 @@ public class ForgeInjectBukkit {
                 String name = normalizeName(resourceLocation.toString());
                 Villager.Profession vp = MohistDynamEnum.addEnum(Villager.Profession.class, name);
                 profession.put(vp, resourceLocation);
-                MohistMC.LOGGER.debug("Registered forge VillagerProfession as Profession {}", vp.name());
+                OneWorldCore.LOGGER.debug("Registered forge VillagerProfession as Profession {}", vp.name());
             }
         }
     }
@@ -304,7 +304,7 @@ public class ForgeInjectBukkit {
                 String name = normalizeName(resourceLocation.getPath());
                 org.bukkit.attribute.Attribute ab = MohistDynamEnum.addEnum(org.bukkit.attribute.Attribute.class, name, List.of(String.class), List.of());
                 attributemap.put(ab, resourceLocation);
-                MohistMC.LOGGER.debug("Registered forge Attribute as Attribute(Bukkit) {}", ab.name());
+                OneWorldCore.LOGGER.debug("Registered forge Attribute as Attribute(Bukkit) {}", ab.name());
             }
         }
     }
@@ -317,7 +317,7 @@ public class ForgeInjectBukkit {
                 String name = normalizeName(resourceLocation.getPath());
                 Fluid fluid = MohistDynamEnum.addEnum(Fluid.class, name);
                 CraftMagicNumbers.FLUIDTYPE_FLUID.put(fluidType, fluid);
-                MohistMC.LOGGER.debug("Registered forge Fluid as Fluid(Bukkit) {}", fluid.name());
+                OneWorldCore.LOGGER.debug("Registered forge Fluid as Fluid(Bukkit) {}", fluid.name());
             }
         }
     }
@@ -330,7 +330,7 @@ public class ForgeInjectBukkit {
                 String name = normalizeName(resourceLocation.getPath());
                 Statistic statistic = MohistDynamEnum.addEnum(Statistic.class, name);
                 statisticMap.put(statType, statistic);
-                MohistMC.LOGGER.debug("Registered forge StatType as Statistic(Bukkit) {}", statistic.name());
+                OneWorldCore.LOGGER.debug("Registered forge StatType as Statistic(Bukkit) {}", statistic.name());
             }
         }
     }
@@ -344,7 +344,7 @@ public class ForgeInjectBukkit {
                 SpawnCategory spawnCategory = MohistDynamEnum.addEnum(SpawnCategory.class, name);
                 spawnCategoryMap.put(category, spawnCategory);
                 spawnCategory.isMods = true;
-                MohistMC.LOGGER.debug("Registered forge MobCategory as SpawnCategory(Bukkit) {}", spawnCategory);
+                OneWorldCore.LOGGER.debug("Registered forge MobCategory as SpawnCategory(Bukkit) {}", spawnCategory);
             }
         }
     }
@@ -353,7 +353,7 @@ public class ForgeInjectBukkit {
         for (Pose pose : Pose.values()) {
             if (pose.ordinal() > 14) {
                 org.bukkit.entity.Pose bukkit = MohistDynamEnum.addEnum(org.bukkit.entity.Pose.class, pose.name());
-                MohistMC.LOGGER.debug("Registered forge Pose as Pose(Bukkit) {}", bukkit);
+                OneWorldCore.LOGGER.debug("Registered forge Pose as Pose(Bukkit) {}", bukkit);
             }
         }
     }
@@ -371,7 +371,7 @@ public class ForgeInjectBukkit {
                 Art art = MohistDynamEnum.addEnum(Art.class, name, List.of(Integer.TYPE, Integer.TYPE, Integer.TYPE), List.of(id, width, height));
                 Art.BY_NAME.put(lookupName, art);
                 Art.BY_ID.put(id, art);
-                MohistMC.LOGGER.debug("Registered forge PaintingType as Art {}", art);
+                OneWorldCore.LOGGER.debug("Registered forge PaintingType as Art {}", art);
                 i++;
             }
         }
@@ -392,3 +392,4 @@ public class ForgeInjectBukkit {
         return !namespacedkey.getNamespace().equals(NamespacedKey.MINECRAFT);
     }
 }
+

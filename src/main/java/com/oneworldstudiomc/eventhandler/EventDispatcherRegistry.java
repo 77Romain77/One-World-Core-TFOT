@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 package com.oneworldstudiomc.eventhandler;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.eventhandler.dispatcher.BlockEventDispatcher;
 import com.oneworldstudiomc.eventhandler.dispatcher.EntityEventDispatcher;
 import com.oneworldstudiomc.eventhandler.dispatcher.ItemEventDispatcher;
@@ -36,6 +36,7 @@ public class EventDispatcherRegistry {
         MinecraftForge.EVENT_BUS.register(new EntityEventDispatcher());
         MinecraftForge.EVENT_BUS.register(new BlockEventDispatcher());
         MinecraftForge.EVENT_BUS.register(new ServerEventDispatcher());
-        MohistMC.LOGGER.info("EventDispatcherRegistry initialized");
+        OneWorldCore.LOGGER.info("EventDispatcherRegistry initialized");
     }
 }
+

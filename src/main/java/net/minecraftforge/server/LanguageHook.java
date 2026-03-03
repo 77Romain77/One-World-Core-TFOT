@@ -8,7 +8,7 @@ package net.minecraftforge.server;
 import com.google.gson.Gson;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -96,7 +96,7 @@ public class LanguageHook
 
     public static void loadForgeAndMCLangs() {
         modTable = new HashMap<>(5000);
-        String lang = MohistConfig.mohist_lang().equalsIgnoreCase("zh_cn") ? "zh_cn" : "en_us";
+        String lang = OneWorldCoreConfig.mohist_lang().equalsIgnoreCase("zh_cn") ? "zh_cn" : "en_us";
         final InputStream mc = Thread.currentThread().getContextClassLoader().getResourceAsStream(String.format(Locale.ROOT, "assets/minecraft/lang/%s.json", lang));
         final InputStream forge = Thread.currentThread().getContextClassLoader().getResourceAsStream(String.format(Locale.ROOT, "assets/forge/lang/%s.json", lang));
         loadLocaleData(mc);
@@ -108,10 +108,11 @@ public class LanguageHook
     static void loadLanguagesOnServer(MinecraftServer server) {
         modTable = new HashMap<>(5000);
         // Possible multi-language server support?
-        for (String lang : Arrays.asList("en_us", MohistConfig.mohist_lang().toLowerCase())) {
+        for (String lang : Arrays.asList("en_us", OneWorldCoreConfig.mohist_lang().toLowerCase())) {
             loadLanguage(lang, server);
         }
         capturedTables.forEach(t->t.putAll(modTable));
         ForgeI18n.loadLanguageData(modTable);
     }
 }
+

@@ -18,7 +18,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/9/12 16:27:32
  */
 public class WarpsCommands extends Command {
@@ -82,7 +82,7 @@ public class WarpsCommands extends Command {
                 for (String w : WarpsConfig.INSTANCE.yaml.getKeys(false)) {
                     wh.addItem(new GUIItem(new ItemStackFactory(Material.BAMBOO_SIGN)
                             .setDisplayName(w)
-                            .setLore(List.of(I18n.as("warpscommands.gui.click"), "§f" + WarpsConfig.INSTANCE.get(w).asString()))
+                            .setLore(List.of(I18n.as("warpscommands.gui.click"), "В§f" + WarpsConfig.INSTANCE.get(w).asString()))
                             .toItemStack()) {
                         @Override
                         public void ClickAction(ClickType type, Player u, ItemStack itemStack) {
@@ -138,3 +138,4 @@ public class WarpsCommands extends Command {
         player.sendMessage(prefix + " /warps gui " + I18n.as("warpscommands.gui"));
     }
 }
+

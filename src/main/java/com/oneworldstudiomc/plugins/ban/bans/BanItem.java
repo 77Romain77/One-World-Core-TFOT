@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.plugins.ban.bans;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.api.ItemAPI;
 import com.oneworldstudiomc.plugins.ban.BanConfig;
 import net.minecraft.world.InteractionHand;
@@ -10,7 +10,7 @@ import org.bukkit.craftbukkit.v1_20_R1.entity.CraftHumanEntity;
 import org.bukkit.craftbukkit.v1_20_R1.inventory.CraftItemStack;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/27 2:54:23
  */
 public class BanItem {
@@ -87,13 +87,13 @@ public class BanItem {
     }
 
     public static boolean check(org.bukkit.inventory.ItemStack itemStack) {
-        if (!MohistConfig.ban_item_enable) return false;
+        if (!OneWorldCoreConfig.ban_item_enable) return false;
         return ItemAPI.isBan(itemStack);
     }
 
     public static boolean checkMoShou(org.bukkit.inventory.ItemStack itemStack) {
         if (itemStack.isEmpty()) return false;
-        if (!MohistConfig.ban_item_enable) return false;
+        if (!OneWorldCoreConfig.ban_item_enable) return false;
         return BanConfig.MOSHOU.getMoShouList().contains(itemStack.getType().name());
     }
 
@@ -109,3 +109,4 @@ public class BanItem {
         return checkMoShou(itemStack) && !bukkitPlayer.hasPermission(permission);
     }
 }
+

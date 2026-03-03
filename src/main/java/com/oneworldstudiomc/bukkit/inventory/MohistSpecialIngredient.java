@@ -9,7 +9,7 @@ import org.bukkit.inventory.RecipeChoice;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/20 23:18:51
  */
 public record MohistSpecialIngredient(Ingredient ingredient) implements RecipeChoice {
@@ -45,3 +45,4 @@ public record MohistSpecialIngredient(Ingredient ingredient) implements RecipeCh
     }
 
 }
+

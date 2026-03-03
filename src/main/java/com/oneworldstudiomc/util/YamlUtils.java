@@ -5,7 +5,7 @@ import java.io.IOException;
 import org.bukkit.configuration.file.FileConfiguration;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/2 18:28:15
  */
 public class YamlUtils {
@@ -18,3 +18,4 @@ public class YamlUtils {
         }
     }
 }
+

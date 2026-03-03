@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.plugins.back;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.util.I18n;
 import org.bukkit.Location;
 import org.bukkit.command.Command;
@@ -15,7 +15,7 @@ public class BackCommands extends Command {
     public BackCommands(String name) {
         super(name);
         this.usageMessage = "/back";
-        if (MohistConfig.back_permissions_enable) {
+        if (OneWorldCoreConfig.back_permissions_enable) {
             this.setPermission("mohist.command.back");
         }
     }
@@ -48,3 +48,4 @@ public class BackCommands extends Command {
         BackConfig.INSTANCE.saveLocation(event.getPlayer(), event.getPlayer().getLocation(), BackType.DEATH);
     }
 }
+

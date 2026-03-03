@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.plugins;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.ScheduledThreadPoolExecutor;
@@ -16,7 +16,7 @@ import org.bukkit.entity.Item;
 import org.bukkit.entity.Monster;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/25 23:56:03
  */
 public class EntityClear {
@@ -28,13 +28,13 @@ public class EntityClear {
     private static ScheduledFuture<?> countdownFuture;
 
     public static void start() {
-        if (MohistConfig.clear_enable) {
+        if (OneWorldCoreConfig.clear_enable) {
             ENTITYCLEAR_ITEM.scheduleAtFixedRate(() -> {
                 if (MinecraftServer.getServer().hasStopped()) {
                     return;
                 }
                 startCountdown();
-            }, MohistConfig.clear_time, MohistConfig.clear_time, TimeUnit.SECONDS);
+            }, OneWorldCoreConfig.clear_time, OneWorldCoreConfig.clear_time, TimeUnit.SECONDS);
         }
     }
 
@@ -42,14 +42,14 @@ public class EntityClear {
         countdownFuture = COUNTDOWN_SERVICE.scheduleAtFixedRate(() -> {
             int remaining = countdownSeconds.decrementAndGet();
             if (remaining > 0) {
-                String msg = MohistConfig.clear_countdown_msg
-                        .replace("&", "§")
+                String msg = OneWorldCoreConfig.clear_countdown_msg
+                        .replace("&", "В§")
                         .replace("%seconds%", String.valueOf(remaining));
                 if (remaining == 30 || remaining == 14 || remaining == 10 || remaining < 4) Bukkit.broadcastMessage(msg);
             } else {
                 countdownSeconds.set(31);
-                if (MohistConfig.clear_item)run_item();
-                if (MohistConfig.clear_noitem)run_entity();
+                if (OneWorldCoreConfig.clear_item)run_item();
+                if (OneWorldCoreConfig.clear_noitem)run_entity();
                 countdownFuture.cancel(false);
             }
         }, 0, 1, TimeUnit.SECONDS);
@@ -67,15 +67,15 @@ public class EntityClear {
                 if (entity instanceof Item item) {
                     String itemName = item.getItemStack().getType().name();
                     String itemRegName = item.getItemStack().getType().name().split("_")[0].toLowerCase() + ":*";
-                    if (!MohistConfig.clear_item_whitelist.contains(itemName) && !MohistConfig.clear_item_whitelist.contains(itemRegName)) {
+                    if (!OneWorldCoreConfig.clear_item_whitelist.contains(itemName) && !OneWorldCoreConfig.clear_item_whitelist.contains(itemRegName)) {
                         entity.remove();
                         size_item.addAndGet(1);
                     }
                 }
             }
         }
-        if (!MohistConfig.clear_item_msg.isEmpty()){
-            Bukkit.broadcastMessage(MohistConfig.clear_item_msg.replace("&", "§").replace("%size%", String.valueOf(size_item.getAndSet(0))));
+        if (!OneWorldCoreConfig.clear_item_msg.isEmpty()){
+            Bukkit.broadcastMessage(OneWorldCoreConfig.clear_item_msg.replace("&", "В§").replace("%size%", String.valueOf(size_item.getAndSet(0))));
         }
     }
 
@@ -86,7 +86,7 @@ public class EntityClear {
                 if (!(entity instanceof Item)) {
                     String entityName = entity.getType().name();
                     String entityRegName = entity.getType().name().split("_")[0].toLowerCase() + ":*";
-                    if (!MohistConfig.clear_noitem_whitelist.contains(entityName) && !MohistConfig.clear_noitem_whitelist.contains(entityRegName)&& entity.getCustomName() == null) {
+                    if (!OneWorldCoreConfig.clear_noitem_whitelist.contains(entityName) && !OneWorldCoreConfig.clear_noitem_whitelist.contains(entityRegName)&& entity.getCustomName() == null) {
                         if (entity instanceof TamableAnimal tamable && tamable.isTame()) {
                            continue;
                         }
@@ -98,8 +98,9 @@ public class EntityClear {
                 }
             }
         }
-        if (!MohistConfig.clear_noitem_msg.isEmpty()){
-            Bukkit.broadcastMessage(MohistConfig.clear_noitem_msg.replace("&", "§").replace("%size%", String.valueOf(size_noitem.getAndSet(0))));
+        if (!OneWorldCoreConfig.clear_noitem_msg.isEmpty()){
+            Bukkit.broadcastMessage(OneWorldCoreConfig.clear_noitem_msg.replace("&", "В§").replace("%size%", String.valueOf(size_noitem.getAndSet(0))));
         }
     }
 }
+

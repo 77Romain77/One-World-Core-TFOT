@@ -5,7 +5,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/2 23:32:24
  */
 
@@ -27,3 +27,4 @@ public class GradientPattern implements IPattern {
         return string;
     }
 }
+

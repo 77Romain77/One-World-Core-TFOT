@@ -1,6 +1,6 @@
 package org.spigotmc;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import net.minecraft.server.MinecraftServer;
 
 public class AsyncCatcher
@@ -12,7 +12,7 @@ public class AsyncCatcher
     {
         if ( enabled && Thread.currentThread() != MinecraftServer.getServer().serverThread )
         {
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.63", reason));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.63", reason));
         }
     }
 
@@ -25,3 +25,4 @@ public class AsyncCatcher
         return false;
     }
 }
+

@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.plugins;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
@@ -10,13 +10,13 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.EnchantmentStorageMeta;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/13 11:36:40
  */
 public class EnchantmentFix {
 
     public static void anvilListener(PrepareAnvilEvent e) {
-        if (!MohistConfig.enchantment_fix) return;
+        if (!OneWorldCoreConfig.enchantment_fix) return;
         ItemStack is = e.getResult();
         if (is == null) {
             return;
@@ -64,7 +64,7 @@ public class EnchantmentFix {
     }
 
     private static int getUplevel(int a, int b) {
-        return Math.min(MohistConfig.max_enchantment_level, getUplevel0(a, b));
+        return Math.min(OneWorldCoreConfig.max_enchantment_level, getUplevel0(a, b));
     }
 
     private static int getUplevel0(int a, int b) {
@@ -74,3 +74,4 @@ public class EnchantmentFix {
         return Math.max(a, b);
     }
 }
+

@@ -14,7 +14,7 @@ import org.bukkit.craftbukkit.v1_20_R1.CraftWorld;
 import org.bukkit.generator.ChunkGenerator;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/6/14 14:49:40
  */
 public class WorldAPI {
@@ -54,3 +54,4 @@ public class WorldAPI {
         }
     }
 }
+

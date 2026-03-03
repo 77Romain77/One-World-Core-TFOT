@@ -11,7 +11,7 @@ import java.util.List;
 import java.util.function.BiConsumer;
 import java.util.stream.IntStream;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.server.packs.resources.ResourceManagerReloadListener;
 import net.minecraftforge.client.ForgeHooksClient;
@@ -76,7 +76,7 @@ public class BrandingControl
     }
 
     public static String getServerBranding() {
-        return MohistConfig.server_mod_name;
+        return OneWorldCoreConfig.server_mod_name;
     }
 
     public static ResourceManagerReloadListener resourceManagerReloadListener() {
@@ -88,3 +88,4 @@ public class BrandingControl
         brandingsNoMC = null;
     }
 }
+

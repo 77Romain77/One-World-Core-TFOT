@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.plugins.tpa;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.util.I18n;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
@@ -12,7 +12,7 @@ public class TpacceptCommands extends Command {
     public TpacceptCommands(String name) {
         super(name);
         this.usageMessage = "/tpaccept";
-        if (MohistConfig.tpa_permissions_enable) {
+        if (OneWorldCoreConfig.tpa_permissions_enable) {
             this.setPermission("mohist.command.tpa");
         }
     }
@@ -34,3 +34,4 @@ public class TpacceptCommands extends Command {
         return false;
     }
 }
+

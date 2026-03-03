@@ -5,7 +5,7 @@
 
 package net.minecraftforge.items;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import net.minecraft.core.NonNullList;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -204,7 +204,7 @@ public class ItemStackHandler implements IItemHandler, IItemHandlerModifiable, I
     protected void validateSlotIndex(int slot)
     {
         if (slot < 0 || slot >= stacks.size())
-            throw new RuntimeException(MohistMC.i18n.as("mohist.i18n.113", slot, stacks.size()));
+            throw new RuntimeException(OneWorldCore.i18n.as("mohist.i18n.113", slot, stacks.size()));
     }
 
     protected void onLoad()
@@ -217,3 +217,4 @@ public class ItemStackHandler implements IItemHandler, IItemHandlerModifiable, I
 
     }
 }
+

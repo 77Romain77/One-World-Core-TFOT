@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 package com.oneworldstudiomc.commands;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.api.ChatComponentAPI;
 import com.oneworldstudiomc.api.ServerAPI;
 import com.mohistmc.tools.HasteUtils;
@@ -288,7 +288,8 @@ public class DumpCommand extends Command {
         try {
             FileUtils.writeByteArrayToFile(file, sb.toString().getBytes(StandardCharsets.UTF_8));
         } catch (IOException e) {
-            MohistMC.LOGGER.error(e);
+            OneWorldCore.LOGGER.error(e);
         }
     }
 }
+

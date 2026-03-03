@@ -1,13 +1,13 @@
 package com.oneworldstudiomc.plugins;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameRules;
 import org.bukkit.GameRule;
 import org.bukkit.entity.Player;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/24 2:54:00
  */
 public class KeepInventory {
@@ -28,7 +28,7 @@ public class KeepInventory {
             return true;
         }
         String world = bukkit_player.getWorld().getName();
-        boolean i = MohistConfig.keepinventory_global ? MohistConfig.keepinventory_inventory : MohistConfig.yml.getBoolean("keepinventory." + world + ".inventory");
+        boolean i = OneWorldCoreConfig.keepinventory_global ? OneWorldCoreConfig.keepinventory_inventory : OneWorldCoreConfig.yml.getBoolean("keepinventory." + world + ".inventory");
         player.getBukkitEntity().getWorld().setGameRule(GameRule.KEEP_INVENTORY, i);
         return i;
     }
@@ -50,13 +50,13 @@ public class KeepInventory {
             return true;
         }
         String world = bukkit_player.getWorld().getName();
-        boolean i = MohistConfig.keepinventory_global ? MohistConfig.keepinventory_exp : MohistConfig.yml.getBoolean("keepinventory." + world + ".exp");
+        boolean i = OneWorldCoreConfig.keepinventory_global ? OneWorldCoreConfig.keepinventory_exp : OneWorldCoreConfig.yml.getBoolean("keepinventory." + world + ".exp");
         player.keepLevel = i;
         return i;
     }
 
     private static boolean hasPermission(Player bukkit_player, Type type){
-        if (!MohistConfig.keepinventory_permission_enable) return false;
+        if (!OneWorldCoreConfig.keepinventory_permission_enable) return false;
         return bukkit_player.hasPermission(type.permission);
     }
 
@@ -71,3 +71,4 @@ public class KeepInventory {
         }
     }
 }
+

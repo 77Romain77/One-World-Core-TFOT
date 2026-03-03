@@ -222,16 +222,44 @@ public class ReflectionHandler extends ClassLoader {
 
     // bukkit -> srg
     public static Class<?> redirectClassForName(String cl, boolean initialize, ClassLoader classLoader) throws ClassNotFoundException {
+        String mapped = remapper.mapType(cl.replace('.', '/')).replace('/', '.');
         try {
-            String replace = remapper.mapType(cl.replace('.', '/')).replace('/', '.');
-            return Class.forName(replace, initialize, classLoader);
-        } catch (ClassNotFoundException e) { // nested/inner class
+            return Class.forName(mapped, initialize, classLoader);
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
+            // Some plugins resolve synthetic NMS inner classes (e.g. ...ServerGamePacketListenerImpl$1)
+            // that do not exist as physical class files on this runtime.
+            if (mapped.startsWith("net.minecraft.") && mapped.contains("$")) {
+                try {
+                    remapper.tryDefineClass(mapped.replace('.', '/'));
+                    return Class.forName(mapped, initialize, classLoader);
+                } catch (Throwable ignored) {
+                }
+            }
+
+            // Fallback for plugins using dot notation for inner classes (Outer.Inner).
             int i = cl.lastIndexOf('.');
-            if (i > 0) {
+            if (i > 0 && !cl.contains("$")) {
                 String replace = cl.substring(0, i).replace('.', '/') + "$" + cl.substring(i + 1);
-                replace = remapper.mapType(replace).replace('/', '.').replace('$', '.');
-                return Class.forName(replace, initialize, classLoader);
-            } else throw e;
+                replace = remapper.mapType(replace).replace('/', '.');
+                try {
+                    return Class.forName(replace, initialize, classLoader);
+                } catch (ClassNotFoundException nested) {
+                    // Try once more via synthetic definition for missing NMS inner classes.
+                    if (replace.startsWith("net.minecraft.") && replace.contains("$")) {
+                        try {
+                            remapper.tryDefineClass(replace.replace('.', '/'));
+                            return Class.forName(replace, initialize, classLoader);
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                    throw nested;
+                }
+            }
+
+            if (e instanceof ClassNotFoundException cnf) {
+                throw cnf;
+            }
+            throw new ClassNotFoundException(cl, e);
         }
     }
 
@@ -424,8 +452,41 @@ public class ReflectionHandler extends ClassLoader {
 
     // bukkit -> srg
     public static Class<?> redirectClassLoaderLoadClass(ClassLoader loader, String binaryName) throws ClassNotFoundException {
-        String replace = remapper.mapType(binaryName.replace('.', '/')).replace('/', '.');
-        return loader.loadClass(replace);
+        String mapped = remapper.mapType(binaryName.replace('.', '/')).replace('/', '.');
+        try {
+            return loader.loadClass(mapped);
+        } catch (ClassNotFoundException | NoClassDefFoundError e) {
+            if (mapped.startsWith("net.minecraft.") && mapped.contains("$")) {
+                try {
+                    remapper.tryDefineClass(mapped.replace('.', '/'));
+                    return loader.loadClass(mapped);
+                } catch (Throwable ignored) {
+                }
+            }
+
+            int i = binaryName.lastIndexOf('.');
+            if (i > 0 && !binaryName.contains("$")) {
+                String inner = binaryName.substring(0, i).replace('.', '/') + "$" + binaryName.substring(i + 1);
+                inner = remapper.mapType(inner).replace('/', '.');
+                try {
+                    return loader.loadClass(inner);
+                } catch (ClassNotFoundException nested) {
+                    if (inner.startsWith("net.minecraft.") && inner.contains("$")) {
+                        try {
+                            remapper.tryDefineClass(inner.replace('.', '/'));
+                            return loader.loadClass(inner);
+                        } catch (Throwable ignored) {
+                        }
+                    }
+                    throw nested;
+                }
+            }
+
+            if (e instanceof ClassNotFoundException cnf) {
+                throw cnf;
+            }
+            throw new ClassNotFoundException(binaryName, e);
+        }
     }
 
     public static String findMappedResource(Class<?> cl, String name) {

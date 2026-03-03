@@ -16,7 +16,7 @@ public class MohistPapiHook extends PlaceholderExpansion {
     }
 
     public static String replace(OfflinePlayer player, String x) {
-        return PlaceholderAPI.setPlaceholders(player, x.replace("&", "§"));
+        return PlaceholderAPI.setPlaceholders(player, x.replace("&", "В§"));
     }
 
     @Override
@@ -25,7 +25,7 @@ public class MohistPapiHook extends PlaceholderExpansion {
             return null;
         }
         if (i.equalsIgnoreCase("world_name")) {
-            return WorldAPI.getWorldName(p.getWorld()).replace("&", "§");
+            return WorldAPI.getWorldName(p.getWorld()).replace("&", "В§");
         }
 
         return null;
@@ -48,7 +48,7 @@ public class MohistPapiHook extends PlaceholderExpansion {
 
     @Override
     public @NotNull String getAuthor() {
-        return "MohistMC";
+        return "OneWorldCore";
     }
 
     @Override
@@ -56,3 +56,4 @@ public class MohistPapiHook extends PlaceholderExpansion {
         return "1.20.1";
     }
 }
+

@@ -225,7 +225,7 @@ public class CraftPlayer extends CraftHumanEntity implements Player {
     }
 
     @Override
-    public PlayerProfile getPlayerProfile() {
+    public com.oneworldstudiomc.paper.profile.PlayerProfile getPlayerProfile() {
         return new CraftPlayerProfile(getProfile());
     }
 

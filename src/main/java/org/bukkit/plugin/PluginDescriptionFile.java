@@ -3,7 +3,7 @@ package org.bukkit.plugin;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandExecutor;
 import org.bukkit.command.CommandSender;
@@ -871,7 +871,7 @@ public final class PluginDescriptionFile {
             if (lazyPermissions == null) {
                 permissions = ImmutableList.<Permission>of();
             } else {
-                permissions = ImmutableList.copyOf(Permission.loadPermissions(lazyPermissions, MohistMC.i18n.as("mohist.i18n.31", getFullName(), defaultPerm), defaultPerm));
+                permissions = ImmutableList.copyOf(Permission.loadPermissions(lazyPermissions, OneWorldCore.i18n.as("mohist.i18n.31", getFullName(), defaultPerm), defaultPerm));
                 lazyPermissions = null;
             }
         }
@@ -1010,7 +1010,7 @@ public final class PluginDescriptionFile {
             name = rawName = map.get("name").toString();
 
             if (!VALID_NAME.matcher(name).matches()) {
-                throw new InvalidDescriptionException(MohistMC.i18n.as("mohist.i18n.32", name))
+                throw new InvalidDescriptionException(OneWorldCore.i18n.as("mohist.i18n.32", name))
                         ;
             }
             name = name.replace(' ', '_');
@@ -1197,9 +1197,9 @@ public final class PluginDescriptionFile {
                 builder.add(entry.toString().replace(' ', '_'));
             }
         } catch (ClassCastException ex) {
-            throw new InvalidDescriptionException(ex, MohistMC.i18n.as("mohist.i18n.33", key));
+            throw new InvalidDescriptionException(ex, OneWorldCore.i18n.as("mohist.i18n.33", key));
         } catch (NullPointerException ex) {
-            throw new InvalidDescriptionException(ex, MohistMC.i18n.as("mohist.i18n.34", key));
+            throw new InvalidDescriptionException(ex, OneWorldCore.i18n.as("mohist.i18n.34", key));
         }
         return builder.build();
     }
@@ -1267,7 +1267,7 @@ public final class PluginDescriptionFile {
         if (object instanceof Map) {
             return (Map<?, ?>) object;
         }
-        throw new InvalidDescriptionException(MohistMC.i18n.as("mohist.i18n.35", object));
+        throw new InvalidDescriptionException(OneWorldCore.i18n.as("mohist.i18n.35", object));
     }
 
     /**
@@ -1280,3 +1280,4 @@ public final class PluginDescriptionFile {
         return rawName;
     }
 }
+

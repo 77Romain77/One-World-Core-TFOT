@@ -34,7 +34,7 @@ public class WatchMohist implements Runnable {
     }
 
     public static boolean isEnable() {
-        return MohistConfig.watchdog_mohist;
+        return OneWorldCoreConfig.watchdog_mohist;
     }
 
     @Override
@@ -42,7 +42,7 @@ public class WatchMohist implements Runnable {
         long curTime = System.currentTimeMillis();
         if (Time > 0L && curTime - Time > 2000L && curTime - WarnTime > 60000L) {
             WarnTime = curTime;
-            MohistMC.LOGGER.warn(MohistMC.i18n.as("watchmohist.1"));
+            OneWorldCore.LOGGER.warn(OneWorldCore.i18n.as("watchmohist.1"));
 
             double[] tps = Bukkit.getTPS();
             String[] tpsAvg = new String[tps.length];
@@ -50,13 +50,13 @@ public class WatchMohist implements Runnable {
                 tpsAvg[i] = TicksPerSecondCommand.format(tps[i]);
             }
 
-            MohistMC.LOGGER.warn(MohistMC.i18n.as("watchmohist.2", String.valueOf(curTime - Time), StringUtils.join(tpsAvg, ", ")));
-            MohistMC.LOGGER.warn(MohistMC.i18n.as("watchmohist.3"));
-            MohistMC.LOGGER.warn(MohistMC.i18n.as("watchmohist.4"));
+            OneWorldCore.LOGGER.warn(OneWorldCore.i18n.as("watchmohist.2", String.valueOf(curTime - Time), StringUtils.join(tpsAvg, ", ")));
+            OneWorldCore.LOGGER.warn(OneWorldCore.i18n.as("watchmohist.3"));
+            OneWorldCore.LOGGER.warn(OneWorldCore.i18n.as("watchmohist.4"));
             for (StackTraceElement stack : MinecraftServer.getServer().serverThread.getStackTrace()) {
-                MohistMC.LOGGER.warn("{}{}", MohistMC.i18n.as("watchmohist.5"), stack);
+                OneWorldCore.LOGGER.warn("{}{}", OneWorldCore.i18n.as("watchmohist.5"), stack);
             }
-            MohistMC.LOGGER.warn(MohistMC.i18n.as("watchmohist.1"));
+            OneWorldCore.LOGGER.warn(OneWorldCore.i18n.as("watchmohist.1"));
         }
     }
 }

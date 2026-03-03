@@ -3,7 +3,7 @@ package com.oneworldstudiomc.util;
 import java.util.Map;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/18 11:47:11
  */
 public record VersionInfo(String oneworldstudio, String bukkit, String craftbukkit, String spigot, String forge) {
@@ -13,3 +13,4 @@ public record VersionInfo(String oneworldstudio, String bukkit, String craftbukk
     }
 
 }
+

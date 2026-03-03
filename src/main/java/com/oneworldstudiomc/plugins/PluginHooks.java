@@ -1,11 +1,11 @@
 package com.oneworldstudiomc.plugins;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/6/26 13:56:32
  */
 public class PluginHooks {
@@ -21,7 +21,8 @@ public class PluginHooks {
         Plugin plugin = e.getPlugin();
         if (plugin.getName().equals("PlaceholderAPI")){
             MohistPapiHook.init();
-            MohistMC.LOGGER.info("Hook PlaceholderAPI!");
+            OneWorldCore.LOGGER.info("Hook PlaceholderAPI!");
         }
     }
 }
+

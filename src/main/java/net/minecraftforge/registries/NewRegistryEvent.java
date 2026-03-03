@@ -5,7 +5,7 @@
 
 package net.minecraftforge.registries;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.logging.LogUtils;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
@@ -81,7 +81,7 @@ public class NewRegistryEvent extends Event implements IModBusEvent
             rootRegistry.freeze();
 
         if (aggregate.getSuppressed().length > 0)
-            LOGGER.error(LogUtils.FATAL_MARKER, MohistMC.i18n.as("mohist.i18n.207", aggregate));
+            LOGGER.error(LogUtils.FATAL_MARKER, OneWorldCore.i18n.as("mohist.i18n.207", aggregate));
     }
 
     private <T> void buildRegistry(Map<RegistryBuilder<?>, IForgeRegistry<?>> builtRegistries, RegistryData<T> data)
@@ -122,3 +122,4 @@ public class NewRegistryEvent extends Event implements IModBusEvent
         return "RegistryEvent.NewRegistry";
     }
 }
+

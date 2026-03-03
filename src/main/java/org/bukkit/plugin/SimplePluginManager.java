@@ -5,7 +5,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.graph.GraphBuilder;
 import com.google.common.graph.Graphs;
 import com.google.common.graph.MutableGraph;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.bukkit.pluginfix.PluginDynamicRegistrFix;
 import com.oneworldstudiomc.plugins.MohistPlugin;
 import com.oneworldstudiomc.util.I18n;
@@ -90,12 +90,12 @@ public final class SimplePluginManager implements PluginManager {
             } catch (NoSuchMethodException ex) {
                 String className = loader.getName();
 
-                throw new IllegalArgumentException(String.format(MohistMC.i18n.as("mohist.i18n.36", className, className)), ex);
+                throw new IllegalArgumentException(String.format(OneWorldCore.i18n.as("mohist.i18n.36", className, className)), ex);
             } catch (Exception ex) {
-                throw new IllegalArgumentException(String.format(MohistMC.i18n.as("mohist.i18n.37", ex.getClass().getName(), loader.getName())), ex);
+                throw new IllegalArgumentException(String.format(OneWorldCore.i18n.as("mohist.i18n.37", ex.getClass().getName(), loader.getName())), ex);
             }
         } else {
-            throw new IllegalArgumentException(String.format(MohistMC.i18n.as("mohist.i18n.38", loader.getName())));
+            throw new IllegalArgumentException(String.format(OneWorldCore.i18n.as("mohist.i18n.38", loader.getName())));
         }
 
         Pattern[] patterns = instance.getPluginFileFilters();
@@ -163,7 +163,7 @@ public final class SimplePluginManager implements PluginManager {
             File replacedFile = plugins.put(description.getName(), file);
             if (replacedFile != null) {
                 server.getLogger().severe(String.format(
-                    MohistMC.i18n.as("mohist.i18n.39",
+                    OneWorldCore.i18n.as("mohist.i18n.39",
                     description.getName(),
                     file.getPath(),
                     replacedFile.getPath(),
@@ -174,7 +174,7 @@ public final class SimplePluginManager implements PluginManager {
             String removedProvided = pluginsProvided.remove(description.getName());
             if (removedProvided != null) {
                 server.getLogger().warning(String.format(
-                        MohistMC.i18n.as("mohist.i18n.41",
+                        OneWorldCore.i18n.as("mohist.i18n.41",
                         description.getName(),
                         removedProvided
                 )));
@@ -184,7 +184,7 @@ public final class SimplePluginManager implements PluginManager {
                 File pluginFile = plugins.get(provided);
                 if (pluginFile != null) {
                     server.getLogger().warning(String.format(
-                            MohistMC.i18n.as("mohist.i18n.42",
+                            OneWorldCore.i18n.as("mohist.i18n.42",
                             file.getPath(),
                             provided,
                             pluginFile.getPath(),
@@ -194,7 +194,7 @@ public final class SimplePluginManager implements PluginManager {
                     String replacedPlugin = pluginsProvided.put(provided, description.getName());
                     if (replacedPlugin != null) {
                         server.getLogger().warning(String.format(
-                                MohistMC.i18n.as("mohist.i18n.43",
+                                OneWorldCore.i18n.as("mohist.i18n.43",
                                 provided,
                                 description.getName(),
                                 replacedPlugin
@@ -270,8 +270,8 @@ public final class SimplePluginManager implements PluginManager {
 
                             server.getLogger().log(
                                     Level.SEVERE,
-                                    MohistMC.i18n.as("mohist.i18n.44", directory.getPath(), entry.getValue().getPath()),
-                                    new UnknownDependencyException(MohistMC.i18n.as("mohist.i18n.45", dependency, dependency)));
+                                    OneWorldCore.i18n.as("mohist.i18n.44", directory.getPath(), entry.getValue().getPath()),
+                                    new UnknownDependencyException(OneWorldCore.i18n.as("mohist.i18n.45", dependency, dependency)));
                             break;
                         }
                     }
@@ -340,11 +340,11 @@ public final class SimplePluginManager implements PluginManager {
                                 loadedPlugins.add(loadedPlugin.getName());
                                 loadedPlugins.addAll(loadedPlugin.getDescription().getProvides());
                             } else {
-                                server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.46", directory.getPath(), file.getPath()));
+                                server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.46", directory.getPath(), file.getPath()));
                             }
                             break;
                         } catch (InvalidPluginException ex) {
-                            server.getLogger().log(Level.SEVERE, MohistMC.i18n.as("mohist.i18n.47", directory.getPath(), file.getPath()), ex);
+                            server.getLogger().log(Level.SEVERE, OneWorldCore.i18n.as("mohist.i18n.47", directory.getPath(), file.getPath()), ex);
                         }
                     }
                 }
@@ -357,7 +357,7 @@ public final class SimplePluginManager implements PluginManager {
                     while (failedPluginIterator.hasNext()) {
                         File file = failedPluginIterator.next();
                         failedPluginIterator.remove();
-                        server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.48", file.getPath(), directory.getPath()));
+                        server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.48", file.getPath(), directory.getPath()));
                     }
                 }
             }
@@ -483,7 +483,7 @@ public final class SimplePluginManager implements PluginManager {
             try {
                 plugin.getPluginLoader().enablePlugin(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.49", plugin.getDescription().getFullName()), ex);
+                server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.49", plugin.getDescription().getFullName()), ex);
             }
 
             HandlerList.bakeAll();
@@ -508,32 +508,32 @@ public final class SimplePluginManager implements PluginManager {
             try {
                 plugin.getPluginLoader().disablePlugin(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.50", plugin.getDescription().getFullName()), ex);
+                server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.50", plugin.getDescription().getFullName()), ex);
             }
 
             try {
                 server.getScheduler().cancelTasks(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.51", plugin.getDescription().getFullName()), ex);
+                server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.51", plugin.getDescription().getFullName()), ex);
             }
 
             try {
                 server.getServicesManager().unregisterAll(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.52", plugin.getDescription().getFullName()), ex);
+                server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.52", plugin.getDescription().getFullName()), ex);
             }
 
             try {
                 HandlerList.unregisterAll(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.53", plugin.getDescription().getFullName()), ex);
+                server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.53", plugin.getDescription().getFullName()), ex);
             }
 
             try {
                 server.getMessenger().unregisterIncomingPluginChannel(plugin);
                 server.getMessenger().unregisterOutgoingPluginChannel(plugin);
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.54", plugin.getDescription().getFullName()), ex);
+                server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.54", plugin.getDescription().getFullName()), ex);
             }
 
             try {
@@ -541,7 +541,7 @@ public final class SimplePluginManager implements PluginManager {
                     world.removePluginChunkTickets(plugin);
                 }
             } catch (Throwable ex) {
-                server.getLogger().log(Level.SEVERE,MohistMC.i18n.as("mohist.i18n.55", plugin.getDescription().getFullName()), ex);
+                server.getLogger().log(Level.SEVERE,OneWorldCore.i18n.as("mohist.i18n.55", plugin.getDescription().getFullName()), ex);
             }
         }
     }
@@ -609,7 +609,7 @@ public final class SimplePluginManager implements PluginManager {
                     plugin.setNaggable(false);
 
                     server.getLogger().log(Level.SEVERE, String.format(
-                            MohistMC.i18n.as("mohist.i18n.56",
+                            OneWorldCore.i18n.as("mohist.i18n.56",
                             plugin.getDescription().getAuthors(),
                             plugin.getDescription().getFullName(),
                             ex.getMessage()
@@ -624,7 +624,7 @@ public final class SimplePluginManager implements PluginManager {
     @Override
     public void registerEvents(@NotNull Listener listener, @NotNull Plugin plugin) {
         if (!plugin.isEnabled()) {
-            throw new IllegalPluginAccessException(MohistMC.i18n.as("mohist.i18n.58", listener));
+            throw new IllegalPluginAccessException(OneWorldCore.i18n.as("mohist.i18n.58", listener));
         }
 
         for (Map.Entry<Class<? extends Event>, Set<RegisteredListener>> entry : plugin.getPluginLoader().createRegisteredListeners(listener, plugin).entrySet()) {
@@ -658,7 +658,7 @@ public final class SimplePluginManager implements PluginManager {
         Preconditions.checkArgument(plugin != null, "Plugin cannot be null");
 
         if (!plugin.isEnabled()) {
-            throw new IllegalPluginAccessException(MohistMC.i18n.as("mohist.i18n.59", event));
+            throw new IllegalPluginAccessException(OneWorldCore.i18n.as("mohist.i18n.59", event));
         }
 
         if (useTimings) {
@@ -680,7 +680,7 @@ public final class SimplePluginManager implements PluginManager {
 
             return (HandlerList) method.invoke(null);
         } catch (Exception e) {
-            throw new IllegalPluginAccessException(MohistMC.i18n.as("mohist.i18n.60", type.toString(), e.toString()));
+            throw new IllegalPluginAccessException(OneWorldCore.i18n.as("mohist.i18n.60", type.toString(), e.toString()));
         }
     }
 
@@ -695,7 +695,7 @@ public final class SimplePluginManager implements PluginManager {
                     && Event.class.isAssignableFrom(clazz.getSuperclass())) {
                 return getRegistrationClass(clazz.getSuperclass().asSubclass(Event.class));
             } else {
-                throw new IllegalPluginAccessException(MohistMC.i18n.as("mohist.i18n.61", clazz.getName()));
+                throw new IllegalPluginAccessException(OneWorldCore.i18n.as("mohist.i18n.61", clazz.getName()));
             }
         }
     }
@@ -716,7 +716,7 @@ public final class SimplePluginManager implements PluginManager {
         String name = perm.getName().toLowerCase(java.util.Locale.ENGLISH);
 
         if (permissions.containsKey(name)) {
-            throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.62", name));
+            throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.62", name));
         }
 
         permissions.put(name, perm);
@@ -893,3 +893,4 @@ public final class SimplePluginManager implements PluginManager {
         useTimings = false;
     }
 }
+

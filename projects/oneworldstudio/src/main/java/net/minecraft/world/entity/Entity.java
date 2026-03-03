@@ -4,7 +4,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Sets;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.plugins.ban.bans.BanEntity;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2DoubleArrayMap;
@@ -2476,7 +2476,7 @@ public abstract class Entity extends net.minecraftforge.common.capabilities.Capa
                if (this instanceof ServerPlayer) {
                   ((ServerPlayer) this).changeDimensionCB(serverlevel1, PlayerTeleportEvent.TeleportCause.NETHER_PORTAL);
                } else {
-                  if (MohistConfig.custom_entity_tp_nether) {
+                  if (OneWorldCoreConfig.custom_entity_tp_nether) {
                      this.changeDimension(serverlevel1);
                   }
                }

@@ -5,7 +5,7 @@
 
 package net.minecraftforge.registries;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.lang.reflect.Field;
 import java.lang.reflect.Modifier;
 import java.util.Locale;
@@ -57,18 +57,18 @@ class ObjectHolderRef implements Consumer<Predicate<ResourceLocation>>
             }
             catch (ResourceLocationException e)
             {
-                throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.208", field.toString()), e);
+                throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.208", field.toString()), e);
             }
         }
 
         if (injectedObjectName == null)
-            throw new IllegalStateException(String.format(Locale.ENGLISH, MohistMC.i18n.as("mohist.i18n.209", field.getType().getName(), field.getDeclaringClass().getName(), field.getName())));
+            throw new IllegalStateException(String.format(Locale.ENGLISH, OneWorldCore.i18n.as("mohist.i18n.209", field.getType().getName(), field.getDeclaringClass().getName(), field.getName())));
 
         field.setAccessible(true);
 
         if (Modifier.isFinal(field.getModifiers()))
         {
-            throw new RuntimeException(MohistMC.i18n.as("mohist.i18n.210", field.getDeclaringClass().getName(), field.getName()));
+            throw new RuntimeException(OneWorldCore.i18n.as("mohist.i18n.210", field.getDeclaringClass().getName(), field.getName()));
         }
 
         return new ObjectHolderRef(registry, field, injectedObjectName);
@@ -99,7 +99,7 @@ class ObjectHolderRef implements Consumer<Predicate<ResourceLocation>>
 
         if (thing == null)
         {
-            LOGGER.debug(MohistMC.i18n.as("mohist.i18n.211", injectedObject, field));
+            LOGGER.debug(OneWorldCore.i18n.as("mohist.i18n.211", injectedObject, field));
             return;
         }
         try
@@ -108,7 +108,7 @@ class ObjectHolderRef implements Consumer<Predicate<ResourceLocation>>
         }
         catch (IllegalArgumentException | ReflectiveOperationException e)
         {
-            LOGGER.warn(MohistMC.i18n.as("mohist.i18n.212", this.field, thing, this.injectedObject), e);
+            LOGGER.warn(OneWorldCore.i18n.as("mohist.i18n.212", this.field, thing, this.injectedObject), e);
         }
     }
 
@@ -127,3 +127,4 @@ class ObjectHolderRef implements Consumer<Predicate<ResourceLocation>>
         return this.field.equals(o.field);
     }
 }
+

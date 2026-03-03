@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.ai.deepseek;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.mohistmc.mjson.Json;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -12,19 +12,19 @@ import org.bukkit.entity.Player;
 public class DeepSeek {
 
     public static void init(Player player, String msg) {
-        if (MohistConfig.deepseek_enable && player.hasPermission("mohist.ai.deepseek")) {
-            String cmd = MohistConfig.deepseek_command + " ";
+        if (OneWorldCoreConfig.deepseek_enable && player.hasPermission("mohist.ai.deepseek")) {
+            String cmd = OneWorldCoreConfig.deepseek_command + " ";
             if (msg.startsWith(cmd)) {
                 String message = msg.replace(cmd, "");
                 CompletableFuture.supplyAsync(() -> chat(message))
-                        .thenAccept(reply -> Bukkit.broadcastMessage(MohistConfig.deepseek_chatfromat.formatted(reply)));
+                        .thenAccept(reply -> Bukkit.broadcastMessage(OneWorldCoreConfig.deepseek_chatfromat.formatted(reply)));
             }
         }
     }
 
     public static String chat(String msg) {
         ChatRequest request = new ChatRequest();
-        request.setModel(MohistConfig.deepseek_model);
+        request.setModel(OneWorldCoreConfig.deepseek_model);
         request.setFrequency_penalty(0);
         request.setMax_tokens(2048);
         request.setPresence_penalty(0);
@@ -43,7 +43,7 @@ public class DeepSeek {
 
         ChatRequest.Message systemMessage = new ChatRequest.Message();
         systemMessage.setRole("system");
-        systemMessage.setContent(MohistConfig.deepseek_system);
+        systemMessage.setContent(OneWorldCoreConfig.deepseek_system);
 
         ChatRequest.Message userMessage = new ChatRequest.Message();
         userMessage.setRole("user");
@@ -53,7 +53,7 @@ public class DeepSeek {
         HttpResponse<String> response = Unirest.post("https://api.deepseek.com/chat/completions")
                 .header("Content-Type", "application/json")
                 .header("Accept", "application/json")
-                .header("Authorization", "Bearer %s".formatted(MohistConfig.deepseek_apikey))
+                .header("Authorization", "Bearer %s".formatted(OneWorldCoreConfig.deepseek_apikey))
                 .body(Json.readBean(request).toString())
                 .asString();
         Json json = Json.read(response.getBody());
@@ -61,3 +61,4 @@ public class DeepSeek {
         return chatCompletion.getChoices()[0].getMessage().getContent();
     }
 }
+

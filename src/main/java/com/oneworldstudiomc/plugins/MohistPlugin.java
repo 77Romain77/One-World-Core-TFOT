@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.plugins;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.ai.koukou.AIConfig;
 import com.oneworldstudiomc.ai.koukou.ApiController;
 import com.oneworldstudiomc.plugins.back.BackCommands;
@@ -35,7 +35,7 @@ import org.bukkit.event.server.PluginEnableEvent;
 import org.bukkit.plugin.Plugin;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/6/14 14:46:34
  */
 public class MohistPlugin {
@@ -45,7 +45,7 @@ public class MohistPlugin {
     public static Logger LOGGER = LogManager.getLogger("MohistPlugin");
 
     public static void init(Server server) {
-        if (MohistConfig.yml.getBoolean("worldmanage", true)) WorldManage.onEnable();
+        if (OneWorldCoreConfig.yml.getBoolean("worldmanage", true)) WorldManage.onEnable();
         File out = new File("libraries/com/oneworldstudiomc/cache", "libPath.txt");
         if (out.exists()) {
             String data;
@@ -77,16 +77,16 @@ public class MohistPlugin {
     }
 
     public static void registerCommands(Map<String, Command> map) {
-        if (MohistConfig.yml.getBoolean("worldmanage", true)) {
+        if (OneWorldCoreConfig.yml.getBoolean("worldmanage", true)) {
             map.put("worlds", new WorldsCommands("worlds"));
         }
         map.put("warps", new WarpsCommands("warps"));
-        if (MohistConfig.yml.getBoolean("tpa.enable", false)) {
+        if (OneWorldCoreConfig.yml.getBoolean("tpa.enable", false)) {
             map.put("tpa", new TpaComamands("tpa"));
             map.put("tpadeny", new TpadenyCommands("tpadeny"));
             map.put("tpaccept", new TpacceptCommands("tpaccept"));
         }
-        if (MohistConfig.yml.getBoolean("back.enable", false)) {
+        if (OneWorldCoreConfig.yml.getBoolean("back.enable", false)) {
             map.put("back", new BackCommands("back"));
         }
     }
@@ -113,3 +113,4 @@ public class MohistPlugin {
     }
 
 }
+

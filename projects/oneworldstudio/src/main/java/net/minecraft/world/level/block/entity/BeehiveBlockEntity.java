@@ -6,7 +6,7 @@ import java.util.Iterator;
 import java.util.List;
 import javax.annotation.Nullable;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
@@ -45,7 +45,7 @@ public class BeehiveBlockEntity extends BlockEntity {
    @Nullable
    public BlockPos savedFlowerPos;
 
-   public int maxBees = MohistConfig.maxBees; // CraftBukkit - allow setting max amount of bees a hive can hold
+   public int maxBees = OneWorldCoreConfig.maxBees; // CraftBukkit - allow setting max amount of bees a hive can hold
 
    public BeehiveBlockEntity(BlockPos p_155134_, BlockState p_155135_) {
       super(BlockEntityType.BEEHIVE, p_155134_, p_155135_);

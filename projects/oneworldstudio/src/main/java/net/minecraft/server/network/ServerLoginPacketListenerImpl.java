@@ -1,7 +1,7 @@
 package net.minecraft.server.network;
 
 import com.google.common.primitives.Ints;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.bukkit.LoginHandler;
 import com.oneworldstudiomc.paper.proxy.VelocityProxy;
 import com.oneworldstudiomc.plugins.PlayerModsCheck;
@@ -199,7 +199,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
             this.connection.send(new ClientboundHelloPacket("", this.server.getKeyPair().getPublic().getEncoded(), this.challenge));
          } else {
             // Paper start - Velocity support
-            if (MohistConfig.velocity_enabled) {
+            if (OneWorldCoreConfig.velocity_enabled) {
                this.velocityLoginMessageId = java.util.concurrent.ThreadLocalRandom.current().nextInt();
                net.minecraft.network.FriendlyByteBuf buf = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
                buf.writeByte(VelocityProxy.MAX_SUPPORTED_FORWARDING_VERSION);
@@ -315,7 +315,7 @@ public class ServerLoginPacketListenerImpl implements ServerLoginPacketListener,
 
    public void handleCustomQueryPacket(ServerboundCustomQueryPacket p_10045_) {
       // Paper start - Velocity support
-      if (MohistConfig.velocity_enabled && p_10045_.getTransactionId() == this.velocityLoginMessageId) {
+      if (OneWorldCoreConfig.velocity_enabled && p_10045_.getTransactionId() == this.velocityLoginMessageId) {
          net.minecraft.network.FriendlyByteBuf buf = p_10045_.getData();
          if (buf == null) {
             this.disconnect("This server requires you to connect with Velocity.");

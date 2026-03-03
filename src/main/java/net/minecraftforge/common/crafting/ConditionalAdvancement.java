@@ -9,7 +9,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -44,7 +44,7 @@ public class ConditionalAdvancement
         for (JsonElement ele : entries)
         {
             if (!ele.isJsonObject())
-                throw new JsonSyntaxException(MohistMC.i18n.as("mohist.i18n.68", idx));
+                throw new JsonSyntaxException(OneWorldCore.i18n.as("mohist.i18n.68", idx));
             if (CraftingHelper.processConditions(GsonHelper.getAsJsonArray(ele.getAsJsonObject(), "conditions"), context))
                 return GsonHelper.getAsJsonObject(ele.getAsJsonObject(), "advancement");
             idx++;
@@ -127,3 +127,4 @@ public class ConditionalAdvancement
         }
     }
 }
+

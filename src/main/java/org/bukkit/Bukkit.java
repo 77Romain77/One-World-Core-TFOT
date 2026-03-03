@@ -1,7 +1,7 @@
 package org.bukkit;
 
 import com.google.common.collect.ImmutableList;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import org.bukkit.Warning.WarningState;
 import org.bukkit.advancement.Advancement;
 import org.bukkit.block.data.BlockData;
@@ -93,7 +93,7 @@ public final class Bukkit {
         }
 
         Bukkit.server = server;
-        server.getLogger().info("This server is running " + getName() + " version " + getVersion() + " (Implementing API version " + getBukkitVersion() + ", Forge version " + MohistMC.versionInfo.forge() + ")");
+        server.getLogger().info("This server is running " + getName() + " version " + getVersion() + " (Implementing API version " + getBukkitVersion() + ", Forge version " + OneWorldCore.versionInfo.forge() + ")");
     }
 
     /**
@@ -2109,3 +2109,4 @@ public final class Bukkit {
         return server.isStopping();
     }
 }
+

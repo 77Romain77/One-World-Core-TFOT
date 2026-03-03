@@ -47,7 +47,7 @@ public class Remapper {
 
     public Remapper() throws Exception {
         this.toNmsMapping = new JarMapping();
-        this.toNmsMapping.packages.put("org/yaml/snakeyaml/", "org/yaml/snakeyaml/");
+        this.toNmsMapping.packages.put("org/yaml/snakeyaml/", "com/mohistmc/org/yaml/snakeyaml/");
         this.toNmsMapping.packages.put("javax/inject/", "com/oneworldstudiomc/javax/inject/");
         this.toNmsMapping.packages.put("com/destroystokyo/paper/", "com/oneworldstudiomc/paper/");
         this.toNmsMapping.packages.put("io/papermc/paper/", "com/oneworldstudiomc/paper/");

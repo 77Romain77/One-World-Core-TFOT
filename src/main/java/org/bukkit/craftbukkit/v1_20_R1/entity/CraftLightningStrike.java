@@ -1,8 +1,10 @@
 package org.bukkit.craftbukkit.v1_20_R1.entity;
 
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.EntityType;
 import org.bukkit.entity.LightningStrike;
+import org.jetbrains.annotations.Nullable;
 
 public class CraftLightningStrike extends CraftEntity implements LightningStrike {
     public CraftLightningStrike(final CraftServer server, final net.minecraft.world.entity.LightningBolt entity) {
@@ -12,6 +14,11 @@ public class CraftLightningStrike extends CraftEntity implements LightningStrike
     @Override
     public boolean isEffect() {
         return getHandle().visualOnly;
+    }
+
+    @Override
+    public @Nullable Entity getCausingEntity() {
+        return getHandle().getCause() == null ? null : getHandle().getCause().getBukkitEntity();
     }
 
     @Override

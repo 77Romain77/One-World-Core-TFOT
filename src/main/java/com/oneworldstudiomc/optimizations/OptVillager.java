@@ -12,7 +12,7 @@ import net.minecraft.world.level.block.WallBlock;
 import net.minecraft.world.level.chunk.ChunkAccess;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/12 5:23:34
  */
 public class OptVillager {
@@ -89,3 +89,4 @@ public class OptVillager {
         return chunk.getBlockState(pos).getBlock().hasCollision;
     }
 }
+

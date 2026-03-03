@@ -2,7 +2,7 @@ package net.minecraft.world.level.block.entity;
 
 import javax.annotation.Nullable;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
@@ -48,7 +48,7 @@ public class EnchantmentTableBlockEntity extends BlockEntity implements Nameable
    }
 
    public static void bookAnimationTick(Level p_155504_, BlockPos p_155505_, BlockState p_155506_, EnchantmentTableBlockEntity p_155507_) {
-      if (!MohistConfig.bookAnimationTick) return; // Mirai - skip enchantment table book tick
+      if (!OneWorldCoreConfig.bookAnimationTick) return; // Mirai - skip enchantment table book tick
       p_155507_.oOpen = p_155507_.open;
       p_155507_.oRot = p_155507_.rot;
       Player player = p_155504_.getNearestPlayer((double)p_155505_.getX() + 0.5D, (double)p_155505_.getY() + 0.5D, (double)p_155505_.getZ() + 0.5D, 3.0D, false);

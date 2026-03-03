@@ -24,7 +24,7 @@ import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/12 5:33:10
  */
 public class ChunkManager {
@@ -126,3 +126,4 @@ public class ChunkManager {
         return true;
     }
 }
+

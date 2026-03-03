@@ -4,7 +4,7 @@
  package net.minecraft.world.level.storage;
  
  import com.google.common.collect.Maps;
-+import com.oneworldstudiomc.MohistConfig;
++import com.oneworldstudiomc.OneWorldCoreConfig;
  import com.mojang.datafixers.DataFixer;
  import com.mojang.logging.LogUtils;
  import java.io.DataInputStream;
@@ -43,7 +43,7 @@
           if (p_164867_ != null) {
 -            p_164867_.m_77757_(this.m_78156_(p_164866_));
 +            // Mohist start - Save data asynchronously, copy by SavedData.
-+            if (MohistConfig.async_save_world && p_164867_.m_77764_()) {
++            if (OneWorldCoreConfig.async_save_world && p_164867_.m_77764_()) {
 +               CompoundTag save = p_164867_.m_7176_(new CompoundTag());
 +               if (save != null) {
 +                  p_164867_.m_77760_(false);

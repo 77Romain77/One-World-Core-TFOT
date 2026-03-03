@@ -87,11 +87,13 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
    @Nullable
    private volatile Component delayedDisconnect;
    private java.util.function.Consumer<Connection> activationHandler;
-   public String hostname = "";
+   public String hostname = ""; // CraftBukkit - add field
+   // Spigot Start
    public java.util.UUID spoofedUUID;
    public com.mojang.authlib.properties.Property[] spoofedProfile;
    public boolean preparing = true;
-   private volatile boolean mohist$isClosing;
+   // Spigot End
+   private volatile boolean mohist$isClosing; //mohist
 
    public Connection(PacketFlow p_129482_) {
       this.receiving = p_129482_;
@@ -101,11 +103,10 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
       super.channelActive(p_129525_);
       this.channel = p_129525_.channel();
       this.address = this.channel.remoteAddress();
-      if (this.activationHandler != null) {
-         this.activationHandler.accept(this);
-      }
+      if (activationHandler != null) activationHandler.accept(this);
+      // Spigot Start
       this.preparing = false;
-
+      // Spigot End
       try {
          this.setProtocol(ConnectionProtocol.HANDSHAKING);
       } catch (Throwable throwable) {
@@ -194,22 +195,14 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
    public void send(Packet<?> p_243248_, @Nullable PacketSendListener p_243316_) {
       if (this.isConnected()) {
          this.flushQueue();
-         this.sendPacketInternal(p_243248_, p_243316_);
+         this.sendPacket(p_243248_, p_243316_);
       } else {
          this.queue.add(new Connection.PacketHolder(p_243248_, p_243316_));
       }
 
    }
 
-   public void sendPacket(Packet<?> packet, @Nullable PacketSendListener listener) {
-      this.send(packet, listener);
-   }
-
-   public void sendPacket(Packet<?> packet, @Nullable PacketSendListener listener, Boolean flushConditional) {
-      this.send(packet, listener);
-   }
-
-   private void sendPacketInternal(Packet<?> p_129521_, @Nullable PacketSendListener p_243246_) {
+   private void sendPacket(Packet<?> p_129521_, @Nullable PacketSendListener p_243246_) {
       ConnectionProtocol connectionprotocol = ConnectionProtocol.getProtocolForPacket(p_129521_);
       ConnectionProtocol connectionprotocol1 = this.getCurrentProtocol();
       ++this.sentPackets;
@@ -265,7 +258,7 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
          synchronized(this.queue) {
             Connection.PacketHolder connection$packetholder;
             while((connection$packetholder = this.queue.poll()) != null) {
-               this.sendPacketInternal(connection$packetholder.packet, connection$packetholder.listener);
+               this.sendPacket(connection$packetholder.packet, connection$packetholder.listener);
             }
 
          }
@@ -308,10 +301,11 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
       if (this.channel == null) {
          this.delayedDisconnect = p_129508_;
       }
+      // Spigot Start
       this.preparing = false;
-
+      // Spigot End
       if (this.isConnected()) {
-         this.mohist$isClosing = true;
+         this.mohist$isClosing = true; // Mohist fix vmp mixin
          this.channel.close().awaitUninterruptibly();
          this.disconnectedReason = p_129508_;
       }
@@ -448,10 +442,11 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
             this.disconnectionHandled = true;
             if (this.getDisconnectedReason() != null) {
                this.getPacketListener().onDisconnect(this.getDisconnectedReason());
+               this.getPacketListener().onDisconnect(this.getDisconnectedReason());
             } else if (this.getPacketListener() != null) {
                this.getPacketListener().onDisconnect(Component.translatable("multiplayer.disconnect.generic"));
             }
-            this.queue.clear();
+            this.queue.clear(); // free packet queue
          }
 
       }
@@ -473,10 +468,6 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
       return this.receiving;
    }
 
-   public SocketAddress getRawAddress() {
-      return this.channel == null ? this.address : this.channel.remoteAddress();
-   }
-
    static class PacketHolder {
       final Packet<?> packet;
       @Nullable
@@ -487,4 +478,11 @@ public class Connection extends SimpleChannelInboundHandler<Packet<?>> {
          this.listener = p_243266_;
       }
    }
+
+   // Spigot Start
+   public SocketAddress getRawAddress() {
+      return this.channel.remoteAddress();
+   }
+   // Spigot End
+   // Spigot End
 }

@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -30,24 +30,23 @@ public class OneWorldCoreConfigUtil {
 
     private static final File LEGACY_MOHIST_YML = new File("mohist-config", "mohist.yml");
     public static final File LEGACY_STUDIO_YML = new File("oneworldstudio-config", "oneworldstudio.yml");
-    public static final File mohistyml = new File("oneworldcore-config", "oneworldstudio.yml");
-    public static final YamlConfiguration yml = YamlConfiguration.loadConfiguration(mohistyml);
+    public static final File LEGACY_CORE_STUDIO_YML = new File("oneworldcore-config", "oneworldstudio.yml");
+    public static final File CORE_YML = new File("oneworldcore-config", "oneworldcore.yml");
+    public static final YamlConfiguration yml = YamlConfiguration.loadConfiguration(CORE_YML);
 
     public static void init() {
         try {
-            if (!mohistyml.getParentFile().exists()) {
-                mohistyml.getParentFile().mkdirs();
+            if (!CORE_YML.getParentFile().exists()) {
+                CORE_YML.getParentFile().mkdirs();
             }
-            if (!mohistyml.exists()) {
-                if (LEGACY_STUDIO_YML.exists()) {
-                    Files.copy(LEGACY_STUDIO_YML.toPath(), mohistyml.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                } else if (LEGACY_MOHIST_YML.exists()) {
-                    Files.copy(LEGACY_MOHIST_YML.toPath(), mohistyml.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                } else {
-                    mohistyml.createNewFile();
-                }
+            if (!CORE_YML.exists()) {
+                migrateLegacyMainConfig(CORE_YML, LEGACY_CORE_STUDIO_YML, LEGACY_STUDIO_YML, LEGACY_MOHIST_YML);
             }
-            yml.load(mohistyml);
+            if (!CORE_YML.exists()) {
+                CORE_YML.createNewFile();
+            }
+            yml.load(CORE_YML);
+            migrateLegacyKeyPrefixes();
         } catch (Exception e) {
             System.out.println("File init exception!");
         }
@@ -93,7 +92,7 @@ public class OneWorldCoreConfigUtil {
 
     public static void save() {
         try {
-            yml.save(mohistyml);
+            yml.save(CORE_YML);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -138,4 +137,63 @@ public class OneWorldCoreConfigUtil {
     private static String getStringCompat(String modernKey, String legacyKey, String defaultValue) {
         return getStringCompat(modernKey, null, legacyKey, defaultValue);
     }
+
+    private static void migrateLegacyMainConfig(File modernTarget, File... legacyFiles) {
+        if (legacyFiles == null) {
+            return;
+        }
+        for (File legacyFile : legacyFiles) {
+            if (legacyFile == null || !legacyFile.exists()) {
+                continue;
+            }
+            try {
+                Files.move(legacyFile.toPath(), modernTarget.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                return;
+            } catch (Exception moveFailed) {
+                try {
+                    Files.copy(legacyFile.toPath(), modernTarget.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                    return;
+                } catch (Exception ignored) {
+                }
+            }
+        }
+    }
+
+    private static void migrateLegacyKeyPrefixes() {
+        try {
+            java.lang.reflect.Method getKeysMethod = yml.getClass().getMethod("getKeys", boolean.class);
+            Object keysObject = getKeysMethod.invoke(yml, true);
+            if (!(keysObject instanceof Iterable<?> iterable)) {
+                return;
+            }
+
+            java.util.List<String> keys = new java.util.ArrayList<>();
+            for (Object key : iterable) {
+                if (key instanceof String keyString) {
+                    keys.add(keyString);
+                }
+            }
+
+            for (String key : keys) {
+                String modernKey = null;
+                if (key.startsWith("mohist.")) {
+                    modernKey = "oneworldcore." + key.substring("mohist.".length());
+                } else if (key.startsWith("oneworldstudio.")) {
+                    modernKey = "oneworldcore." + key.substring("oneworldstudio.".length());
+                }
+                if (modernKey == null || modernKey.equals(key)) {
+                    continue;
+                }
+
+                Object modernValue = yml.get(modernKey);
+                if (modernValue == null) {
+                    yml.set(modernKey, yml.get(key));
+                }
+                yml.set(key, null);
+            }
+            save();
+        } catch (Throwable ignored) {
+        }
+    }
 }
+

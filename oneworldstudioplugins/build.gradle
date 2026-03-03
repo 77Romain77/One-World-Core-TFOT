@@ -3,7 +3,7 @@ plugins {
 }
 
 group = 'com.oneworldstudiomc'
-version = MC_VERSION
+version = ONEWORLDCORE_VERSION
 
 repositories {
     mavenCentral()
@@ -11,4 +11,11 @@ repositories {
 
 dependencies {
     implementation(project(':oneworldstudio'))
+}
+
+tasks.named('processResources') {
+    inputs.property('pluginVersion', project.version)
+    filesMatching('plugin.yml') {
+        expand(pluginVersion: project.version)
+    }
 }

@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 public class ApiController {
 
     public static ListenRegister eventBus = ListenRegister.getInstance();
-    public static Logger LOGGER = LogManager.getLogger("Mohist Http Server");
+    public static Logger LOGGER = LogManager.getLogger("OneWorldCore Http Server");
 
     public static void init() {
         if (!AIConfig.INSTANCE.enable()) return;

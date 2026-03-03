@@ -5,7 +5,7 @@
 
 package net.minecraftforge.registries;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
@@ -175,7 +175,7 @@ public final class RegistryObject<T> implements Supplier<T>
                     if (!registryExists(registryName))
                     {
                         invalidRegistry = true;
-                        throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.222", registryName, modid, callerStack));
+                        throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.222", registryName, modid, callerStack));
                     }
                     registryExists = true;
                 }
@@ -201,7 +201,7 @@ public final class RegistryObject<T> implements Supplier<T>
     public T get()
     {
         T ret = this.value;
-        if (ret == null) throw new NullPointerException(MohistMC.i18n.as("mohist.i18n.223", this.name));
+        if (ret == null) throw new NullPointerException(OneWorldCore.i18n.as("mohist.i18n.223", this.name));
         return ret;
     }
 
@@ -497,3 +497,4 @@ public final class RegistryObject<T> implements Supplier<T>
         return Objects.hashCode(name);
     }
 }
+

@@ -4,7 +4,7 @@
  package net.minecraft.server.network;
  
  import com.google.common.primitives.Ints;
-+import com.oneworldstudiomc.MohistConfig;
++import com.oneworldstudiomc.OneWorldCoreConfig;
 +import com.oneworldstudiomc.bukkit.LoginHandler;
 +import com.oneworldstudiomc.paper.proxy.VelocityProxy;
 +import com.oneworldstudiomc.plugins.PlayerModsCheck;
@@ -131,7 +131,7 @@
           } else {
 -            this.f_10019_ = ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT;
 +            // Paper start - Velocity support
-+            if (MohistConfig.velocity_enabled) {
++            if (OneWorldCoreConfig.velocity_enabled) {
 +               this.velocityLoginMessageId = java.util.concurrent.ThreadLocalRandom.current().nextInt();
 +               net.minecraft.network.FriendlyByteBuf buf = new net.minecraft.network.FriendlyByteBuf(io.netty.buffer.Unpooled.buffer());
 +               buf.writeByte(VelocityProxy.MAX_SUPPORTED_FORWARDING_VERSION);
@@ -223,7 +223,7 @@
  
     public void m_7223_(ServerboundCustomQueryPacket p_10045_) {
 +      // Paper start - Velocity support
-+      if (MohistConfig.velocity_enabled && p_10045_.m_179824_() == this.velocityLoginMessageId) {
++      if (OneWorldCoreConfig.velocity_enabled && p_10045_.m_179824_() == this.velocityLoginMessageId) {
 +         net.minecraft.network.FriendlyByteBuf buf = p_10045_.m_179825_();
 +         if (buf == null) {
 +            this.disconnect("This server requires you to connect with Velocity.");

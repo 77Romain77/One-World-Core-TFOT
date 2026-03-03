@@ -8,7 +8,7 @@ package net.minecraftforge.common.data;
 import com.google.common.base.Preconditions;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -210,7 +210,7 @@ public abstract class ParticleDescriptionProvider implements DataProvider {
 
         // Insert into map
         if (this.descriptions.putIfAbsent(particle, desc) != null) {
-            throw new IllegalArgumentException(String.format(MohistMC.i18n.as("mohist.i18n.71", particle)));
+            throw new IllegalArgumentException(String.format(OneWorldCore.i18n.as("mohist.i18n.71", particle)));
         }
     }
 
@@ -236,3 +236,4 @@ public abstract class ParticleDescriptionProvider implements DataProvider {
         return "Particle Descriptions";
     }
 }
+

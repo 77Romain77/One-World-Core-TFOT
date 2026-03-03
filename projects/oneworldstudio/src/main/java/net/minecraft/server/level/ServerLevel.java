@@ -3,7 +3,7 @@ package net.minecraft.server.level;
 import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Streams;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.api.WorldAPI;
 import com.oneworldstudiomc.forge.ForgeInjectBukkit;
 import com.oneworldstudiomc.forge.MohistDerivedWorldInfo;
@@ -1081,7 +1081,7 @@ public class ServerLevel extends Level implements WorldGenLevel {
          if (BooleanUtils.is()) LOGGER.warn("Tried to add entity {} but it was marked as removed already", (Object)EntityType.getKey(p_8873_.getType()));
          return false;
       } else {
-         if (p_8873_ instanceof Villager && MohistConfig.custom_no_villager) return false;
+         if (p_8873_ instanceof Villager && OneWorldCoreConfig.custom_no_villager) return false;
          if (BanEntity.check(p_8873_)) {
             return false;
          }

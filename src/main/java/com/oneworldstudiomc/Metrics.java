@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -294,11 +294,12 @@ public class Metrics {
             String serverUUID = config.getString("serverUuid");
 
             if (config.getBoolean("enabled", true)) {
-                Metrics metrics = new Metrics("Mohist", serverUUID);
+                Metrics metrics = new Metrics("OneWorldCore", serverUUID);
 
                 metrics.addCustomChart(new SingleLineChart("players", () -> Bukkit.getOnlinePlayers().size()));
                 metrics.addCustomChart(new SimplePie("online_mode", () -> Bukkit.getOnlineMode() ? "online" : "offline"));
-                metrics.addCustomChart(new SimplePie("mohist_version", () -> MohistMC.version));
+                metrics.addCustomChart(new SimplePie("oneworldcore_version", () -> OneWorldCore.version));
+                metrics.addCustomChart(new SimplePie("mohist_version", () -> OneWorldCore.version));
                 metrics.addCustomChart(new SimplePie("bungeecord", () -> String.valueOf(SpigotConfig.bungee)));
 
                 metrics.addCustomChart(new DrilldownPie("java_version", () -> {
@@ -332,7 +333,7 @@ public class Metrics {
                     Map<String, Integer> modslist = new HashMap<>();
                     String[] mods = ServerAPI.modlists_All.toString().replace("[", "").replace("]", "").split(", ");
                     for (String x : mods) {
-                        if (x.equals("minecraft") || x.equals("forge") || x.equals("mohist")) {
+                        if (x.equals("minecraft") || x.equals("forge") || x.equals("mohist") || x.equals("oneworldcore")) {
                             continue;
                         }
                         modslist.put(x, 1);
@@ -340,7 +341,10 @@ public class Metrics {
 
                     Map<String, Integer> pluginlist = new HashMap<>();
                     for (Plugin plugin : Bukkit.getPluginManager().getPlugins()) {
-                        if (plugin.isEnabled() && !plugin.getName().equals("mohist")) {
+                        String pluginName = plugin.getName();
+                        if (plugin.isEnabled()
+                                && !"mohist".equalsIgnoreCase(pluginName)
+                                && !"oneworldcore".equalsIgnoreCase(pluginName)) {
                             pluginlist.put(plugin.getDescription().getName(), 1);
                         }
                     }

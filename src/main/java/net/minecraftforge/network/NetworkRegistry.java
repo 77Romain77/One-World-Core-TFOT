@@ -5,7 +5,7 @@
 
 package net.minecraftforge.network;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.util.ProxyUtils;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -131,11 +131,11 @@ public class NetworkRegistry
     private static NetworkInstance createInstance(ResourceLocation name, Supplier<String> networkProtocolVersion, Predicate<String> clientAcceptedVersions, Predicate<String> serverAcceptedVersions)
     {
         if(lock) {
-            LOGGER.error(NETREGISTRY, MohistMC.i18n.as("mohist.i18n.126", name));
+            LOGGER.error(NETREGISTRY, OneWorldCore.i18n.as("mohist.i18n.126", name));
             throw new IllegalArgumentException("Registration of impl channels is locked");
         }
         if (instances.containsKey(name)) {
-            LOGGER.error(NETREGISTRY, MohistMC.i18n.as("mohist.i18n.127", name));
+            LOGGER.error(NETREGISTRY, OneWorldCore.i18n.as("mohist.i18n.127", name));
             throw new IllegalArgumentException("NetworkDirection Channel {"+ name +"} already registered");
         }
         final NetworkInstance networkInstance = new NetworkInstance(name, networkProtocolVersion, clientAcceptedVersions, serverAcceptedVersions);
@@ -186,7 +186,7 @@ public class NetworkRegistry
                 }).filter(p->!p.getRight()).toList();
 
         if (!ProxyUtils.is() && !results.isEmpty()) {
-            LOGGER.error(NETREGISTRY, MohistMC.i18n.as("mohist.i18n.128",
+            LOGGER.error(NETREGISTRY, OneWorldCore.i18n.as("mohist.i18n.128",
                     results.stream().map(Pair::getLeft).map(Object::toString).collect(Collectors.joining(","))));
             return results.stream().map(Pair::getLeft).map(Object::toString).collect(Collectors.toList());
         }
@@ -227,17 +227,17 @@ public class NetworkRegistry
                 map(ni -> {
                     final String incomingVersion = incoming.getOrDefault(ni.getChannelName(), ABSENT.version());
                     final boolean test = testFunction.apply(ni, incomingVersion);
-                    LOGGER.debug(NETREGISTRY, MohistMC.i18n.as("mohist.i18n.129", ni.getChannelName(), incomingVersion, originName, test ? "ACCEPTED" : "REJECTED"));
+                    LOGGER.debug(NETREGISTRY, OneWorldCore.i18n.as("mohist.i18n.129", ni.getChannelName(), incomingVersion, originName, test ? "ACCEPTED" : "REJECTED"));
                     return Pair.of(Pair.of(ni.getChannelName(), incomingVersion), test);
                 }).filter(p->!p.getRight()).map(Pair::getLeft).collect(Collectors.toMap(Pair::getLeft, Pair::getRight));
 
         if (!results.isEmpty()) {
-            LOGGER.error(NETREGISTRY, MohistMC.i18n.as("mohist.i18n.130",
+            LOGGER.error(NETREGISTRY, OneWorldCore.i18n.as("mohist.i18n.130",
                     results.keySet().stream().map(Object::toString).collect(Collectors.joining(",")),
                     originName));
             return results;
         }
-        LOGGER.debug(NETREGISTRY, MohistMC.i18n.as("mohist.i18n.131", originName));
+        LOGGER.debug(NETREGISTRY, OneWorldCore.i18n.as("mohist.i18n.131", originName));
         return results;
     }
 
@@ -274,12 +274,12 @@ public class NetworkRegistry
                 collect(Collectors.toList());
 
         if (!results.isEmpty()) {
-            LOGGER.error(NETREGISTRY, MohistMC.i18n.as("mohist.i18n.132",
+            LOGGER.error(NETREGISTRY, OneWorldCore.i18n.as("mohist.i18n.132",
                     results.stream().map(Pair::getLeft).map(Object::toString).collect(Collectors.joining(","))));
             return false;
         }
         if(!missingButRequired.isEmpty()){
-            LOGGER.error(NETREGISTRY, MohistMC.i18n.as("mohist.i18n.133",
+            LOGGER.error(NETREGISTRY, OneWorldCore.i18n.as("mohist.i18n.133",
                     missingButRequired));
             return false;
         }
@@ -438,3 +438,4 @@ public class NetworkRegistry
         }
     }
 }
+

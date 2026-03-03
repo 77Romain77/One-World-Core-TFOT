@@ -1,6 +1,6 @@
 package net.minecraft.world.level.material;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import java.util.Optional;
 import javax.annotation.Nullable;
 
@@ -164,7 +164,7 @@ public abstract class LavaFluid extends FlowingFluid {
    }
 
    public int getTickDelay(LevelReader p_76226_) {
-      return p_76226_.dimensionType().ultraWarm() ? MohistConfig.custom_lava_speed_nether : MohistConfig.custom_lava_speed_normal;
+      return p_76226_.dimensionType().ultraWarm() ? OneWorldCoreConfig.custom_lava_speed_nether : OneWorldCoreConfig.custom_lava_speed_normal;
    }
 
    public int getSpreadDelay(Level p_76203_, BlockPos p_76204_, FluidState p_76205_, FluidState p_76206_) {

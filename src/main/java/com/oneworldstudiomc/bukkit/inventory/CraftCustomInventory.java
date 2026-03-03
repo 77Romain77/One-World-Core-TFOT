@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -58,3 +58,4 @@ public class CraftCustomInventory implements InventoryHolder {
         }
     }
 }
+

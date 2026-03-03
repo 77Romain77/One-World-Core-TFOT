@@ -4,7 +4,7 @@ import com.google.common.annotations.VisibleForTesting;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.optimizations.OptVillager;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
@@ -265,7 +265,7 @@ public class Villager extends AbstractVillager implements ReputationEventHandler
    }
 
    public void tick() {
-      if (MohistConfig.custom_no_villager) {
+      if (OneWorldCoreConfig.custom_no_villager) {
          discard();
       }
       super.tick();

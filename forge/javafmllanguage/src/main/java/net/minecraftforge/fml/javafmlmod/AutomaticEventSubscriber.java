@@ -15,6 +15,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Type;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.List;
@@ -38,10 +39,12 @@ public class AutomaticEventSubscriber
     {
         if (scanData == null) return;
         LOGGER.debug(LOADING,"Attempting to inject @EventBusSubscriber classes into the eventbus for {}", mod.getModId());
-        List<ModFileScanData.AnnotationData> ebsTargets = scanData.getAnnotations().stream().
+        // Work on a local snapshot to avoid ConcurrentModificationException when other loaders mutate scan data.
+        final List<ModFileScanData.AnnotationData> annotations = new ArrayList<>(scanData.getAnnotations());
+        List<ModFileScanData.AnnotationData> ebsTargets = annotations.stream().
                 filter(annotationData -> AUTO_SUBSCRIBER.equals(annotationData.annotationType())).
                 collect(Collectors.toList());
-        Map<String, String> modids = scanData.getAnnotations().stream().
+        Map<String, String> modids = annotations.stream().
                 filter(annotationData -> MOD_TYPE.equals(annotationData.annotationType())).
                 collect(Collectors.toMap(a -> a.clazz().getClassName(), a -> (String)a.annotationData().get("value")));
 

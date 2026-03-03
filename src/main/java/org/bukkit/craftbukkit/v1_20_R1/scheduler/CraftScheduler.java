@@ -13,6 +13,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.PriorityQueue;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
@@ -107,6 +108,10 @@ public class CraftScheduler implements BukkitScheduler {
     };
     private CraftAsyncDebugger debugTail = debugHead;
     private static final int RECENT_TICKS;
+    private static final long DUPLICATE_SYNC_EXCEPTION_WINDOW_MILLIS = 30_000L;
+    private static final int MAX_SYNC_EXCEPTION_TRACKING = 4096;
+    private final ConcurrentHashMap<String, Long> syncExceptionLastLogged = new ConcurrentHashMap<String, Long>();
+    private final ConcurrentHashMap<String, Integer> syncExceptionSuppressed = new ConcurrentHashMap<String, Integer>();
 
     static {
         RECENT_TICKS = 30;
@@ -415,13 +420,25 @@ public class CraftScheduler implements BukkitScheduler {
                 try {
                     task.run();
                 } catch (final Throwable throwable) {
-                    task.getOwner().getLogger().log(
-                            Level.WARNING,
-                            String.format(
-                                "Task #%s for %s generated an exception",
-                                task.getTaskId(),
-                                task.getOwner().getDescription().getFullName()),
-                            throwable);
+                    final String exceptionKey = buildSyncExceptionKey(task, throwable);
+                    final long now = System.currentTimeMillis();
+                    if (shouldLogSyncException(exceptionKey, now)) {
+                        final int suppressed = consumeSuppressedSyncExceptionCount(exceptionKey);
+                        final String suffix = suppressed > 0
+                                ? String.format(
+                                " (suppressed %s duplicate warnings in the last %s seconds)",
+                                suppressed,
+                                DUPLICATE_SYNC_EXCEPTION_WINDOW_MILLIS / 1000L)
+                                : "";
+                        task.getOwner().getLogger().log(
+                                Level.WARNING,
+                                String.format(
+                                        "Task #%s for %s generated an exception%s",
+                                        task.getTaskId(),
+                                        task.getOwner().getDescription().getFullName(),
+                                        suffix),
+                                throwable);
+                    }
                 } finally {
                     currentTask = null;
                 }
@@ -443,6 +460,55 @@ public class CraftScheduler implements BukkitScheduler {
         pending.addAll(temp);
         temp.clear();
         debugHead = debugHead.getNextHead(currentTick);
+    }
+
+    private String buildSyncExceptionKey(final CraftTask task, final Throwable throwable) {
+        final String owner = task.getOwner() != null ? task.getOwner().getName() : "unknown-owner";
+        final String taskClass = task.getTaskClass() != null ? task.getTaskClass().getName() : "unknown-task";
+        final String throwableClass = throwable.getClass().getName();
+        final String throwableMessage = throwable.getMessage() != null ? throwable.getMessage() : "";
+
+        String topFrame = "";
+        final StackTraceElement[] stackTrace = throwable.getStackTrace();
+        if (stackTrace != null && stackTrace.length > 0 && stackTrace[0] != null) {
+            final StackTraceElement frame = stackTrace[0];
+            topFrame = frame.getClassName() + "#" + frame.getMethodName() + ":" + frame.getLineNumber();
+        }
+
+        return owner + "|" + taskClass + "|" + throwableClass + "|" + throwableMessage + "|" + topFrame;
+    }
+
+    private boolean shouldLogSyncException(final String exceptionKey, final long nowMillis) {
+        final Long lastLogged = syncExceptionLastLogged.put(exceptionKey, nowMillis);
+        if (lastLogged == null || nowMillis - lastLogged > DUPLICATE_SYNC_EXCEPTION_WINDOW_MILLIS) {
+            trimSyncExceptionCaches(nowMillis);
+            return true;
+        }
+
+        syncExceptionSuppressed.merge(exceptionKey, 1, Integer::sum);
+        trimSyncExceptionCaches(nowMillis);
+        return false;
+    }
+
+    private int consumeSuppressedSyncExceptionCount(final String exceptionKey) {
+        final Integer suppressed = syncExceptionSuppressed.remove(exceptionKey);
+        return suppressed != null ? suppressed : 0;
+    }
+
+    private void trimSyncExceptionCaches(final long nowMillis) {
+        if (syncExceptionLastLogged.size() <= MAX_SYNC_EXCEPTION_TRACKING) {
+            return;
+        }
+
+        final long expiry = nowMillis - (DUPLICATE_SYNC_EXCEPTION_WINDOW_MILLIS * 2L);
+        final Iterator<Map.Entry<String, Long>> iterator = syncExceptionLastLogged.entrySet().iterator();
+        while (iterator.hasNext() && syncExceptionLastLogged.size() > MAX_SYNC_EXCEPTION_TRACKING) {
+            final Map.Entry<String, Long> entry = iterator.next();
+            if (entry.getValue() < expiry) {
+                syncExceptionLastLogged.remove(entry.getKey(), entry.getValue());
+                syncExceptionSuppressed.remove(entry.getKey());
+            }
+        }
     }
 
     private void addTask(final CraftTask task) {

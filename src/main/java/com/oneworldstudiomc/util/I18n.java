@@ -1,18 +1,19 @@
 package com.oneworldstudiomc.util;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/9/23 6:15:26
  */
 public class I18n {
 
     public static String as(String key) {
-        return MohistMC.i18n.as(key);
+        return OneWorldCore.i18n.as(key);
     }
 
     public static String as(String key, Object... objects) {
-        return MohistMC.i18n.as(key, objects);
+        return OneWorldCore.i18n.as(key, objects);
     }
 }
+

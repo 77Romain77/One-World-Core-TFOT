@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 package com.oneworldstudiomc.commands;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.ai.koukou.AIConfig;
 import com.oneworldstudiomc.api.PlayerAPI;
 import com.oneworldstudiomc.api.ServerAPI;
@@ -115,7 +115,11 @@ public class MohistCommand extends Command {
             }
             case "reload" -> {
                 MinecraftServer console = MinecraftServer.getServer();
-                com.oneworldstudiomc.MohistConfig.init((File) console.options.valueOf("mohist-settings"));
+                File coreSettings = (File) console.options.valueOf("oneworldcore-settings");
+                if (coreSettings == null) {
+                    coreSettings = (File) console.options.valueOf("mohist-settings");
+                }
+                com.oneworldstudiomc.OneWorldCoreConfig.init(coreSettings);
                 ((CraftServer)Bukkit.getServer()).initConfig();
                 ((CraftServer)Bukkit.getServer()).loadCustomPermissions();
                 SpigotConfig.init((File) console.options.valueOf("spigot-settings"));
@@ -127,16 +131,16 @@ public class MohistCommand extends Command {
                 console.server.reloadCount++;
                 sender.sendMessage(ChatColor.GREEN + I18n.as("mohistcmd.reload.complete"));
                 if (AIConfig.INSTANCE.enable()) {
-                    sender.sendMessage(ChatColor.GREEN + "QQ 机器人模块已启用！");
+                    sender.sendMessage(ChatColor.GREEN + "QQ жњєе™ЁдєєжЁЎеќ—е·ІеђЇз”ЁпјЃ");
                 }
                 return true;
             }
             case "version" -> {
-                sender.sendMessage("OneWorldCore: " + MohistMC.versionInfo.oneworldstudio());
-                sender.sendMessage("Forge: " + MohistMC.versionInfo.forge());
-                sender.sendMessage("Bukkit: " + MohistMC.versionInfo.bukkit());
-                sender.sendMessage("CraftBukkit: " + MohistMC.versionInfo.craftbukkit());
-                sender.sendMessage("Spigot: " + MohistMC.versionInfo.spigot());
+                sender.sendMessage("OneWorldCore: " + OneWorldCore.versionInfo.oneworldstudio());
+                sender.sendMessage("Forge: " + OneWorldCore.versionInfo.forge());
+                sender.sendMessage("Bukkit: " + OneWorldCore.versionInfo.bukkit());
+                sender.sendMessage("CraftBukkit: " + OneWorldCore.versionInfo.craftbukkit());
+                sender.sendMessage("Spigot: " + OneWorldCore.versionInfo.spigot());
                 return true;
             }
             case "channels_incom" -> sender.sendMessage(ServerAPI.channels_Incoming().toString());
@@ -216,3 +220,4 @@ public class MohistCommand extends Command {
         }
     }
 }
+

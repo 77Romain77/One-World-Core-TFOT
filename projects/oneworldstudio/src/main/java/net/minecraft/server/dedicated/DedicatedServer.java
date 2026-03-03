@@ -2,8 +2,8 @@ package net.minecraft.server.dedicated;
 
 import com.google.common.collect.Lists;
 import com.oneworldstudiomc.Metrics;
-import com.oneworldstudiomc.MohistConfig;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCoreConfig;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.WatchMohist;
 import com.oneworldstudiomc.api.ServerAPI;
 import com.oneworldstudiomc.api.color.ColorsAPI;
@@ -216,11 +216,11 @@ public class DedicatedServer extends MinecraftServer implements ServerInterface 
          org.spigotmc.SpigotConfig.registerCommands();
          // Spigot end
          // Mohsit start
-         MohistConfig.init((java.io.File) options.valueOf("mohist-settings"));
+         OneWorldCoreConfig.init((java.io.File) options.valueOf("mohist-settings"));
          MohistPlugin.initConfig();
-         MohistConfig.registerCommands();
-         if (MohistConfig.motdEnable) {
-            this.setMotd(MohistConfig.motd());
+         OneWorldCoreConfig.registerCommands();
+         if (OneWorldCoreConfig.motdEnable) {
+            this.setMotd(OneWorldCoreConfig.motd());
          }
          // Mohist end
          // CraftBukkit start

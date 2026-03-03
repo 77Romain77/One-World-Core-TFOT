@@ -1,7 +1,7 @@
 package com.oneworldstudiomc.api;
 
-import com.oneworldstudiomc.MohistConfig;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCoreConfig;
+import com.oneworldstudiomc.OneWorldCore;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.DataInputStream;
@@ -42,7 +42,7 @@ public class ItemAPI {
     public static String getClientName(ItemStack itemStack) {
         return itemStack.hasItemMeta() && itemStack.getItemMeta().hasDisplayName()
                 ? itemStack.getItemMeta().getDisplayName()
-                : "§r" + Component.translatable(itemStack.getTranslationKey()).getString();
+                : "В§r" + Component.translatable(itemStack.getTranslationKey()).getString();
     }
 
     public static ItemStack doItem(Material material, int menge, String name, List<String> lore) {
@@ -146,7 +146,7 @@ public class ItemAPI {
             try {
                 return NbtIo.readCompressed(buf);
             } catch (IOException e) {
-                MohistMC.LOGGER.error("Reading nbt ", e);
+                OneWorldCore.LOGGER.error("Reading nbt ", e);
             }
         }
         return null;
@@ -162,7 +162,7 @@ public class ItemAPI {
             baos.close();
             return outputByteArray;
         } catch (IOException e) {
-            MohistMC.LOGGER.error("nbtToByte ", e);
+            OneWorldCore.LOGGER.error("nbtToByte ", e);
             return null;
         }
     }
@@ -176,14 +176,14 @@ public class ItemAPI {
             byteArrayInputStream.close();
             return reconstructedCompoundTag;
         } catch (IOException e) {
-            MohistMC.LOGGER.error("byteToNbt ", e);
+            OneWorldCore.LOGGER.error("byteToNbt ", e);
             return null;
         }
     }
 
     public static void name(ItemStack itemStack, String name) {
         ItemMeta im = itemStack.getItemMeta();
-        im.setDisplayName(name.replace("&", "§"));
+        im.setDisplayName(name.replace("&", "В§"));
         itemStack.setItemMeta(im);
     }
 
@@ -209,7 +209,7 @@ public class ItemAPI {
 
     public static boolean isBan(ItemStack itemStack) {
         if (itemStack == null) return false;
-        return MohistConfig.ban_item_materials.contains(itemStack.getType().name());
+        return OneWorldCoreConfig.ban_item_materials.contains(itemStack.getType().name());
     }
 
     public static Material getEggMaterial(net.minecraft.world.entity.EntityType<?> entitytype) {

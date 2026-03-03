@@ -5,7 +5,7 @@
 
 package net.minecraftforge.server.permission;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.forge.BukkitPermissionsHandler;
 import java.util.Collection;
 import java.util.Collections;
@@ -134,10 +134,11 @@ public final class PermissionAPI
         {
             LOGGER.error("Error parsing config value 'permissionHandler'", e);
         }
-        if (MohistConfig.bukkitpermissionshandler) {
+        if (OneWorldCoreConfig.bukkitpermissionshandler) {
             var handler = new BukkitPermissionsHandler(activeHandler);
             LOGGER.info("Forwarding forge permission[{}] to bukkit[{}]", activeHandler.getIdentifier(), handler.getIdentifier());
             activeHandler = handler;
         }
     }
 }
+

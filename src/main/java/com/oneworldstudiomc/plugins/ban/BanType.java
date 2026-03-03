@@ -1,7 +1,7 @@
 package com.oneworldstudiomc.plugins.ban;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/27 15:10:13
  */
 public enum BanType {
@@ -21,3 +21,4 @@ public enum BanType {
         this.i18n_key_remove = i18n_key_remove;
     }
 }
+

@@ -1,7 +1,7 @@
 package net.minecraft.network.protocol.game;
 
 import com.google.common.collect.Queues;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -239,7 +239,7 @@ public class ClientboundCommandsPacket implements Packet<ClientGamePacketListene
       private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void serializeCap(FriendlyByteBuf p_237663_, ArgumentTypeInfo<A, T> p_237664_, ArgumentTypeInfo.Template<A> p_237665_) {
          // Mohist start
          ResourceLocation key = ForgeRegistries.COMMAND_ARGUMENT_TYPES.getKey(p_237664_);
-         if ((!MohistConfig.velocity_enabled && !SpigotConfig.bungee) || ((key != null) && (key.getNamespace().equals("minecraft") || key.getNamespace().equals("brigadier")))) {
+         if ((!OneWorldCoreConfig.velocity_enabled && !SpigotConfig.bungee) || ((key != null) && (key.getNamespace().equals("minecraft") || key.getNamespace().equals("brigadier")))) {
             p_237663_.writeVarInt(BuiltInRegistries.COMMAND_ARGUMENT_TYPE.getId(p_237664_));
             p_237664_.serializeToNetwork((T) p_237665_, p_237663_);
             return;

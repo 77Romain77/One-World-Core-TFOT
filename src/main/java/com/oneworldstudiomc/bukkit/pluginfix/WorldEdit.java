@@ -15,7 +15,7 @@ import org.objectweb.asm.tree.TypeInsnNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/11 4:24:52
  */
 public class WorldEdit {
@@ -98,3 +98,4 @@ public class WorldEdit {
         }
     }
 }
+

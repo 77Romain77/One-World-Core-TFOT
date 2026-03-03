@@ -5,7 +5,7 @@
 
 package net.minecraftforge.common;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 import net.minecraft.client.Minecraft;
@@ -45,8 +45,8 @@ public class MinecraftForge
     */
    public static void initialize()
    {
-       LOGGER.info(FORGE,MohistMC.i18n.as("mohist.i18n.104", ForgeVersion.getVersion()));
-       LOGGER.info(FORGE,MohistMC.i18n.as("mohist.i18n.105", MohistMC.versionInfo.oneworldstudio()));
+       LOGGER.info(FORGE,OneWorldCore.i18n.as("mohist.i18n.104", ForgeVersion.getVersion()));
+       LOGGER.info(FORGE,OneWorldCore.i18n.as("mohist.i18n.105", OneWorldCore.versionInfo.oneworldstudio()));
 
        UsernameCache.load();
        TierSortingRegistry.init();
@@ -84,3 +84,4 @@ public class MinecraftForge
         );
     }
 }
+

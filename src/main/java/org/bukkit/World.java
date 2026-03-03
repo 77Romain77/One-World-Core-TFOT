@@ -192,7 +192,33 @@ public interface World extends RegionAccessor, WorldInfo, PluginMessageRecipient
      */
     @NotNull
     default CompletableFuture<Chunk> getChunkAtAsync(int x, int z, boolean generate) {
+        return getChunkAtAsync(x, z, generate, false);
+    }
+
+    /**
+     * Gets the {@link Chunk} at the given coordinates asynchronously.
+     *
+     * @param x X-coordinate of the chunk
+     * @param z Z-coordinate of the chunk
+     * @param generate Whether the chunk should be fully generated or not
+     * @param urgent Whether to prioritize this load
+     * @return Future that completes with the requested chunk
+     */
+    @NotNull
+    default CompletableFuture<Chunk> getChunkAtAsync(int x, int z, boolean generate, boolean urgent) {
         return CompletableFuture.completedFuture(getChunkAt(x, z, generate));
+    }
+
+    /**
+     * Gets the {@link Chunk} at the given coordinates asynchronously with urgent priority.
+     *
+     * @param x X-coordinate of the chunk
+     * @param z Z-coordinate of the chunk
+     * @return Future that completes with the requested chunk
+     */
+    @NotNull
+    default CompletableFuture<Chunk> getChunkAtAsyncUrgently(int x, int z) {
+        return getChunkAtAsync(x, z, true, true);
     }
     // Paper end - async chunk API compatibility
 

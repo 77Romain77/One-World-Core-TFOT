@@ -5,7 +5,7 @@
 
 package net.minecraftforge.registries.holdersets;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.datafixers.util.Either;
 import com.mojang.serialization.Codec;
 import java.util.Iterator;
@@ -84,7 +84,7 @@ public record AnyHolderSet<T>(HolderLookup.RegistryLookup<T> registryLookup) imp
         List<Holder<T>> holders = this.stream().toList();
         Holder<T> holder = i >= holders.size() ? null : holders.get(i);
         if (holder == null)
-            throw new NoSuchElementException(MohistMC.i18n.as("mohist.i18n.134", i, this.registryLookup.key()));
+            throw new NoSuchElementException(OneWorldCore.i18n.as("mohist.i18n.134", i, this.registryLookup.key()));
 
         return holder;
     }

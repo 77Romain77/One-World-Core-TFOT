@@ -5,7 +5,7 @@
 
 package net.minecraftforge.network;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import io.netty.buffer.Unpooled;
 import net.minecraft.network.Connection;
 import net.minecraft.network.FriendlyByteBuf;
@@ -49,9 +49,9 @@ public class LoginWrapper
             data = new FriendlyByteBuf(payload.readBytes(payloadLength));
         }
         final int loginSequence = packet.getLoginIndex();
-        LOGGER.debug(HandshakeHandler.FMLHSMARKER, MohistMC.i18n.as("mohist.i18n.122", targetNetworkReceiver, loginSequence));
+        LOGGER.debug(HandshakeHandler.FMLHSMARKER, OneWorldCore.i18n.as("mohist.i18n.122", targetNetworkReceiver, loginSequence));
         final NetworkEvent.Context context = new NetworkEvent.Context(wrappedContext.getNetworkManager(), wrappedContext.getDirection(), (rl, buf) -> {
-            LOGGER.debug(HandshakeHandler.FMLHSMARKER,MohistMC.i18n.as("mohist.i18n.123", rl, loginSequence));
+            LOGGER.debug(HandshakeHandler.FMLHSMARKER,OneWorldCore.i18n.as("mohist.i18n.123", rl, loginSequence));
             wrappedContext.getPacketDispatcher().sendPacket(WRAPPER, this.wrapPacket(rl, buf));
         });
         final NetworkEvent.LoginPayloadEvent loginPayloadEvent = new NetworkEvent.LoginPayloadEvent(data, () -> context, loginSequence);
@@ -74,3 +74,4 @@ public class LoginWrapper
         manager.send(NetworkDirection.LOGIN_TO_CLIENT.buildPacket(Pair.of(pb, index), WRAPPER).getThis());
     }
 }
+

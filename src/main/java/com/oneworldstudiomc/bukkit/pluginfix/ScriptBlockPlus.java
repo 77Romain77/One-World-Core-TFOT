@@ -14,7 +14,7 @@ import java.util.Set;
 import java.util.TreeMap;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/9/11 13:47:38
  */
 public class ScriptBlockPlus {
@@ -187,3 +187,4 @@ public class ScriptBlockPlus {
                 ("clean".equals(repositoryStatus)? "" : " (repository: " + repositoryStatus + ')');
     }
 }
+

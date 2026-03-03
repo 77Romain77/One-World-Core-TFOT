@@ -6,7 +6,7 @@
 package net.minecraftforge.items.wrapper;
 
 import com.google.common.collect.ImmutableList;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.world.entity.EquipmentSlot;
@@ -175,7 +175,7 @@ public abstract class EntityEquipmentInvWrapper implements IItemHandlerModifiabl
     protected EquipmentSlot validateSlotIndex(final int slot)
     {
         if (slot < 0 || slot >= slots.size())
-            throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.112", slot, slots.size()));
+            throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.112", slot, slots.size()));
 
         return slots.get(slot);
     }
@@ -190,3 +190,4 @@ public abstract class EntityEquipmentInvWrapper implements IItemHandlerModifiabl
         return ret;
     }
 }
+

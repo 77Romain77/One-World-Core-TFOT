@@ -9,7 +9,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonSyntaxException;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.Consumer;
@@ -51,7 +51,7 @@ public class ConditionalRecipe
             for (JsonElement ele : items)
             {
                 if (!ele.isJsonObject())
-                    throw new JsonSyntaxException(MohistMC.i18n.as("mohist.i18n.69", idx));
+                    throw new JsonSyntaxException(OneWorldCore.i18n.as("mohist.i18n.69", idx));
                 if (CraftingHelper.processConditions(GsonHelper.getAsJsonArray(ele.getAsJsonObject(), "conditions"), context))
                     return (T)RecipeManager.fromJson(recipeId, GsonHelper.getAsJsonObject(ele.getAsJsonObject(), "recipe"));
                 idx++;
@@ -209,3 +209,4 @@ public class ConditionalRecipe
         }
     }
 }
+

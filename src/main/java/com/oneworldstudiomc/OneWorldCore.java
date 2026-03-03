@@ -18,17 +18,17 @@ import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 
 @Mod("oneworldstudio")
 @OnlyIn(Dist.DEDICATED_SERVER)
-public class MohistMC {
+public class OneWorldCore {
     public static final String NAME = "OneWorldCore";
     public static Logger LOGGER = LogManager.getLogger();
     public static i18n i18n;
-    public static String version = "1.20.1";
+    public static String version = resolveBuildVersion();
     public static String modid = "oneworldstudio";
     public static ClassLoader classLoader;
     public static VersionInfo versionInfo;
 
-    public MohistMC() {
-        classLoader = MohistMC.class.getClassLoader();
+    public OneWorldCore() {
+        classLoader = OneWorldCore.class.getClassLoader();
 
         //TODO: do something when mod loading
         LOGGER.info("OneWorldCore mod loading.....");
@@ -38,17 +38,29 @@ public class MohistMC {
     }
 
     public static void initVersion() {
-        String mohist_lang = MohistConfig.yml.getString("mohist.lang", Locale.getDefault().toString());
-        i18n = new i18n(MohistMC.class.getClassLoader(), mohist_lang);
+        String coreLang = OneWorldCoreConfig.yml.getString(
+                "oneworldcore.lang",
+                OneWorldCoreConfig.yml.getString(
+                        "oneworldstudio.lang",
+                        OneWorldCoreConfig.yml.getString("mohist.lang", Locale.getDefault().toString())
+                )
+        );
+        i18n = new i18n(OneWorldCore.class.getClassLoader(), coreLang);
 
         Map<String, String> arguments = new HashMap<>();
         String craftVersion = CraftServer.class.getPackage().getImplementationVersion();
         String[] cbs = craftVersion != null ? craftVersion.split("-") : new String[0];
-        arguments.put("oneworldstudio", (MohistMC.class.getPackage().getImplementationVersion() != null) ? MohistMC.class.getPackage().getImplementationVersion() : version);
+        arguments.put("oneworldstudio", (OneWorldCore.class.getPackage().getImplementationVersion() != null) ? OneWorldCore.class.getPackage().getImplementationVersion() : version);
         arguments.put("bukkit", cbs.length > 0 ? cbs[0] : "unknown");
         arguments.put("craftbukkit", cbs.length > 1 ? cbs[1] : "unknown");
         arguments.put("spigot", cbs.length > 2 ? cbs[2] : "unknown");
         arguments.put("forge", ForgeVersion.getVersion());
         versionInfo = new VersionInfo(arguments);
     }
+
+    private static String resolveBuildVersion() {
+        String implementationVersion = OneWorldCore.class.getPackage().getImplementationVersion();
+        return implementationVersion == null || implementationVersion.isBlank() ? "unknown" : implementationVersion;
+    }
 }
+

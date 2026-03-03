@@ -5,7 +5,7 @@
 
 package net.minecraftforge.fluids;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import java.util.Optional;
@@ -64,7 +64,7 @@ public class FluidStack
         }
         else if (ForgeRegistries.FLUIDS.getKey(fluid) == null)
         {
-            LOGGER.fatal(MohistMC.i18n.as("mohist.i18n.111", ForgeRegistries.FLUIDS.getKey(fluid), fluid.getClass().getName()));
+            LOGGER.fatal(OneWorldCore.i18n.as("mohist.i18n.111", ForgeRegistries.FLUIDS.getKey(fluid), fluid.getClass().getName()));
             throw new IllegalArgumentException("Cannot create a fluidstack from an unregistered fluid");
         }
         this.fluidDelegate = ForgeRegistries.FLUIDS.getDelegateOrThrow(fluid);
@@ -334,3 +334,4 @@ public class FluidStack
         return isFluidEqual((FluidStack) o);
     }
 }
+

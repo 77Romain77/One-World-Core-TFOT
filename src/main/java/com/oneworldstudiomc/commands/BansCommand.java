@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.commands;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.api.EntityAPI;
 import com.oneworldstudiomc.api.ItemAPI;
 import com.oneworldstudiomc.api.gui.DemoGUI;
@@ -29,7 +29,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/27 5:33:43
  */
 public class BansCommand extends Command {
@@ -67,44 +67,44 @@ public class BansCommand extends Command {
                 }
                 switch (args[1]) {
                     case "item" -> {
-                        if (!MohistConfig.ban_item_enable) {
+                        if (!OneWorldCoreConfig.ban_item_enable) {
                             sender.sendMessage(ChatColor.RED + check);
                             return false;
                         }
-                        BanSaveInventory banSaveInventory = new BanSaveInventory(BanType.ITEM, "§4Add bans item");
+                        BanSaveInventory banSaveInventory = new BanSaveInventory(BanType.ITEM, "В§4Add bans item");
                         Inventory inventory = banSaveInventory.getInventory();
                         player.openInventory(inventory);
                         BanListener.openInventory = banSaveInventory;
                         return true;
                     }
                     case "item-moshou" -> {
-                        if (!MohistConfig.ban_item_enable) {
+                        if (!OneWorldCoreConfig.ban_item_enable) {
                             sender.sendMessage(ChatColor.RED + check);
                             return false;
                         }
-                        BanSaveInventory banSaveInventory = new BanSaveInventory(BanType.ITEM_MOSHOU, "§4Add bans moshou item");
+                        BanSaveInventory banSaveInventory = new BanSaveInventory(BanType.ITEM_MOSHOU, "В§4Add bans moshou item");
                         Inventory inventory = banSaveInventory.getInventory();
                         player.openInventory(inventory);
                         BanListener.openInventory = banSaveInventory;
                         return true;
                     }
                     case "entity" -> {
-                        if (!MohistConfig.ban_entity_enable) {
+                        if (!OneWorldCoreConfig.ban_entity_enable) {
                             sender.sendMessage(ChatColor.RED + check);
                             return false;
                         }
-                        BanSaveInventory banSaveInventory = new BanSaveInventory(BanType.ENTITY, "§4Add bans entity");
+                        BanSaveInventory banSaveInventory = new BanSaveInventory(BanType.ENTITY, "В§4Add bans entity");
                         Inventory inventory = banSaveInventory.getInventory();
                         player.openInventory(inventory);
                         BanListener.openInventory = banSaveInventory;
                         return true;
                     }
                     case "enchantment" -> {
-                        if (!MohistConfig.ban_enchantment_enable) {
+                        if (!OneWorldCoreConfig.ban_enchantment_enable) {
                             sender.sendMessage(ChatColor.RED + check);
                             return false;
                         }
-                        BanSaveInventory banSaveInventory = new BanSaveInventory(BanType.ENCHANTMENT, "§4Add bans enchantment");
+                        BanSaveInventory banSaveInventory = new BanSaveInventory(BanType.ENCHANTMENT, "В§4Add bans enchantment");
                         Inventory inventory = banSaveInventory.getInventory();
                         player.openInventory(inventory);
                         BanListener.openInventory = banSaveInventory;
@@ -124,8 +124,8 @@ public class BansCommand extends Command {
                 switch (args[1]) {
                     case "item" -> {
                         DemoGUI wh = new DemoGUI(I18n.as("banscmd.show.item"));
-                        List<String> old = MohistConfig.ban_item_materials;
-                        for (String s : MohistConfig.ban_item_materials) {
+                        List<String> old = OneWorldCoreConfig.ban_item_materials;
+                        for (String s : OneWorldCoreConfig.ban_item_materials) {
                             Material material = ItemAPI.getMaterial(s);
                             if (!material.isEmpty()) {
                                 wh.addItem(new GUIItem(new ItemStackFactory(material)
@@ -172,8 +172,8 @@ public class BansCommand extends Command {
                     }
                     case "entity" -> {
                         DemoGUI wh = new DemoGUI(I18n.as("banscmd.show.entity"));
-                        List<String> old = MohistConfig.ban_entity_types;
-                        for (String s : MohistConfig.ban_entity_types) {
+                        List<String> old = OneWorldCoreConfig.ban_entity_types;
+                        for (String s : OneWorldCoreConfig.ban_entity_types) {
                             wh.addItem(new GUIItem(new ItemStackFactory(ItemAPI.getEggMaterial(EntityAPI.getType(s)))
                                     .setDisplayName(s)
                                     .toItemStack()) {
@@ -193,8 +193,8 @@ public class BansCommand extends Command {
                     }
                     case "enchantment" -> {
                         DemoGUI wh = new DemoGUI(I18n.as("banscmd.show.enchantment"));
-                        List<String> old = MohistConfig.ban_enchantment_list;
-                        for (String s : MohistConfig.ban_enchantment_list) {
+                        List<String> old = OneWorldCoreConfig.ban_enchantment_list;
+                        for (String s : OneWorldCoreConfig.ban_enchantment_list) {
                             wh.addItem(new GUIItem(new ItemStackFactory(Material.ENCHANTED_BOOK)
                                     .setDisplayName(s)
                                     .setEnchantment(ItemAPI.getEnchantmentByKey(s))
@@ -225,7 +225,7 @@ public class BansCommand extends Command {
                 }
                 switch (args[1]) {
                     case "item", "item-moshou" -> {
-                        if (!MohistConfig.ban_item_enable) {
+                        if (!OneWorldCoreConfig.ban_item_enable) {
                             sender.sendMessage(ChatColor.RED + check);
                             return false;
                         }
@@ -246,14 +246,14 @@ public class BansCommand extends Command {
                         return true;
                     }
                     case "entity" -> {
-                        if (!MohistConfig.ban_entity_enable) {
+                        if (!OneWorldCoreConfig.ban_entity_enable) {
                             sender.sendMessage(ChatColor.RED + check);
                             return false;
                         }
                         return true;
                     }
                     case "enchantment" -> {
-                        if (!MohistConfig.ban_enchantment_enable) {
+                        if (!OneWorldCoreConfig.ban_enchantment_enable) {
                             sender.sendMessage(ChatColor.RED + check);
                             return false;
                         }
@@ -293,3 +293,4 @@ public class BansCommand extends Command {
         return list;
     }
 }
+

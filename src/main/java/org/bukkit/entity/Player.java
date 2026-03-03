@@ -61,6 +61,10 @@ public interface Player extends HumanEntity, Conversable, OfflinePlayer, PluginM
     @Override
     public String getName();
 
+    @NotNull
+    @Override
+    com.oneworldstudiomc.paper.profile.PlayerProfile getPlayerProfile();
+
     /**
      * Gets the "friendly" name to display of this player. This may include
      * color.

@@ -1,5 +1,5 @@
 /*
- * MohistMC
+ * OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -178,3 +178,4 @@ public abstract class Action {
     }
 
 }
+

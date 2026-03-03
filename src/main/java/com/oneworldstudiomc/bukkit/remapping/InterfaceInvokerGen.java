@@ -1,7 +1,7 @@
 package com.oneworldstudiomc.bukkit.remapping;
 
 import com.google.common.collect.Maps;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
@@ -51,7 +51,7 @@ public class InterfaceInvokerGen implements PluginTransformer {
                     if (!extend) {
                         MethodNode methodNode = generateSynthetic(name, desc, node, remapper);
                         classNode.methods.add(methodNode);
-                        MohistMC.LOGGER.debug("Generated {} redirecting to {}", classNode.name + "/" + name + " " + desc, node.owner + "/" + node.name + " " + node.desc);
+                        OneWorldCore.LOGGER.debug("Generated {} redirecting to {}", classNode.name + "/" + name + " " + desc, node.owner + "/" + node.name + " " + node.desc);
                     }
                 }
             }
@@ -98,3 +98,4 @@ public class InterfaceInvokerGen implements PluginTransformer {
         }
     }
 }
+

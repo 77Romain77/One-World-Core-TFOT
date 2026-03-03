@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.plugins.back;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.plugins.config.MohistPluginConfig;
 import com.oneworldstudiomc.util.ConfigPathResolver;
 import java.io.File;
@@ -22,7 +22,7 @@ public class BackConfig extends MohistPluginConfig {
     }
 
     public void saveLocation(Player player, Location location, BackType backType) {
-        if (!MohistConfig.back_enable) return;
+        if (!OneWorldCoreConfig.back_enable) return;
         yaml.set(player.getUniqueId() + ".location.world", location.getWorld().getName());
         yaml.set(player.getUniqueId() + ".location.x", location.getX());
         yaml.set(player.getUniqueId() + ".location.y", location.getY());
@@ -48,3 +48,4 @@ public class BackConfig extends MohistPluginConfig {
         return BackType.valueOf(yaml.getString(player.getUniqueId() + ".type"));
     }
 }
+

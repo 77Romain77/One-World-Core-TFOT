@@ -23,7 +23,7 @@ import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_6;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/9/19 6:38:32
  */
 public class PluginClassLoaderFactory extends ClassLoaderFactory {
@@ -88,3 +88,4 @@ public class PluginClassLoaderFactory extends ClassLoaderFactory {
         return Unsafe.defineClass(name, bytes, 0, bytes.length, callback.getDeclaringClass().getClassLoader(), callback.getDeclaringClass().getProtectionDomain());
     }
 }
+

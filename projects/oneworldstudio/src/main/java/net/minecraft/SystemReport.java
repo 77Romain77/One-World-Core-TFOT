@@ -1,7 +1,7 @@
 package net.minecraft;
 
 import com.google.common.collect.Maps;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.logging.LogUtils;
 import java.util.List;
 import java.util.Locale;
@@ -27,7 +27,7 @@ public class SystemReport {
    private final Map<String, String> entries = Maps.newLinkedHashMap();
 
    public SystemReport() {
-      this.setDetail("OneWorldStudio Version", MohistMC.versionInfo.oneworldstudio());
+      this.setDetail("OneWorldStudio Version", OneWorldCore.versionInfo.oneworldstudio());
       this.setDetail("Minecraft Version", SharedConstants.getCurrentVersion().getName());
       this.setDetail("Minecraft Version ID", SharedConstants.getCurrentVersion().getId());
       this.setDetail("Operating System", OPERATING_SYSTEM);

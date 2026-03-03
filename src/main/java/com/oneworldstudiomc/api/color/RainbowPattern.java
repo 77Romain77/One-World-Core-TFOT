@@ -3,7 +3,7 @@ package com.oneworldstudiomc.api.color;
 import java.util.regex.Matcher;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/3 0:53:40
  */
 public class RainbowPattern implements IPattern {
@@ -24,3 +24,4 @@ public class RainbowPattern implements IPattern {
         return string;
     }
 }
+

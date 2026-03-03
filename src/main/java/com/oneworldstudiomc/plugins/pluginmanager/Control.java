@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 package com.oneworldstudiomc.plugins.pluginmanager;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.io.File;
 import java.io.IOException;
 import java.util.Iterator;
@@ -48,7 +48,7 @@ public class Control {
             jar.close();
             return pdf;
         } catch (InvalidDescriptionException | IOException ioe) {
-            MohistMC.LOGGER.error(ioe);
+            OneWorldCore.LOGGER.error(ioe);
         }
 
         return null;
@@ -62,7 +62,7 @@ public class Control {
                 return p;
             }
         } catch (Exception e) {
-            MohistMC.LOGGER.error(e);
+            OneWorldCore.LOGGER.error(e);
         }
         return null;
     }
@@ -100,3 +100,4 @@ public class Control {
     }
 
 }
+

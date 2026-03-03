@@ -2,7 +2,7 @@ package org.bukkit.command.defaults;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import org.bukkit.Bukkit;
 import org.bukkit.ChatColor;
 import org.bukkit.command.CommandSender;
@@ -30,7 +30,7 @@ public class VersionCommand extends BukkitCommand {
         if (!testPermission(sender)) return true;
 
         if (args.length == 0) {
-            sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion()  + ", Forge version " + MohistMC.versionInfo.forge() +  ")");
+            sender.sendMessage("This server is running " + Bukkit.getName() + " version " + Bukkit.getVersion() + " (Implementing API version " + Bukkit.getBukkitVersion()  + ", Forge version " + OneWorldCore.versionInfo.forge() +  ")");
         } else {
             StringBuilder name = new StringBuilder();
 
@@ -133,3 +133,4 @@ public class VersionCommand extends BukkitCommand {
         return ImmutableList.of();
     }
 }
+

@@ -11,7 +11,7 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.math.Axis;
 import com.mojang.math.Transformation;
 import java.lang.reflect.Type;
@@ -135,7 +135,7 @@ public final class TransformationHelper
                 }
                 else
                 {
-                    throw new JsonParseException(MohistMC.i18n.as("mohist.i18n.80", transform));
+                    throw new JsonParseException(OneWorldCore.i18n.as("mohist.i18n.80", transform));
                 }
             }
             if (json.isJsonArray())
@@ -143,7 +143,7 @@ public final class TransformationHelper
                 // direct matrix array
                 return new Transformation(parseMatrix(json));
             }
-            if (!json.isJsonObject()) throw new JsonParseException(MohistMC.i18n.as("mohist.i18n.81", json));
+            if (!json.isJsonObject()) throw new JsonParseException(OneWorldCore.i18n.as("mohist.i18n.81", json));
             JsonObject obj = json.getAsJsonObject();
             Transformation ret;
             if (obj.has("matrix"))
@@ -214,7 +214,7 @@ public final class TransformationHelper
                 origin = parseOrigin(obj);
                 elements.remove("origin");
             }
-            if (!elements.isEmpty()) throw new JsonParseException(MohistMC.i18n.as("mohist.i18n.82", String.join(", ", elements)));
+            if (!elements.isEmpty()) throw new JsonParseException(OneWorldCore.i18n.as("mohist.i18n.82", String.join(", ", elements)));
 
             Transformation matrix = new Transformation(translation, leftRot, scale, rightRot);
             return matrix.applyOrigin(new Vector3f(origin));
@@ -400,3 +400,4 @@ public final class TransformationHelper
         }
     }
 }
+

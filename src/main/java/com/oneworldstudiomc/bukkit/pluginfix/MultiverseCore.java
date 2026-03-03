@@ -11,7 +11,7 @@ import org.objectweb.asm.tree.MethodNode;
 import org.objectweb.asm.tree.VarInsnNode;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/27 11:29:47
  */
 public class MultiverseCore {
@@ -32,4 +32,5 @@ public class MultiverseCore {
         return ((CraftServer) Bukkit.getServer()).getWorldsByName().contains(name);
     }
 }
+
 

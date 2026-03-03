@@ -5,7 +5,7 @@
 
 package net.minecraftforge.common;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import net.minecraftforge.common.ForgeConfigSpec.BooleanValue;
 import net.minecraftforge.common.ForgeConfigSpec.ConfigValue;
 import net.minecraftforge.common.ForgeConfigSpec.DoubleValue;
@@ -220,7 +220,7 @@ public class ForgeConfig {
 
     @SubscribeEvent
     public static void onLoad(final ModConfigEvent.Loading configEvent) {
-        LogManager.getLogger().debug(Logging.FORGEMOD, MohistMC.i18n.as("mohist.i18n.88", configEvent.getConfig().getFileName()));
+        LogManager.getLogger().debug(Logging.FORGEMOD, OneWorldCore.i18n.as("mohist.i18n.88", configEvent.getConfig().getFileName()));
     }
 
     @SubscribeEvent
@@ -233,3 +233,4 @@ public class ForgeConfig {
     //public static boolean logCascadingWorldGeneration = true; // see Chunk#logCascadingWorldGeneration()
     //public static boolean fixVanillaCascading = false;
 }
+

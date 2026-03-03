@@ -47,7 +47,7 @@ import org.spongepowered.asm.service.MixinService;
  */
 public class ClassLoaderRemapper extends LenientJarRemapper {
 
-    private static final Logger LOGGER = LogManager.getLogger("Mohist");
+    private static final Logger LOGGER = LogManager.getLogger("OneWorldCore");
     private static final String PREFIX = "net/minecraft/";
     private static final String REPLACED_NAME = Type.getInternalName(ReflectionHandler.class);
 

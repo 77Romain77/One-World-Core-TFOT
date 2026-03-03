@@ -10,7 +10,7 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.mojang.authlib.Agent;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.GameProfileRepository;
@@ -91,7 +91,7 @@ public class GameProfileCache {
             atomicreference.set((GameProfile)null);
          }
       };
-      if (MohistConfig.isProxyOnlineMode())
+      if (OneWorldCoreConfig.isProxyOnlineMode())
       p_10994_.findProfilesByNames(new String[]{p_10995_}, Agent.MINECRAFT, profilelookupcallback);
       GameProfile gameprofile = atomicreference.get();
       if (!usesAuthentication() && gameprofile == null) {

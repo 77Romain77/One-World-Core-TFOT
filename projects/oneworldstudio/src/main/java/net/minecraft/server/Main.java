@@ -1,7 +1,7 @@
 package net.minecraft.server;
 
 import com.google.common.base.Charsets;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
@@ -73,7 +73,7 @@ public class Main {
    @DontObfuscate
    public static void main(String[] p_129699_) {
       SharedConstants.tryDetectVersion();
-      MohistMC.initVersion();
+      OneWorldCore.initVersion();
       OptionParser optionparser = new OptionParser();
       OptionSpec<Void> optionspec = optionparser.accepts("nogui");
       OptionSpec<Void> optionspec1 = optionparser.accepts("initSettings", "Initializes 'server.properties' and 'eula.txt', then quits");

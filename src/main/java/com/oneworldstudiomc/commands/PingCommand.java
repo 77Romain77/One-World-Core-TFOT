@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.commands;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.util.I18n;
 import java.util.ArrayList;
 import java.util.List;
@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/5 16:24:49
  */
 public class PingCommand extends Command {
@@ -44,7 +44,7 @@ public class PingCommand extends Command {
 
         if (args.length == 0) {
             if (sender instanceof Player player) {
-                String output = String.format(MohistConfig.pingCommandOutput, player.getName(), player.getPing());
+                String output = String.format(OneWorldCoreConfig.pingCommandOutput, player.getName(), player.getPing());
                 sender.sendMessage(output);
                 return true;
             } else {
@@ -54,7 +54,7 @@ public class PingCommand extends Command {
         } else if(args.length == 1) {
             Player player = Bukkit.getPlayer(args[0]);
             if (player != null) {
-                String output = String.format(MohistConfig.pingCommandOutput, player.getName(), player.getPing());
+                String output = String.format(OneWorldCoreConfig.pingCommandOutput, player.getName(), player.getPing());
                 sender.sendMessage(output);
                 return true;
             } else {
@@ -66,3 +66,4 @@ public class PingCommand extends Command {
         return false;
     }
 }
+

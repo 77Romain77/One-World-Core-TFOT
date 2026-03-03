@@ -1,7 +1,7 @@
 package com.oneworldstudiomc.plugins;
 
-import com.oneworldstudiomc.MohistConfig;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCoreConfig;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.api.event.MohistNetworkEvent;
 import com.mohistmc.tools.IOUtil;
 import java.io.IOException;
@@ -22,15 +22,15 @@ public class MohistProxySelector extends ProxySelector {
 
     @Override
     public List<Proxy> select(URI uri) {
-        if (MohistConfig.networkmanager_debug) {
-            MohistMC.LOGGER.error(uri.toString());
+        if (OneWorldCoreConfig.networkmanager_debug) {
+            OneWorldCore.LOGGER.error(uri.toString());
         }
 
         String uriString = uri.toString();
         String defaultMsg = "[NetworkManager] Network protection and blocked by network rules!";
         boolean intercept = false;
-        if (MohistConfig.networkmanager_intercept != null) {
-            for (String config_uri : MohistConfig.networkmanager_intercept) {
+        if (OneWorldCoreConfig.networkmanager_intercept != null) {
+            for (String config_uri : OneWorldCoreConfig.networkmanager_intercept) {
                 if (uriString.contains(config_uri)) {
                     intercept = true;
                     break;
@@ -49,7 +49,7 @@ public class MohistProxySelector extends ProxySelector {
             try {
                 IOUtil.throwException(new IOException(defaultMsg));
             } catch (Throwable throwable) {
-                MohistMC.LOGGER.error(throwable.getMessage());
+                OneWorldCore.LOGGER.error(throwable.getMessage());
             }
         } else {
             return this.defaultSelector.select(uri);
@@ -66,3 +66,4 @@ public class MohistProxySelector extends ProxySelector {
         return this.defaultSelector;
     }
 }
+

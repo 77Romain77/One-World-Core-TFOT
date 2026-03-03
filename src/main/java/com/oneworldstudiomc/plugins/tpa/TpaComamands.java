@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.plugins.tpa;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.util.I18n;
 import java.util.HashMap;
 import net.md_5.bungee.api.chat.ClickEvent;
@@ -20,7 +20,7 @@ public class TpaComamands extends Command {
     public TpaComamands(String name) {
         super(name);
         this.usageMessage = "/tpa <player_name>";
-        if (MohistConfig.tpa_permissions_enable) {
+        if (OneWorldCoreConfig.tpa_permissions_enable) {
             this.setPermission("mohist.command.tpa");
         }
     }
@@ -57,3 +57,4 @@ public class TpaComamands extends Command {
         return false;
     }
 }
+

@@ -9,7 +9,7 @@ import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.serialization.Lifecycle;
 import java.util.Collections;
 import java.util.HashMap;
@@ -115,7 +115,7 @@ public class RegistryManager
     <V> ForgeRegistry<V> createRegistry(ResourceLocation name, RegistryBuilder<V> builder)
     {
         if (registries.containsKey(name))
-            throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.220", name));
+            throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.220", name));
         ForgeRegistry<V> reg = new ForgeRegistry<V>(this, name, builder);
         registries.put(name, reg);
         if (builder.getSaveToDisc())
@@ -158,7 +158,7 @@ public class RegistryManager
     {
         if (this.legacyNames.containsKey(legacyName))
         {
-            throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.221", name, legacyName));
+            throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.221", name, legacyName));
         }
         this.legacyNames.put(legacyName, name);
     }
@@ -212,3 +212,4 @@ public class RegistryManager
         return vanillaRegistryKeys;
     }
 }
+

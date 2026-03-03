@@ -131,6 +131,7 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -235,6 +236,27 @@ public class CraftWorld extends CraftRegionAccessor implements World {
         }
 
         return new CraftChunk(getHandle(), x, z);
+    }
+
+    @NotNull
+    @Override
+    public CompletableFuture<Chunk> getChunkAtAsync(int x, int z, boolean generate, boolean urgent) {
+        CompletableFuture<Chunk> future = new CompletableFuture<>();
+        Runnable loadChunkTask = () -> {
+            try {
+                future.complete(getChunkAt(x, z, generate));
+            } catch (Throwable throwable) {
+                future.completeExceptionally(throwable);
+            }
+        };
+
+        if (this.world.getServer().isSameThread()) {
+            loadChunkTask.run();
+        } else {
+            this.world.getServer().execute(loadChunkTask);
+        }
+
+        return future;
     }
 
     @Override

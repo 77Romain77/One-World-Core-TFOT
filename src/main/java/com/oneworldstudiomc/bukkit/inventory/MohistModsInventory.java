@@ -14,7 +14,7 @@ import org.bukkit.entity.HumanEntity;
 import org.bukkit.inventory.InventoryHolder;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/10 22:30:10
  */
 public class MohistModsInventory implements Container {
@@ -142,3 +142,4 @@ public class MohistModsInventory implements Container {
     public void setCurrentRecipe(Recipe recipe) {
     }
 }
+

@@ -5,7 +5,7 @@ import net.minecraftforge.common.util.BlockSnapshot;
 import org.bukkit.craftbukkit.v1_20_R1.block.CraftBlock;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/25 19:54:50
  */
 public class MohistBlockSnapshot extends CraftBlock {
@@ -26,3 +26,4 @@ public class MohistBlockSnapshot extends CraftBlock {
         return new MohistBlockSnapshot(blockSnapshot, current);
     }
 }
+

@@ -165,13 +165,23 @@ public class HandlerList {
         boolean changed = false;
         for (List<RegisteredListener> list : handlerslots.values()) {
             for (ListIterator<RegisteredListener> i = list.listIterator(); i.hasNext();) {
-                if (i.next().getListener().equals(listener)) {
+                Listener registeredListener = i.next().getListener();
+                if (registeredListener == listener || listenerEqualsSafe(registeredListener, listener)) {
                     i.remove();
                     changed = true;
                 }
             }
         }
         if (changed) handlers = null;
+    }
+
+    private static boolean listenerEqualsSafe(@NotNull Listener left, @NotNull Listener right) {
+        try {
+            return left.equals(right);
+        } catch (Throwable ignored) {
+            // Some plugin-generated proxies can throw from equals(); skip them safely.
+            return false;
+        }
     }
 
     /**

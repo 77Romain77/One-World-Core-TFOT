@@ -5,7 +5,7 @@
 
 package net.minecraftforge.server.command;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -91,7 +91,7 @@ public final class CommandHelper
             return resultNode;
         } else
         {
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.225", sourceNode));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.225", sourceNode));
         }
 
         if (sourceNode.getCommand() != null)
@@ -109,3 +109,4 @@ public final class CommandHelper
         return resultNode;
     }
 }
+

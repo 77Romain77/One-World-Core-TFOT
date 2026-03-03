@@ -132,7 +132,7 @@ public class Main extends OptionParser {
         acceptsAll(Arrays.asList("M", "mohist-settings", "oneworldstudio-settings", "oneworldcore-settings"), "File for OneWorldCore settings")
                 .withRequiredArg()
                 .ofType(File.class)
-                .defaultsTo(new File("oneworldcore-config","oneworldstudio.yml"))
+                .defaultsTo(new File("oneworldcore-config","oneworldcore.yml"))
                 .describedAs("Yml file");
         // OneWorldCore End
     }

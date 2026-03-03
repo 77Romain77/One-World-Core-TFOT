@@ -10,7 +10,7 @@ import org.bukkit.configuration.ConfigurationSection;
 import org.bukkit.inventory.ItemStack;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/2 18:27:05
  */
 public class ItemsConfig extends MohistPluginConfig {
@@ -43,3 +43,4 @@ public class ItemsConfig extends MohistPluginConfig {
         put("items." + iten_name, null);
     }
 }
+

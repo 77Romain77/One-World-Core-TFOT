@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  * All Rights Reserved - One World Studio 2019-2026
  *
@@ -66,3 +66,4 @@ public class BukkitPermissionsHandler implements IPermissionHandler {
         }
     }
 }
+

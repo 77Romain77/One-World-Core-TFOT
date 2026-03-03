@@ -8,7 +8,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
 import it.unimi.dsi.fastutil.objects.Object2ObjectLinkedOpenHashMap;
@@ -74,12 +74,12 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
 
          try {
             if (entry.getValue().isJsonObject() && !net.minecraftforge.common.crafting.CraftingHelper.processConditions(entry.getValue().getAsJsonObject(), "conditions", this.context)) {
-               if (MohistConfig.recipe_warn) LOGGER.debug("Skipping loading recipe {} as it's conditions were not met", resourcelocation);
+               if (OneWorldCoreConfig.recipe_warn) LOGGER.debug("Skipping loading recipe {} as it's conditions were not met", resourcelocation);
                continue;
             }
             Recipe<?> recipe = fromJson(resourcelocation, GsonHelper.convertToJsonObject(entry.getValue(), "top element"), this.context);
             if (recipe == null) {
-               if (MohistConfig.recipe_warn) LOGGER.info("Skipping loading recipe {} as it's serializer returned null", resourcelocation);
+               if (OneWorldCoreConfig.recipe_warn) LOGGER.info("Skipping loading recipe {} as it's serializer returned null", resourcelocation);
                continue;
             }
 
@@ -91,7 +91,7 @@ public class RecipeManager extends SimpleJsonResourceReloadListener {
                // CraftBukkit end
             }).putAndMoveToFirst(resourcelocation, recipe);
          } catch (IllegalArgumentException | JsonParseException jsonparseexception) {
-            if (MohistConfig.recipe_warn) LOGGER.error("Parsing error loading recipe {}", resourcelocation, jsonparseexception);
+            if (OneWorldCoreConfig.recipe_warn) LOGGER.error("Parsing error loading recipe {}", resourcelocation, jsonparseexception);
          }
       }
 

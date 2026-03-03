@@ -33,14 +33,14 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/1 20:00:00
  */
 public class ShowsCommand extends Command {
 
     public ShowsCommand(String name) {
         super(name);
-        this.description = "Mohist shows commands";
+        this.description = "OneWorldCore shows commands";
         this.usageMessage = "/shows [sound|entitys|blockentitys]";
         this.setPermission("mohist.command.shows");
     }
@@ -158,13 +158,13 @@ public class ShowsCommand extends Command {
                     int finalMaxCount = maxCount;
                     wh.addItem(new GUIItem(new ItemStackFactory(ItemAPI.getEggMaterial(s.getKey()))
                                        .setLore(List.of(
-                                               "§7====================",
+                                               "В§7====================",
                                                I18n.as("shows.entitys.item.name", s.getValue()),
                                                I18n.as("shows.entitys.item.entity", EntityType.getKey(s.getKey())),
                                                I18n.as("shows.entitys.item.chunk", finalTopChunk, finalMaxCount),
                                                "",
                                                I18n.as("shows.entitys.item.click"),
-                                               "§7===================="
+                                               "В§7===================="
                                        ))
                                        .toItemStack()) {
                                    @Override
@@ -213,8 +213,8 @@ public class ShowsCommand extends Command {
                 for (Map.Entry<Material, Integer> s : newMap.entrySet()) {
                     Material material = s.getKey().name().contains("_WALL") ? Material.getMaterial(s.getKey().name().replace("_WALL", "")) : s.getKey();
                     wh.addItem(new GUIItem(new ItemStackFactory(material)
-                            .setDisplayName("§6Size: §4" + s.getValue())
-                            .setLore(List.of("§7BlockEntity: §2" + s.getKey()))
+                            .setDisplayName("В§6Size: В§4" + s.getValue())
+                            .setLore(List.of("В§7BlockEntity: В§2" + s.getKey()))
                             .toItemStack())
                     );
                 }
@@ -228,3 +228,4 @@ public class ShowsCommand extends Command {
         }
     }
 }
+

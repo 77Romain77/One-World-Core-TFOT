@@ -12,7 +12,7 @@ import org.bukkit.entity.Player;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  *
  * This is useful when no permission management plugin is installed
  *
@@ -72,3 +72,4 @@ public class PermissionCommand extends Command {
     }
 
 }
+

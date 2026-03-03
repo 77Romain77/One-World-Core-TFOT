@@ -5,7 +5,7 @@
 
 package net.minecraftforge.network;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.logging.LogUtils;
 import io.netty.buffer.Unpooled;
 import io.netty.util.Attribute;
@@ -70,7 +70,7 @@ public class MCRegisterPacketHandler
                     try {
                         rl.add(new ResourceLocation(s));
                     } catch (ResourceLocationException ex) {
-                        LOGGER.warn(MohistMC.i18n.as("mohist.i18n.124", s));
+                        LOGGER.warn(OneWorldCore.i18n.as("mohist.i18n.124", s));
                     }
                     last = cur + 1;
                 }
@@ -123,3 +123,4 @@ public class MCRegisterPacketHandler
         manager.send(iPacketICustomPacket.getThis());
     }
 }
+

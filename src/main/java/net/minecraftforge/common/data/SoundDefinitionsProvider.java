@@ -6,7 +6,7 @@
 package net.minecraftforge.common.data;
 
 import com.google.gson.JsonObject;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.nio.file.Path;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -194,7 +194,7 @@ public abstract class SoundDefinitionsProvider implements DataProvider
     {
         if (this.sounds.put(soundEvent, definition) != null)
         {
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.72",this.modId, soundEvent));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.72",this.modId, soundEvent));
         }
     }
 
@@ -228,7 +228,7 @@ public abstract class SoundDefinitionsProvider implements DataProvider
         // that has broken the invariants of this sound definition's provider. In fact, a sound may only be either of
         // SOUND or EVENT type. Any other values is somebody messing with the internals, reflectively adding something
         // to an enum or passing `null` to a parameter annotated with `@NotNull`.
-        throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.73", sound.name(), sound.type()));
+        throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.73", sound.name(), sound.type()));
     }
 
     private boolean validateSound(final String soundName, final ResourceLocation name)
@@ -237,7 +237,7 @@ public abstract class SoundDefinitionsProvider implements DataProvider
         if (!valid)
         {
             final String path = name.getNamespace() + ":sounds/" + name.getPath() + ".ogg";
-            LOGGER.warn(MohistMC.i18n.as("mohist.i18n.74", path, soundName));
+            LOGGER.warn(OneWorldCore.i18n.as("mohist.i18n.74", path, soundName));
         }
         return valid;
     }
@@ -247,7 +247,7 @@ public abstract class SoundDefinitionsProvider implements DataProvider
         final boolean valid = this.sounds.containsKey(soundName) || ForgeRegistries.SOUND_EVENTS.containsKey(name);
         if (!valid)
         {
-            LOGGER.warn(MohistMC.i18n.as("mohist.i18n.75", name, soundName));
+            LOGGER.warn(OneWorldCore.i18n.as("mohist.i18n.75", name, soundName));
         }
         return valid;
     }
@@ -265,3 +265,4 @@ public abstract class SoundDefinitionsProvider implements DataProvider
         return obj;
     }
 }
+

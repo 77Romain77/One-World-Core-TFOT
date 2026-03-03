@@ -21,7 +21,8 @@ public final class ConfigPathResolver {
     }
 
     public static File resolveMainConfigFile() {
-        return resolve(new File(MODERN_ROOT, "oneworldstudio.yml"),
+        return resolve(new File(MODERN_ROOT, "oneworldcore.yml"),
+                new File(MODERN_ROOT, "oneworldstudio.yml"),
                 new File(LEGACY_STUDIO_ROOT, "oneworldstudio.yml"),
                 new File(LEGACY_MOHIST_ROOT, "mohist.yml"));
     }
@@ -30,6 +31,22 @@ public final class ConfigPathResolver {
         File parent = modernFile.getParentFile();
         if (parent != null && !parent.exists()) {
             parent.mkdirs();
+        }
+
+        if (modernFile.exists()) {
+            if (legacyFiles != null) {
+                for (File legacyFile : legacyFiles) {
+                    if (legacyFile == null || !legacyFile.exists()) {
+                        continue;
+                    }
+                    try {
+                        Files.deleteIfExists(legacyFile.toPath());
+                    } catch (IOException ignored) {
+                    }
+                }
+            }
+            cleanupLegacyTree();
+            return modernFile;
         }
 
         if (legacyFiles != null) {

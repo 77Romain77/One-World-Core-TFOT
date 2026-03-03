@@ -22,7 +22,7 @@ import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.meta.ItemMeta;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/6/14 14:39:37
  */
 public class InventoryClickListener {
@@ -93,7 +93,7 @@ public class InventoryClickListener {
                     if (event.getCurrentItem() == null) {
                         return;
                     }
-                    if (itemMeta != null && itemMeta.hasDisplayName() && itemMeta.getDisplayName().startsWith("§7>>")) {
+                    if (itemMeta != null && itemMeta.hasDisplayName() && itemMeta.getDisplayName().startsWith("В§7>>")) {
                         String toSplit = itemMeta.getDisplayName();
                         String[] splitted = toSplit.split("6");
                         if (Bukkit.getWorld(splitted[1]) != null) {
@@ -109,3 +109,4 @@ public class InventoryClickListener {
         }
     }
 }
+

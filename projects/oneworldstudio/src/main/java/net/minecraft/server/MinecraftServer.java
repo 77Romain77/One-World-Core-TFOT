@@ -6,7 +6,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Sets;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.WatchMohist;
 import com.oneworldstudiomc.forge.ForgeInjectBukkit;
 import com.oneworldstudiomc.util.I18n;
@@ -289,7 +289,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
          LOGGER.error("Uncaught exception in server thread", p_177910_);
       });
       if (Runtime.getRuntime().availableProcessors() > 4) {
-         thread.setPriority(MohistConfig.yml.getInt("threadpriority.server_thread", 8));
+         thread.setPriority(OneWorldCoreConfig.yml.getInt("threadpriority.server_thread", 8));
       }
 
       S s = p_129873_.apply(thread);

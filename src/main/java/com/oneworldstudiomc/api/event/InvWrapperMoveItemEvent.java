@@ -9,7 +9,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/10/10 3:29:10
  */
 public class InvWrapperMoveItemEvent extends Event implements Cancellable {
@@ -121,3 +121,4 @@ public class InvWrapperMoveItemEvent extends Event implements Cancellable {
         }
     }
 }
+

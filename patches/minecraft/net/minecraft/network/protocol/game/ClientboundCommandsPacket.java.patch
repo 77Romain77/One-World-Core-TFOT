@@ -4,7 +4,7 @@
  package net.minecraft.network.protocol.game;
  
  import com.google.common.collect.Queues;
-+import com.oneworldstudiomc.MohistConfig;
++import com.oneworldstudiomc.OneWorldCoreConfig;
  import com.mojang.brigadier.arguments.ArgumentType;
  import com.mojang.brigadier.builder.ArgumentBuilder;
  import com.mojang.brigadier.builder.LiteralArgumentBuilder;
@@ -31,7 +31,7 @@
        private static <A extends ArgumentType<?>, T extends ArgumentTypeInfo.Template<A>> void m_237662_(FriendlyByteBuf p_237663_, ArgumentTypeInfo<A, T> p_237664_, ArgumentTypeInfo.Template<A> p_237665_) {
 +         // Mohist start
 +         ResourceLocation key = ForgeRegistries.COMMAND_ARGUMENT_TYPES.getKey(p_237664_);
-+         if ((!MohistConfig.velocity_enabled && !SpigotConfig.bungee) || ((key != null) && (key.m_135827_().equals("minecraft") || key.m_135827_().equals("brigadier")))) {
++         if ((!OneWorldCoreConfig.velocity_enabled && !SpigotConfig.bungee) || ((key != null) && (key.m_135827_().equals("minecraft") || key.m_135827_().equals("brigadier")))) {
 +            p_237663_.m_130130_(BuiltInRegistries.f_256979_.m_7447_(p_237664_));
 +            p_237664_.m_214155_((T) p_237665_, p_237663_);
 +            return;

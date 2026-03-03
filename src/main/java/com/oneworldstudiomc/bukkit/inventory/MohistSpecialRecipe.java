@@ -10,7 +10,7 @@ import org.bukkit.inventory.ItemStack;
 import org.jetbrains.annotations.NotNull;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/7/20 23:02:32
  */
 public class MohistSpecialRecipe extends CraftComplexRecipe {
@@ -37,3 +37,4 @@ public class MohistSpecialRecipe extends CraftComplexRecipe {
         ServerLifecycleHooks.getCurrentServer().getRecipeManager().addRecipe(this.recipe);
     }
 }
+

@@ -1,9 +1,10 @@
 package com.oneworldstudiomc.api.color;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/8/2 23:27:57
  */
 public interface IPattern {
     String process(final String p0);
 }
+

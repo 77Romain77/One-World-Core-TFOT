@@ -5,7 +5,7 @@
 
 package net.minecraftforge.common;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.ArrayList;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -79,7 +79,7 @@ public class ForgeSpawnEggItem extends SpawnEggItem
         }
         catch (Exception exception)
         {
-            DispenseItemBehavior.LOGGER.error(MohistMC.i18n.as("mohist.i18n.103", source.getPos()), exception);
+            DispenseItemBehavior.LOGGER.error(OneWorldCore.i18n.as("mohist.i18n.103", source.getPos()), exception);
             return ItemStack.EMPTY;
         }
 

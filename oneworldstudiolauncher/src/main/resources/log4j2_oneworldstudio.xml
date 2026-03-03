@@ -19,15 +19,27 @@
     </filters>
     <Appenders>
         <TerminalConsole name="Console">
+            <Filters>
+                <RegexFilter regex=".*Radium Class Analysis Error:.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex=".*Failed to generate the cutting recipe for.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
             <PatternLayout>
                 <LoggerNamePatternSelector defaultPattern="[%highlightTime{%d{HH:mm:ss}} %highlightLevel{%level}]: %highlightMsg{%msg{nolookups}}%n">
                 </LoggerNamePatternSelector>
             </PatternLayout>
         </TerminalConsole>
         <Queue name="TerminalConsole">
+            <Filters>
+                <RegexFilter regex=".*Radium Class Analysis Error:.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex=".*Failed to generate the cutting recipe for.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
             <PatternLayout pattern="[%highlightTime{%d{HH:mm:ss}} %highlightLevel{%level}]: %highlightMsg{%msg{nolookups}}%n" />
         </Queue>
         <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.zip">
+            <Filters>
+                <RegexFilter regex=".*Radium Class Analysis Error:.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex=".*Failed to generate the cutting recipe for.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
             <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %replace{%msg{nolookups}}{(?i)\u00A7[0-9A-FK-OR]}{}%n" charset="UTF-8"/>
             <Policies>
                 <TimeBasedTriggeringPolicy/>
@@ -36,6 +48,10 @@
             <DefaultRolloverStrategy max="99"/>
         </RollingRandomAccessFile>
         <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.zip">
+            <Filters>
+                <RegexFilter regex=".*Radium Class Analysis Error:.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+                <RegexFilter regex=".*Failed to generate the cutting recipe for.*" onMatch="DENY" onMismatch="NEUTRAL"/>
+            </Filters>
             <PatternLayout pattern="[%d{HH:mm:ss}] [%t/%level] [%logger]: %replace{%msg{nolookups}}{(?i)\u00A7[0-9A-FK-OR]}{}%n" charset="UTF-8"/>
             <Policies>
                 <OnStartupTriggeringPolicy/>

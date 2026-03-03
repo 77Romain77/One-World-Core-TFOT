@@ -4,7 +4,7 @@ import com.google.common.base.Function;
 import com.google.common.base.Functions;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.Lists;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.bukkit.inventory.MohistModsInventory;
 import com.mohistmc.dynamicenum.MohistDynamEnum;
 import com.oneworldstudiomc.forge.ForgeInjectBukkit;
@@ -1797,7 +1797,7 @@ public class CraftEventFactory {
         try {
             owner = inventory.getOwner();
         }catch ( AbstractMethodError error ){
-            //MohistMC.LOGGER.error( "An error occurred while handling Mod inventory: "+error.getMessage() );
+            //OneWorldCore.LOGGER.error( "An error occurred while handling Mod inventory: "+error.getMessage() );
             owner = null;
         }
 
@@ -1818,7 +1818,7 @@ public class CraftEventFactory {
             bukkit_spell = CraftSpellcaster.toBukkitSpell(spell);
         } catch (Exception e) {
             bukkit_spell = MohistDynamEnum.addEnum(Spellcaster.Spell.class, spell.name());
-            MohistMC.LOGGER.debug("Registered forge Spellcaster.Spell as Spellcaster.Spell(Bukkit) {}", bukkit_spell);
+            OneWorldCore.LOGGER.debug("Registered forge Spellcaster.Spell as Spellcaster.Spell(Bukkit) {}", bukkit_spell);
         }
         EntitySpellCastEvent event = new EntitySpellCastEvent((Spellcaster) caster.getBukkitEntity(), bukkit_spell);
         Bukkit.getPluginManager().callEvent(event);
@@ -1906,3 +1906,4 @@ public class CraftEventFactory {
         return event;
     }
 }
+

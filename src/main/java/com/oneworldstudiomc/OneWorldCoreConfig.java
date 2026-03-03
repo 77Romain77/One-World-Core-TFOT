@@ -36,7 +36,7 @@ import org.bukkit.command.Command;
 import org.bukkit.configuration.InvalidConfigurationException;
 import org.bukkit.configuration.file.YamlConfiguration;
 
-public class MohistConfig {
+public class OneWorldCoreConfig {
 
     private static final List<String> HEADER = Arrays.asList("""
             This is the main configuration file for OneWorldCore.
@@ -57,37 +57,19 @@ public class MohistConfig {
     private static File CONFIG_FILE;
 
     private static final File LEGACY_MOHIST_YML = new File("mohist-config", "mohist.yml");
-    public static File mohistyml = ConfigPathResolver.resolveMainConfigFile();
-    public static YamlConfiguration yml = YamlConfiguration.loadConfiguration(mohistyml);
+    private static final File LEGACY_CORE_STUDIO_YML = new File("oneworldcore-config", "oneworldstudio.yml");
+    public static File coreyml = ConfigPathResolver.resolveMainConfigFile();
+    public static YamlConfiguration yml = YamlConfiguration.loadConfiguration(coreyml);
 
     public static void init(File configFile) {
-        mohistyml = ConfigPathResolver.resolveMainConfigFile();
+        coreyml = ConfigPathResolver.resolveMainConfigFile();
         configFile = resolveConfigFile(configFile);
         ensureConfigFileExists(configFile);
 
-        if (!configFile.exists() && LEGACY_MOHIST_YML.exists()) {
-            try {
-                File parent = configFile.getParentFile();
-                if (parent != null && !parent.exists()) {
-                    parent.mkdirs();
-                }
-                Files.copy(LEGACY_MOHIST_YML.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException ignored) {
-            }
-        }
-
-        if (!mohistyml.exists() && LEGACY_MOHIST_YML.exists()) {
-            try {
-                if (!mohistyml.getParentFile().exists()) {
-                    mohistyml.getParentFile().mkdirs();
-                }
-                Files.copy(LEGACY_MOHIST_YML.toPath(), mohistyml.toPath(), StandardCopyOption.REPLACE_EXISTING);
-            } catch (IOException ignored) {
-            }
-        }
-
         try {
-            yml.load(mohistyml);
+            yml.load(coreyml);
+            migrateLegacyKeyPrefixes(yml);
+            YamlUtils.save(coreyml, yml);
         } catch (Exception ignored) {
         }
 
@@ -95,6 +77,7 @@ public class MohistConfig {
         config = new YamlConfiguration();
         try {
             config.load(CONFIG_FILE);
+            migrateLegacyKeyPrefixes(config);
         } catch (IOException | InvalidConfigurationException ex) {
             Bukkit.getLogger().log(Level.SEVERE, "Could not load OneWorldCore settings file, please correct your syntax errors", ex);
             Throwables.throwIfUnchecked(ex);
@@ -132,8 +115,9 @@ public class MohistConfig {
 
     private static File resolveConfigFile(File configFile) {
         try {
-            if (configFile.toPath().equals(LEGACY_MOHIST_YML.toPath())) {
-                return mohistyml;
+            if (configFile.toPath().equals(LEGACY_MOHIST_YML.toPath())
+                    || configFile.toPath().equals(LEGACY_CORE_STUDIO_YML.toPath())) {
+                return coreyml;
             }
         } catch (Exception ignored) {
         }
@@ -151,8 +135,13 @@ public class MohistConfig {
         }
 
         try {
-            if (!configFile.toPath().equals(mohistyml.toPath()) && mohistyml.exists()) {
-                Files.copy(mohistyml.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            if (!configFile.toPath().equals(coreyml.toPath()) && coreyml.exists()) {
+                Files.copy(coreyml.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
+                return;
+            }
+
+            if (!configFile.toPath().equals(LEGACY_CORE_STUDIO_YML.toPath()) && LEGACY_CORE_STUDIO_YML.exists()) {
+                Files.copy(LEGACY_CORE_STUDIO_YML.toPath(), configFile.toPath(), StandardCopyOption.REPLACE_EXISTING);
                 return;
             }
 
@@ -167,7 +156,7 @@ public class MohistConfig {
     }
 
     public static void save() {
-        YamlUtils.save(mohistyml, yml);
+        YamlUtils.save(coreyml, yml);
     }
 
     public static void registerCommands() {
@@ -177,7 +166,7 @@ public class MohistConfig {
     }
 
     static void readConfig() {
-        for (Method method : MohistConfig.class.getDeclaredMethods()) {
+        for (Method method : OneWorldCoreConfig.class.getDeclaredMethods()) {
             if (Modifier.isPrivate(method.getModifiers())) {
                 if (method.getParameterTypes().length == 0 && method.getReturnType() == Void.TYPE) {
                     try {
@@ -233,7 +222,7 @@ public class MohistConfig {
                 yml.getString("oneworldstudio.lang", yml.getString("mohist.lang", Locale.getDefault().toString())));
     }
     public static String motd() {
-        return ColorsAPI.of(MohistConfig.motdFirstLine) + "\n" + ColorsAPI.of(MohistConfig.motdSecondLine);
+        return ColorsAPI.of(OneWorldCoreConfig.motdFirstLine) + "\n" + ColorsAPI.of(OneWorldCoreConfig.motdSecondLine);
     }
 
     public static boolean isProxyOnlineMode() {
@@ -340,16 +329,26 @@ public class MohistConfig {
         show_logo = getBooleanCompat("oneworldcore.show_logo", "oneworldstudio.show_logo", "mohist.show_logo", true);
         mohist_lang = getStringCompat("oneworldcore.lang", "oneworldstudio.lang", "mohist.lang", Locale.getDefault().toString());
         check_update = getBooleanCompat("oneworldcore.check_update", "oneworldstudio.check_update", "mohist.check_update", true);
-        ping_status_version = getStringCompat("oneworldcore.ping_status_version", "oneworldstudio.ping_status_version", "mohist.ping_status_version", "oneworldcore 1.20.1");
+        String detectedCoreVersion = OneWorldCore.version;
+        if (OneWorldCore.versionInfo != null && OneWorldCore.versionInfo.oneworldstudio() != null && !OneWorldCore.versionInfo.oneworldstudio().isEmpty()) {
+            detectedCoreVersion = OneWorldCore.versionInfo.oneworldstudio();
+        }
+        ping_status_version = getStringCompat(
+                "oneworldcore.ping_status_version",
+                "oneworldstudio.ping_status_version",
+                "mohist.ping_status_version",
+                "oneworldcore " + detectedCoreVersion
+        );
         watchdog_spigot = getBooleanCompat("oneworldcore.watchdog_spigot", "oneworldstudio.watchdog_spigot", "mohist.watchdog_spigot", true);
-        watchdog_mohist = getBooleanCompat("oneworldcore.watchdog_mohist", "oneworldstudio.watchdog_mohist", "mohist.watchdog_mohist", false);
+        watchdog_mohist = getBooleanCompat("oneworldcore.watchdog_core", "oneworldcore.watchdog_mohist", false);
         maximumRepairCost = getInt("anvilfix.maximumrepaircost", 40);
         enchantment_fix = getBoolean("anvilfix.enchantment_fix", false);
         max_enchantment_level = getInt("anvilfix.max_enchantment_level", 32767);
         player_modlist_blacklist_enable = getBoolean("player_modlist_blacklist.enable", false);
         player_modlist_blacklist = getStringList("player_modlist_blacklist.list", new ArrayList<>());
         server_modlist_whitelist_enable = getBoolean("server_modlist_whitelist.enable", false);
-        server_modlist_whitelist = getString("server_modlist_whitelist.list", ServerAPI.modlists_All.toString().replace(", mohist", ""));
+        server_modlist_whitelist = getString("server_modlist_whitelist.list",
+                ServerAPI.modlists_All.toString().replace(", mohist", "").replace(", oneworldcore", ""));
         maxBees = getInt("custom.max-bees-in-hive", 3);
         bookAnimationTick = getBoolean("enchantment-table-book-animation-tick", false);
         networkmanager_debug = getBoolean("networkmanager.debug", false);
@@ -357,14 +356,14 @@ public class MohistConfig {
         keepinventory_global = getBoolean("keepinventory.global.enable", false);
         keepinventory_inventory = getBoolean("keepinventory.global.inventory", true);
         keepinventory_permission_enable = getBoolean("keepinventory.permission.enable", false);
-        keepinventory_inventory_permission = getString("keepinventory.permission.inventory", "mohist.keepinventory.inventory");
+        keepinventory_inventory_permission = getString("keepinventory.permission.inventory", "oneworldcore.keepinventory.inventory");
         keepinventory_exp = getBoolean("keepinventory.global.exp", true);
-        keepinventory_exp_permission = getString("keepinventory.permission.exp", "mohist.keepinventory.exp");
+        keepinventory_exp_permission = getString("keepinventory.permission.exp", "oneworldcore.keepinventory.exp");
         server_thread = getInt("threadpriority.server_thread", 8);
 
         clear_enable = getBoolean("entity.clear.enable", false);
         clear_time = getInt("entity.clear.time", 1800);
-        clear_countdown_msg = getString("entity.clear.countdown.msg", "[Server] В§cItems will be cleared after %seconds% secondsпјЃ");
+        clear_countdown_msg = getString("entity.clear.countdown.msg", "[Server] Р’В§cItems will be cleared after %seconds% secondsРїСРѓ");
 
         clear_item = getBoolean("entity.clear.item.enable", false);
         clear_item_whitelist = getStringList("entity.clear.item.whitelist", new ArrayList<>());
@@ -384,7 +383,7 @@ public class MohistConfig {
         motdFirstLine = getString("motd.firstline", "<RAINBOW1>A Minecraft Server</RAINBOW>");
         motdSecondLine = getString("motd.secondline", "");
 
-        pingCommandOutput = getString("settings.messages.ping-command-output", "В§2%s's ping is %sms");
+        pingCommandOutput = getString("settings.messages.ping-command-output", "Р’В§2%s's ping is %sms");
 
         doFireTick = getBoolean("events.fire_tick", false);
         explosion = getBoolean("events.explosion", false);
@@ -413,7 +412,7 @@ public class MohistConfig {
         deepseek_model = getString("deepseek.model", "deepseek-chat");
         deepseek_system = getString("deepseek.system", "Your name is Xiaoxiaomo, you are 18 years old, and you are a cute girl!");
         deepseek_command = getString("deepseek.command", "ai");
-        deepseek_chatfromat = getString("deepseek.chatfromat", "<е°Џе°ЏеўЁ> %s");
+        deepseek_chatfromat = getString("deepseek.chatfromat", "<РµВ°РЏРµВ°РЏРµСћРЃ> %s");
 
         custom_no_villager = getBoolean("custom.no_villager", false);
         custom_entity_tp_end = getBoolean("custom.entity_tp_end", true);
@@ -459,5 +458,30 @@ public class MohistConfig {
     private static String getStringCompat(String modernPath, String legacyPath, String def) {
         return getStringCompat(modernPath, null, legacyPath, def);
     }
+
+    private static void migrateLegacyKeyPrefixes(YamlConfiguration target) {
+        if (target == null) {
+            return;
+        }
+
+        List<String> keys = new ArrayList<>(target.getKeys(true));
+        for (String key : keys) {
+            String modernKey = null;
+            if (key.startsWith("mohist.")) {
+                modernKey = "oneworldcore." + key.substring("mohist.".length());
+            } else if (key.startsWith("oneworldstudio.")) {
+                modernKey = "oneworldcore." + key.substring("oneworldstudio.".length());
+            }
+            if (modernKey == null || modernKey.equals(key)) {
+                continue;
+            }
+
+            if (!target.contains(modernKey)) {
+                target.set(modernKey, target.get(key));
+            }
+            target.set(key, null);
+        }
+    }
 }
+
 

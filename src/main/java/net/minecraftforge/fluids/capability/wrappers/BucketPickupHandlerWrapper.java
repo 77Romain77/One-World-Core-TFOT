@@ -5,7 +5,7 @@
 
 package net.minecraftforge.fluids.capability.wrappers;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.item.BucketItem;
 import net.minecraft.world.item.ItemStack;
@@ -93,7 +93,7 @@ public class BucketPickupHandlerWrapper implements IFluidHandler
                         if (!resource.isFluidEqual(extracted))
                         {
                             //Be loud if something went wrong
-                            LOGGER.error(MohistMC.i18n.as("mohist.i18n.110",
+                            LOGGER.error(OneWorldCore.i18n.as("mohist.i18n.110",
                                     ForgeRegistries.FLUIDS.getKey(fluidState.getType()), blockPos, world.dimension().location(), ForgeRegistries.FLUIDS.getKey(bucket.getFluid())));
                             return FluidStack.EMPTY;
                         }
@@ -137,3 +137,4 @@ public class BucketPickupHandlerWrapper implements IFluidHandler
         return FluidStack.EMPTY;
     }
 }
+

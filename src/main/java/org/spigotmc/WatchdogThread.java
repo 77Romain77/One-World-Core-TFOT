@@ -1,6 +1,6 @@
 package org.spigotmc;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import net.minecraft.server.MinecraftServer;
 import org.bukkit.Bukkit;
 
@@ -41,7 +41,7 @@ public class WatchdogThread extends Thread {
     }
 
     public static void tick() {
-        if (MohistConfig.watchdog_spigot) {
+        if (OneWorldCoreConfig.watchdog_spigot) {
             instance.lastTick = monotonicMillis();
         }
     }
@@ -106,3 +106,4 @@ public class WatchdogThread extends Thread {
         }
     }
 }
+

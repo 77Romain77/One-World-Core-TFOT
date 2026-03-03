@@ -18,7 +18,7 @@ import com.google.common.base.Joiner;
 import com.google.common.base.Preconditions;
 import com.google.common.base.Splitter;
 import com.google.common.collect.Lists;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -79,12 +79,12 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
         this.childConfig = config;
         if (config != null && !isCorrect(config)) {
             String configName = config instanceof FileConfig ? ((FileConfig) config).getNioPath().toString() : config.toString();
-            LOGGER.warn(Logging.CORE, MohistMC.i18n.as("mohist.i18n.89", configName));
+            LOGGER.warn(Logging.CORE, OneWorldCore.i18n.as("mohist.i18n.89", configName));
             correct(config,
                     (action, path, incorrectValue, correctedValue) ->
                             LOGGER.debug(Logging.CORE,"Incorrect key {} was corrected from {} to its default, {}. {}", DOT_JOINER.join( path ), incorrectValue, correctedValue, incorrectValue == correctedValue ? "This seems to be an error." : ""),
                     (action, path, incorrectValue, correctedValue) ->
-                            LOGGER.debug(Logging.CORE,MohistMC.i18n.as("mohist.i18n.90", DOT_JOINER.join( path ))));
+                            LOGGER.debug(Logging.CORE,OneWorldCore.i18n.as("mohist.i18n.90", DOT_JOINER.join( path ))));
 
             if (config instanceof FileConfig) {
                 ((FileConfig) config).save();
@@ -362,13 +362,13 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
                 @Override
                 public Object correct(Object value) {
                     if (value == null || !(value instanceof List) || ((List<?>)value).isEmpty()) {
-                        LOGGER.debug(Logging.CORE,MohistMC.i18n.as("mohist.i18n.91", path.get(path.size() - 1)));
+                        LOGGER.debug(Logging.CORE,OneWorldCore.i18n.as("mohist.i18n.91", path.get(path.size() - 1)));
                         return getDefault();
                     }
                     List<?> list = new ArrayList<>((List<?>) value);
                     list.removeIf(elementValidator.negate());
                     if (list.isEmpty()) {
-                        LOGGER.debug(Logging.CORE,MohistMC.i18n.as("mohist.i18n.92", path.get(path.size() - 1)));
+                        LOGGER.debug(Logging.CORE,OneWorldCore.i18n.as("mohist.i18n.92", path.get(path.size() - 1)));
                         return getDefault();
                     }
                     return list;
@@ -390,13 +390,13 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
                 @Override
                 public Object correct(Object value) {
                     if (value == null || !(value instanceof List)) {
-                        LOGGER.debug(Logging.CORE,MohistMC.i18n.as("mohist.i18n.93", path.get(path.size() - 1)));
+                        LOGGER.debug(Logging.CORE,OneWorldCore.i18n.as("mohist.i18n.93", path.get(path.size() - 1)));
                         return getDefault();
                     }
                     List<?> list = new ArrayList<>((List<?>) value);
                     list.removeIf(elementValidator.negate());
                     if (list.isEmpty()) {
-                        LOGGER.debug(Logging.CORE,MohistMC.i18n.as("mohist.i18n.94", path.get(path.size() - 1)));
+                        LOGGER.debug(Logging.CORE,OneWorldCore.i18n.as("mohist.i18n.94", path.get(path.size() - 1)));
                         return getDefault();
                     }
                     return list;
@@ -554,7 +554,7 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
             // Iterate list first, to throw meaningful errors
             // Don't add any comments until we make sure there is no nulls
             for (int i = 0; i < comment.length; i++)
-                Preconditions.checkNotNull(comment[i],MohistMC.i18n.as("mohist.i18n.95", i));
+                Preconditions.checkNotNull(comment[i],OneWorldCore.i18n.as("mohist.i18n.95", i));
 
             for (String s : comment)
                 context.addComment(s);
@@ -598,7 +598,7 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
 
         public Builder pop(int count) {
             if (count > currentPath.size())
-                throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.96", count, currentPath));
+                throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.96", count, currentPath));
             for (int x = 0; x < count; x++)
                 currentPath.remove(currentPath.size() - 1);
             return this;
@@ -649,10 +649,10 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
             if (comment.stream().allMatch(String::isBlank))
             {
                 if (FMLEnvironment.production)
-                    LOGGER.warn(Logging.CORE,MohistMC.i18n.as("mohist.i18n.97",
+                    LOGGER.warn(Logging.CORE,OneWorldCore.i18n.as("mohist.i18n.97",
                             DOT_JOINER.join(path)));
                 else
-                    throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.98", DOT_JOINER.join(path)));
+                    throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.98", DOT_JOINER.join(path)));
 
                 return "A developer of this mod has defined this config option with a blank comment, which causes obscure bugs in Forge's config system and will cause a crash in the future. Please report this to the mod author.";
             }
@@ -725,7 +725,7 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
                 boolean result = ((Number)min).doubleValue() <= n.doubleValue() && n.doubleValue() <= ((Number)max).doubleValue();
                 if(!result)
                 {
-                    LOGGER.debug(Logging.CORE,MohistMC.i18n.as("mohist.i18n.99", n.doubleValue(), ((Number)min).doubleValue(), ((Number)max).doubleValue()));
+                    LOGGER.debug(Logging.CORE,OneWorldCore.i18n.as("mohist.i18n.99", n.doubleValue(), ((Number)min).doubleValue(), ((Number)max).doubleValue()));
                 }
                 return result;
             }
@@ -735,7 +735,7 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
             boolean result = c.compareTo(min) >= 0 && c.compareTo(max) <= 0;
             if(!result)
             {
-                LOGGER.debug(Logging.CORE,MohistMC.i18n.as("mohist.i18n.100", c, min, max));
+                LOGGER.debug(Logging.CORE,OneWorldCore.i18n.as("mohist.i18n.100", c, min, max));
             }
             return result;
         }
@@ -978,3 +978,4 @@ public class ForgeConfigSpec extends UnmodifiableConfigWrapper<UnmodifiableConfi
         return Lists.newArrayList(DOT_SPLITTER.split(path));
     }
 }
+

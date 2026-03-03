@@ -1,7 +1,7 @@
 package net.minecraft.world.level.storage;
 
 import com.google.common.collect.Maps;
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.logging.LogUtils;
 import java.io.DataInputStream;
@@ -130,7 +130,7 @@ public class DimensionDataStorage {
       this.cache.forEach((p_164866_, p_164867_) -> {
          if (p_164867_ != null) {
             // Mohist start - Save data asynchronously, copy by SavedData.
-            if (MohistConfig.async_save_world && p_164867_.isDirty()) {
+            if (OneWorldCoreConfig.async_save_world && p_164867_.isDirty()) {
                CompoundTag save = p_164867_.save(new CompoundTag());
                if (save != null) {
                   p_164867_.setDirty(false);

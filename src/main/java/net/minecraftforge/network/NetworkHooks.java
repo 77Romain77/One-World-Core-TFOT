@@ -5,7 +5,7 @@
 
 package net.minecraftforge.network;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.bukkit.inventory.MohistModsInventory;
 import io.netty.buffer.Unpooled;
 import io.netty.channel.Channel;
@@ -208,7 +208,7 @@ public class NetworkHooks
         output.writeBytes(extraData);
 
         if (output.readableBytes() > 32600 || output.readableBytes() < 1) {
-            throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.125", output.readableBytes()));
+            throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.125", output.readableBytes()));
         }
         var c = containerSupplier.createMenu(openContainerId, player.getInventory(), player);
         if (c == null) return;
@@ -262,3 +262,4 @@ public class NetworkHooks
         return mgr.channel().attr(NetworkConstants.FML_MC_REGISTRY).get();
     }
 }
+

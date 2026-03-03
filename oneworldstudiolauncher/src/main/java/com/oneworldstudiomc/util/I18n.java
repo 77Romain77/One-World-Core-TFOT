@@ -3,7 +3,7 @@ package com.oneworldstudiomc.util;
 import com.oneworldstudiomc.OneWorldCoreStart;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/9/23 3:19:38
  */
 public class I18n {
@@ -16,3 +16,4 @@ public class I18n {
         return OneWorldCoreStart.i18n.as(key, objects);
     }
 }
+

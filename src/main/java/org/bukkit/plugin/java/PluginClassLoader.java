@@ -2,7 +2,7 @@ package org.bukkit.plugin.java;
 
 import com.google.common.base.Preconditions;
 import com.google.common.io.ByteStreams;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.bukkit.pluginfix.PluginFixManager;
 import com.oneworldstudiomc.bukkit.remapping.ClassLoaderRemapper;
 import com.oneworldstudiomc.bukkit.remapping.Remapper;
@@ -10,6 +10,7 @@ import com.oneworldstudiomc.bukkit.remapping.RemappingClassLoader;
 import com.oneworldstudiomc.plugins.PluginHooks;
 import cpw.mods.modlauncher.EnumerationHelper;
 import cpw.mods.modlauncher.TransformingClassLoader;
+import io.izzel.tools.product.Product;
 import io.izzel.tools.product.Product2;
 import org.bukkit.Bukkit;
 import org.bukkit.plugin.InvalidPluginException;
@@ -21,10 +22,12 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.JarURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.net.URLConnection;
+import java.security.CodeSigner;
 import java.security.CodeSource;
 import java.util.Collection;
 import java.util.Collections;
@@ -36,12 +39,12 @@ import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
-import java.util.logging.Level;
 
 /**
  * A ClassLoader for plugins, to allow shared classes across multiple plugins
  */
 public final class PluginClassLoader extends URLClassLoader implements RemappingClassLoader {
+    private static final String PROTOCOLLIB_PLUGIN_NAME = "ProtocolLib";
     private final JavaPluginLoader loader;
     private final Map<String, Class<?>> classes = new ConcurrentHashMap<String, Class<?>>();
     private final PluginDescriptionFile description;
@@ -88,14 +91,14 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
             try {
                 jarClass = Class.forName(description.getMain(), true, this);
             } catch (ClassNotFoundException ex) {
-                throw new InvalidPluginException(MohistMC.i18n.as("mohist.i18n.26", description.getMain()), ex);
+                throw new InvalidPluginException(OneWorldCore.i18n.as("mohist.i18n.26", description.getMain()), ex);
             }
 
             Class<? extends JavaPlugin> pluginClass;
             try {
                 pluginClass = jarClass.asSubclass(JavaPlugin.class);
             } catch (ClassCastException ex) {
-                throw new InvalidPluginException(MohistMC.i18n.as("mohist.i18n.27", description.getMain()), ex);
+                throw new InvalidPluginException(OneWorldCore.i18n.as("mohist.i18n.27", description.getMain()), ex);
             }
 
             plugin = pluginClass.newInstance();
@@ -105,7 +108,7 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
             throw new InvalidPluginException("Abnormal plugin type", ex);
         }
         if (PluginHooks.hook(plugin)) {
-            ((TransformingClassLoader) MohistMC.classLoader).addChild(this);
+            ((TransformingClassLoader) OneWorldCore.classLoader).addChild(this);
         }
     }
 
@@ -139,6 +142,7 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
     }
 
     Class<?> loadClass0(@NotNull String name, boolean resolve, boolean checkGlobal, boolean checkLibraries) throws ClassNotFoundException {
+        ClassNotFoundException firstError = null;
         try {
             Class<?> result = super.loadClass(name, resolve);
 
@@ -147,6 +151,12 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
                 return result;
             }
         } catch (ClassNotFoundException ex) {
+            firstError = ex;
+        }
+
+        Class<?> nmsInner = tryResolveNmsInnerClass(name, resolve);
+        if (nmsInner != null) {
+            return nmsInner;
         }
 
         if (checkLibraries && libraryLoader != null) {
@@ -170,12 +180,8 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
                             && !((SimplePluginManager) loader.server.getPluginManager()).isTransitiveDepend(description, provider)) {
 
                         seenIllegalAccess.add(provider.getName());
-                        if (plugin != null) {
-                            plugin.getLogger().log(Level.WARNING,MohistMC.i18n.as("mohist.i18n.28", name, provider.getFullName()));
-                        } else {
-                            // In case the bad access occurs on construction
-                            loader.server.getLogger().log(Level.WARNING,MohistMC.i18n.as("mohist.i18n.29", description.getName(), name, provider.getFullName()));
-                        }
+                        // Suppress noisy cross-plugin access warning:
+                        // "Loaded class ... which is not a depend or softdepend of this plugin."
                     }
                 }
 
@@ -183,7 +189,34 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
             }
         }
 
-        throw new ClassNotFoundException(name);
+        nmsInner = tryResolveNmsInnerClass(name, resolve);
+        if (nmsInner != null) {
+            return nmsInner;
+        }
+
+        throw firstError == null ? new ClassNotFoundException(name) : new ClassNotFoundException(name, firstError);
+    }
+
+    @Nullable
+    private Class<?> tryResolveNmsInnerClass(@NotNull String name, boolean resolve) {
+        if (!name.startsWith("net.minecraft.") || !name.contains("$")) {
+            return null;
+        }
+
+        ClassLoader nmsLoader = OneWorldCore.classLoader;
+        if (nmsLoader != null && nmsLoader != this) {
+            try {
+                return Class.forName(name, false, nmsLoader);
+            } catch (ClassNotFoundException ignored) {
+            }
+        }
+
+        try {
+            this.getRemapper().tryDefineClass(name.replace('.', '/'));
+            return super.loadClass(name, resolve);
+        } catch (Throwable ignored) {
+            return null;
+        }
     }
 
     @Override
@@ -198,6 +231,7 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
             URL url = this.findResource(path);
 
             if (url != null) {
+                final boolean bypassProtocolLibRemap = shouldBypassRemapPipeline();
 
                 URLConnection connection;
                 Callable<byte[]> byteSource;
@@ -207,9 +241,11 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
                     byteSource = () -> {
                         try (InputStream is = connection.getInputStream()) {
                             byte[] classBytes = ByteStreams.toByteArray(is);
-                            classBytes = Remapper.SWITCH_TABLE_FIXER.apply(classBytes);
-                            classBytes = Bukkit.getUnsafe().processClass(description, path, classBytes);
-                            classBytes = PluginFixManager.injectPluginFix(name, classBytes); // Mohist - Inject plugin fix
+                            if (!bypassProtocolLibRemap) {
+                                classBytes = Remapper.SWITCH_TABLE_FIXER.apply(classBytes);
+                                classBytes = Bukkit.getUnsafe().processClass(description, path, classBytes);
+                                classBytes = PluginFixManager.injectPluginFix(name, classBytes); // Mohist - Inject plugin fix
+                            }
                             return classBytes;
                         }
                     };
@@ -217,7 +253,9 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
                     throw new ClassNotFoundException(name, e);
                 }
 
-                Product2<byte[], CodeSource> classBytes = this.getRemapper().remapClass(name, byteSource, connection);
+                Product2<byte[], CodeSource> classBytes = bypassProtocolLibRemap
+                        ? loadUnmappedClass(name, byteSource, connection)
+                        : this.getRemapper().remapClass(name, byteSource, connection);
 
                 int dot = name.lastIndexOf('.');
                 if (dot != -1) {
@@ -231,7 +269,7 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
                             }
                         } catch (IllegalArgumentException ex) {
                             if (getPackage(pkgName) == null) {
-                                throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.30", pkgName));
+                                throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.30", pkgName));
                             }
                         }
                     }
@@ -249,6 +287,28 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
         }
 
         return result;
+    }
+
+    private boolean shouldBypassRemapPipeline() {
+        return PROTOCOLLIB_PLUGIN_NAME.equalsIgnoreCase(this.description.getName());
+    }
+
+    private Product2<byte[], CodeSource> loadUnmappedClass(String className, Callable<byte[]> byteSource, URLConnection connection) throws ClassNotFoundException {
+        try {
+            byte[] bytes = byteSource.call();
+            URL sourceUrl;
+            CodeSigner[] signers;
+            if (connection instanceof JarURLConnection jarConnection) {
+                sourceUrl = jarConnection.getJarFileURL();
+                signers = jarConnection.getJarEntry() != null ? jarConnection.getJarEntry().getCodeSigners() : null;
+            } else {
+                sourceUrl = connection.getURL();
+                signers = null;
+            }
+            return Product.of(bytes, new CodeSource(sourceUrl, signers));
+        } catch (Exception e) {
+            throw new ClassNotFoundException(className, e);
+        }
     }
 
     @Override
@@ -278,3 +338,4 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
         javaPlugin.init(loader, loader.server, description, dataFolder, file, this);
     }
 }
+

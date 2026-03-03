@@ -7,7 +7,7 @@ package net.minecraftforge.registries;
 
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.SetMultimap;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
@@ -175,7 +175,7 @@ public class DeferredRegister<T>
     public <I extends T> RegistryObject<I> register(final String name, final Supplier<? extends I> sup)
     {
         if (seenRegisterEvent)
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.143"));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.143"));
         Objects.requireNonNull(name);
         Objects.requireNonNull(sup);
         final ResourceLocation key = new ResourceLocation(modid, name);
@@ -186,10 +186,10 @@ public class DeferredRegister<T>
                     ? RegistryObject.createOptional(key, this.registryKey, this.modid)
                     : RegistryObject.create(key, this.registryKey, this.modid);
         else
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.144"));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.144"));
 
         if (entries.putIfAbsent((RegistryObject<T>) ret, sup) != null) {
-            throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.145", name));
+            throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.145", name));
         }
 
         return ret;
@@ -355,9 +355,9 @@ public class DeferredRegister<T>
 
     private Supplier<IForgeRegistry<T>> makeRegistry(final ResourceLocation registryName, final Supplier<RegistryBuilder<T>> sup) {
         if (registryName == null)
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.146"));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.146"));
         if (RegistryManager.ACTIVE.getRegistry(registryName) != null || this.registryFactory != null)
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.147"));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.147"));
 
         this.registryFactory = () -> sup.get().setName(registryName);
         return new RegistryHolder<>(this.registryKey);
@@ -371,7 +371,7 @@ public class DeferredRegister<T>
 
         ITagManager<T> tagManager = (ITagManager<T>) registry.tags();
         if (tagManager == null)
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.148", registry.getRegistryName()));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.148", registry.getRegistryName()));
 
         Multimaps.asMap(this.optionalTags).forEach(tagManager::addOptionalTagDefaults);
     }
@@ -415,3 +415,4 @@ public class DeferredRegister<T>
         }
     }
 }
+

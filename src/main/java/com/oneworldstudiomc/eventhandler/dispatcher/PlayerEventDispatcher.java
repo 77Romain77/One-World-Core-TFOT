@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -19,6 +19,7 @@
 package com.oneworldstudiomc.eventhandler.dispatcher;
 
 import com.oneworldstudiomc.bukkit.inventory.MohistModsInventory;
+import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraftforge.event.entity.player.AdvancementEvent;
@@ -36,7 +37,17 @@ public class PlayerEventDispatcher {
     @SubscribeEvent
     public void onAdvancementDone(AdvancementEvent event) {
         if (event.getEntity() instanceof ServerPlayer player) {
-            Bukkit.getPluginManager().callEvent(new PlayerAdvancementDoneEvent(player.getBukkitEntity(), event.getAdvancement().bukkit));
+            PlayerAdvancementDoneEvent bukkitEvent = new PlayerAdvancementDoneEvent(player.getBukkitEntity(), event.getAdvancement().bukkit);
+            if (Bukkit.isPrimaryThread()) {
+                Bukkit.getPluginManager().callEvent(bukkitEvent);
+                return;
+            }
+            MinecraftServer server = MinecraftServer.getServer();
+            if (server != null) {
+                server.executeIfPossible(() -> Bukkit.getPluginManager().callEvent(bukkitEvent));
+                return;
+            }
+            Bukkit.getPluginManager().callEvent(bukkitEvent);
         }
     }
 
@@ -54,3 +65,4 @@ public class PlayerEventDispatcher {
         CraftEventFactory.handleInventoryCloseEvent(event.getEntity()); // CraftBukkit
     }
 }
+

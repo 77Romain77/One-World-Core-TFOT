@@ -3,7 +3,7 @@ package com.oneworldstudiomc.bukkit.remapping;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Multimap;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import io.izzel.tools.func.Func4;
 import io.izzel.tools.product.Product;
 import io.izzel.tools.product.Product2;
@@ -51,6 +51,7 @@ public class RedirectAdapter implements PluginTransformer {
 
     public static final RedirectAdapter INSTANCE = new RedirectAdapter();
     private static final Marker MARKER = MarkerManager.getMarker("REDIRECT");
+    private static final String PROTOCOLLIB_BYTEBUDDY_PREFIX = "com/comphenix/net/bytebuddy/";
     private static final String REPLACED_NAME = Type.getInternalName(ReflectionHandler.class);
     private static final Multimap<String, Product2<String, MethodInsnNode>> METHOD_MODIFY = HashMultimap.create();
     private static final Multimap<String, Product2<String, MethodInsnNode>> METHOD_REDIRECT = HashMultimap.create();
@@ -125,7 +126,7 @@ public class RedirectAdapter implements PluginTransformer {
 
     public static void scanMethod(byte[] bytes) {
         ClassReader reader = new ClassReader(bytes);
-        MohistMC.LOGGER.debug(MARKER, "Scanning {}", reader.getClassName());
+        OneWorldCore.LOGGER.debug(MARKER, "Scanning {}", reader.getClassName());
         ClassNode node = new ClassNode();
         reader.accept(node, ClassReader.SKIP_FRAMES | ClassReader.SKIP_DEBUG);
         for (MethodNode method : node.methods) {
@@ -151,7 +152,7 @@ public class RedirectAdapter implements PluginTransformer {
                             if (target != null) {
                                 Func4<ClassLoaderRemapper, Method, Object, Object[], Object[]> bridge = METHOD_TO_HANDLER.get(methodToString(target));
                                 if (bridge != null) {
-                                    MohistMC.LOGGER.debug(MARKER, "Creating bridge handler {}/{}{} to {}", node.name, method.name, method.desc, methodToString(target));
+                                    OneWorldCore.LOGGER.debug(MARKER, "Creating bridge handler {}/{}{} to {}", node.name, method.name, method.desc, methodToString(target));
                                     METHOD_TO_HANDLER.put(node.name + '/' + method.name + method.desc, new BridgeHandler(bridge, target));
                                 }
                             }
@@ -168,6 +169,11 @@ public class RedirectAdapter implements PluginTransformer {
 
     @Override
     public void handleClass(ClassNode node, ClassLoaderRemapper remapper) {
+        // Keep ProtocolLib ByteBuddy runtime untouched. Its generated dispatchers rely on
+        // exact bytecode/runtime assumptions that our reflection redirect can break.
+        if (node.name != null && node.name.startsWith(PROTOCOLLIB_BYTEBUDDY_PREFIX)) {
+            return;
+        }
         redirect(node, remapper);
     }
 
@@ -480,3 +486,4 @@ public class RedirectAdapter implements PluginTransformer {
             }
         }
 }
+

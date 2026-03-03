@@ -5,7 +5,7 @@
 
 package net.minecraftforge.data.loading;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.io.File;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -37,7 +37,7 @@ public class DatagenModLoader {
             final boolean structureValidator, final boolean flat, final String assetIndex, final File assetsDir) {
         if (mods.contains("minecraft") && mods.size() == 1)
             return;
-        LOGGER.info(MohistMC.i18n.as("mohist.i18n.109", mods));
+        LOGGER.info(OneWorldCore.i18n.as("mohist.i18n.109", mods));
         runningDataGen = true;
         Bootstrap.bootStrap();
         ModLoader.get().gatherAndInitializeMods(ModWorkManager.syncExecutor(), ModWorkManager.parallelExecutor(), ()->{});
@@ -54,3 +54,4 @@ public class DatagenModLoader {
         dataGeneratorConfig.runAll();
     }
 }
+

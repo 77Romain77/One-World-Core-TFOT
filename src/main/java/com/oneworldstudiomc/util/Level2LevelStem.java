@@ -8,7 +8,7 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import org.bukkit.World;
 
 /**
- * @author Mgazul by MohistMC
+ * @author Mgazul by OneWorldCore
  * @date 2023/5/25 21:28:44
  */
 public class Level2LevelStem {
@@ -38,3 +38,4 @@ public class Level2LevelStem {
         return path;
     }
 }
+

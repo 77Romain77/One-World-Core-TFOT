@@ -6,7 +6,7 @@
 package net.minecraftforge.common.util;
 
 import com.google.common.collect.Streams;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -97,7 +97,7 @@ public class TextTable
     {
         if (values.length != columns.size())
         {
-            throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.78", columns.size(), columns.size()));
+            throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.78", columns.size(), columns.size()));
         }
         Row row = new Row();
         for (int i = 0; i < values.length; i++)
@@ -194,7 +194,7 @@ public class TextTable
         {
             if (columns.size() != values.size())
             {
-                throw new IllegalArgumentException(MohistMC.i18n.as("mohist.i18n.79",columns.size(), columns.size()));
+                throw new IllegalArgumentException(OneWorldCore.i18n.as("mohist.i18n.79",columns.size(), columns.size()));
             }
             return Streams.zip(values.stream(), columns.stream(), (v, c) -> c.format(v, padding)).collect(Collectors.toList());
         }
@@ -205,3 +205,4 @@ public class TextTable
         LEFT, CENTER, RIGHT
     }
 }
+

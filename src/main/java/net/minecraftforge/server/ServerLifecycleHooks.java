@@ -5,7 +5,7 @@
 
 package net.minecraftforge.server;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.oneworldstudiomc.util.ProxyUtils;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -169,7 +169,7 @@ public class ServerLifecycleHooks
             }
 
             if (!ProxyUtils.is() && connectionType == ConnectionType.VANILLA && !NetworkRegistry.acceptsVanillaClientConnections()) {
-                rejectConnection(manager, connectionType, MohistConfig.message_require_forge);
+                rejectConnection(manager, connectionType, OneWorldCoreConfig.message_require_forge);
                 return false;
             }
         }
@@ -245,3 +245,4 @@ public class ServerLifecycleHooks
         });
     }
 }
+

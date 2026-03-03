@@ -1,5 +1,5 @@
 /*
- * Mohist - MohistMC
+ * Mohist - OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -18,7 +18,7 @@
 
 package com.oneworldstudiomc.commands;
 
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mohistmc.tools.ZipUtil;
 import com.oneworldstudiomc.util.I18n;
 import java.io.File;
@@ -33,6 +33,7 @@ import org.bukkit.command.CommandSender;
 import org.jetbrains.annotations.NotNull;
 
 public class BackupWorldCommand extends Command {
+    private static final String BACKUP_DIR = "OneWorldCoreBackups";
 
     public BackupWorldCommand(String name) {
         super(name);
@@ -71,14 +72,14 @@ public class BackupWorldCommand extends Command {
                 try {
                     sender.sendMessage(I18n.as("worldbackupcmd.notice.creatingWorldBackup"));
                     LocalDateTime now = LocalDateTime.now();
-                    File zip = new File("./MohistBackups/" + args[0] + "-" + now.getDayOfMonth() + "-" + now.getMonthValue() + "-" + now.getYear() + "-" + now.getHour() + "-" + now.getMinute() + "-" + now.getSecond() + ".zip");
+                    File zip = new File("./" + BACKUP_DIR + "/" + args[0] + "-" + now.getDayOfMonth() + "-" + now.getMonthValue() + "-" + now.getYear() + "-" + now.getHour() + "-" + now.getMinute() + "-" + now.getSecond() + ".zip");
                     zip.getParentFile().mkdirs();
                     zip.createNewFile();
 
                     ZipUtil.zipFolder(Paths.get("./" + args[0]), zip.toPath());
                     sender.sendMessage(I18n.as("worldbackupcmd.notice.worldComplete"));
                 } catch (Exception e) {
-                    MohistMC.LOGGER.error("Failed to save world or this world doesn't exists.", e);
+                    OneWorldCore.LOGGER.error("Failed to save world or this world doesn't exists.", e);
                 }
             }).start();
         }

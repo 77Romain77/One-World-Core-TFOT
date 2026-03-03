@@ -1,6 +1,6 @@
 package net.minecraft.world.inventory;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import com.mojang.logging.LogUtils;
 import java.util.Map;
 
@@ -46,7 +46,7 @@ public class AnvilMenu extends ItemCombinerMenu {
 
    // CraftBukkit start
    public static final int DEFAULT_DENIED_COST = -1;
-   public int maximumRepairCost = Math.min(Short.MAX_VALUE, Math.max(41, MohistConfig.maximumRepairCost));
+   public int maximumRepairCost = Math.min(Short.MAX_VALUE, Math.max(41, OneWorldCoreConfig.maximumRepairCost));
    private CraftInventoryView bukkitEntity;
    @Override
    public CraftInventoryView getBukkitView() {

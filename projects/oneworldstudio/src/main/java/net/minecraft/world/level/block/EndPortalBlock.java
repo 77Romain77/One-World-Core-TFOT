@@ -1,6 +1,6 @@
 package net.minecraft.world.level.block;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.particles.ParticleTypes;
 import net.minecraft.network.chat.Component;
@@ -62,7 +62,7 @@ public class EndPortalBlock extends BaseEntityBlock {
             return;
          }
          // CraftBukkit end
-         if (MohistConfig.custom_entity_tp_end && p_53026_.getCraftServer().getAllowEnd()) {
+         if (OneWorldCoreConfig.custom_entity_tp_end && p_53026_.getCraftServer().getAllowEnd()) {
             // Mohist end
             p_53028_.changeDimension(serverlevel);
          }

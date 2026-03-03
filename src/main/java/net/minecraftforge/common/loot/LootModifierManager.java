@@ -11,7 +11,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.mojang.serialization.JsonOps;
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -76,7 +76,7 @@ public class LootModifierManager extends SimpleJsonResourceReloadListener {
             JsonElement json = resourceList.get(location);
             IGlobalLootModifier.DIRECT_CODEC.parse(JsonOps.INSTANCE, json)
                 // log error if parse fails
-                .resultOrPartial(errorMsg -> LOGGER.debug(MohistMC.i18n.as("mohist.i18n.76", location, errorMsg)))
+                .resultOrPartial(errorMsg -> LOGGER.debug(OneWorldCore.i18n.as("mohist.i18n.76", location, errorMsg)))
                 // add loot modifier if parse succeeds
                 .ifPresent(modifier -> builder.put(location, modifier));
         }
@@ -91,3 +91,4 @@ public class LootModifierManager extends SimpleJsonResourceReloadListener {
     }
 
 }
+

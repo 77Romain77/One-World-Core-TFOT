@@ -1,7 +1,7 @@
 package com.oneworldstudiomc.plugins.ban;
 
-import com.oneworldstudiomc.MohistConfig;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCoreConfig;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.api.EnchantmentAPI;
 import com.oneworldstudiomc.api.ItemAPI;
 import com.oneworldstudiomc.plugins.ban.utils.BanSaveInventory;
@@ -31,7 +31,7 @@ public class BanListener {
             Inventory inventory = event.getInventory();
             if (openInventory != null && openInventory.getInventory() == inventory) {
                 if (openInventory.getBanType() == BanType.ITEM) {
-                    List<String> old = MohistConfig.ban_item_materials;
+                    List<String> old = OneWorldCoreConfig.ban_item_materials;
                     for (org.bukkit.inventory.ItemStack itemStack : event.getInventory().getContents()) {
                         if (itemStack != null && itemStack.getType() != Material.AIR) {
                             ListUtils.isDuplicate(old, itemStack.getType().name());
@@ -39,7 +39,7 @@ public class BanListener {
                     }
                     BanUtils.saveToYaml(player, ClickType.ADD, old, BanType.ITEM);
                 } else if (openInventory.getBanType() == BanType.ENTITY) {
-                    List<String> old = MohistConfig.ban_entity_types;
+                    List<String> old = OneWorldCoreConfig.ban_entity_types;
                     for (org.bukkit.inventory.ItemStack itemStack : event.getInventory().getContents()) {
                         if (itemStack != null && itemStack.getType() != Material.AIR) {
                             ItemStack nmsItem = ItemAPI.toNMSItem(itemStack);
@@ -52,7 +52,7 @@ public class BanListener {
                     }
                     BanUtils.saveToYaml(player, ClickType.ADD, old, BanType.ENTITY);
                 } else if (openInventory.getBanType() == BanType.ENCHANTMENT) {
-                    List<String> old = MohistConfig.ban_enchantment_list;
+                    List<String> old = OneWorldCoreConfig.ban_enchantment_list;
                     for (org.bukkit.inventory.ItemStack itemStack : event.getInventory().getContents()) {
                         if (itemStack != null && itemStack.getType() != Material.AIR) {
                             if (EnchantmentAPI.has(itemStack)) {
@@ -76,8 +76,9 @@ public class BanListener {
                 openInventory = null;
             }
         } catch (Exception e) {
-            MohistMC.LOGGER.warn(I18n.as("bans.add.item.failed"));
+            OneWorldCore.LOGGER.warn(I18n.as("bans.add.item.failed"));
             e.printStackTrace();
         }
     }
 }
+

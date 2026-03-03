@@ -8,7 +8,7 @@ package net.minecraftforge.registries;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Multimaps;
 import com.google.common.collect.Sets;
-import com.oneworldstudiomc.MohistMC;
+import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.bukkit.pluginfix.PluginDynamicRegistrFix;
 import com.mojang.datafixers.util.Pair;
 import com.mojang.logging.LogUtils;
@@ -74,7 +74,7 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
     public Holder.Reference<T> registerMapping(int id, ResourceKey<T> key, T value, Lifecycle lifecycle)
     {
         if (PluginDynamicRegistrFix.canLock && locked)
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.198"));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.198"));
 
         Validate.notNull(value);
         markKnown();
@@ -82,7 +82,7 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
 
         int realId = this.delegate.add(id, key.location(), value);
         if (realId != id && id != -1)
-            LOGGER.debug(MohistMC.i18n.as("mohist.i18n.197", key, id, realId));
+            LOGGER.debug(OneWorldCore.i18n.as("mohist.i18n.197", key, id, realId));
 
         return getHolder(key, value);
     }
@@ -270,13 +270,13 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
     void validateWrite()
     {
         if (PluginDynamicRegistrFix.canLock && this.frozen)
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.199"));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.199"));
     }
 
     void validateWrite(ResourceKey<T> key)
     {
         if (this.frozen)
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.200", key));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.200", key));
     }
 
     Holder.Reference<T> getOrCreateHolderOrThrow(ResourceKey<T> key)
@@ -284,7 +284,7 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
         return this.holdersByName.computeIfAbsent(key.location(), k -> {
             if (this.intrusiveHolderCallback != null)
             {
-                throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.201"));
+                throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.201"));
             }
             else
             {
@@ -352,7 +352,7 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
             throw new IllegalStateException("Unbound values in registry " + this.key() + ": " + unregistered.stream().map(ResourceLocation::toString).collect(Collectors.joining(", \n\t")));
 
         if (this.unregisteredIntrusiveHolders != null && this.unregisteredIntrusiveHolders.values().stream().anyMatch(r -> !r.isBound() && r.getType() == Holder.Reference.Type.INTRUSIVE)) {
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.202", this.unregisteredIntrusiveHolders.values(), stage.getName()));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.202", this.unregisteredIntrusiveHolders.values(), stage.getName()));
         }
 
         return this;
@@ -362,7 +362,7 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
     public Holder.Reference<T> createIntrusiveHolder(T value)
     {
         if (this.intrusiveHolderCallback == null)
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.203"));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.203"));
 
         this.validateWrite();
 
@@ -385,7 +385,7 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
         Set<TagKey<T>> set = new HashSet<>(Sets.difference(this.tags.keySet(), newTags.keySet()));
         set.removeAll(this.optionalTags.keySet());
         if (!set.isEmpty())
-            LOGGER.warn(MohistMC.i18n.as("mohist.i18n.204", this.key(), set.stream().map(k -> k.location().toString()).sorted()
+            LOGGER.warn(OneWorldCore.i18n.as("mohist.i18n.204", this.key(), set.stream().map(k -> k.location().toString()).sorted()
                     .collect(Collectors.joining(", \n\t"))));
 
         Map<TagKey<T>, HolderSet.Named<T>> tmpTags = new IdentityHashMap<>(this.tags);
@@ -411,10 +411,10 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
     private void addTagToHolder(Map<Holder.Reference<T>, List<TagKey<T>>> holderToTag, TagKey<T> name, Holder<T> holder)
     {
         if (!holder.canSerializeIn(this.holderOwner()))
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.205",name, holder, this));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.205",name, holder, this));
 
         if (!(holder instanceof Holder.Reference<T>))
-            throw new IllegalStateException(MohistMC.i18n.as("mohist.i18n.206", holder, name));
+            throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.206", holder, name));
 
         holderToTag.get((Holder.Reference<T>) holder).add(name);
     }
@@ -510,3 +510,4 @@ class NamespacedWrapper<T> extends MappedRegistry<T> implements ILockableRegistr
         }
     }
 }
+

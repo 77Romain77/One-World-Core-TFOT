@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.api;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import java.util.Objects;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
@@ -41,6 +41,7 @@ public class EntityAPI {
     }
 
     public static boolean isBan(Entity entity) {
-        return MohistConfig.ban_entity_types.contains(resourceLocation(entity));
+        return OneWorldCoreConfig.ban_entity_types.contains(resourceLocation(entity));
     }
 }
+

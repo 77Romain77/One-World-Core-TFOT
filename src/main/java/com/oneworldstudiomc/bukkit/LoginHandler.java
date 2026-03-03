@@ -1,6 +1,6 @@
 package com.oneworldstudiomc.bukkit;
 
-import com.oneworldstudiomc.MohistConfig;
+import com.oneworldstudiomc.OneWorldCoreConfig;
 import java.util.concurrent.ExecutionException;
 import net.minecraft.network.chat.Component;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -14,7 +14,7 @@ public class LoginHandler {
 
     public void fireEvents(ServerLoginPacketListenerImpl serverLoginPacketListener) throws Exception {
         // Paper start - Velocity support
-        if (serverLoginPacketListener.velocityLoginMessageId == -1 && MohistConfig.velocity_enabled) {
+        if (serverLoginPacketListener.velocityLoginMessageId == -1 && OneWorldCoreConfig.velocity_enabled) {
             serverLoginPacketListener.disconnect("This server requires you to connect with Velocity.");
             return;
         }
@@ -75,3 +75,4 @@ public class LoginHandler {
         }
     }
 }
+

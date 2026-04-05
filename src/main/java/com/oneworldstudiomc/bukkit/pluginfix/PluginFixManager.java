@@ -1411,6 +1411,8 @@ public class PluginFixManager {
             case "com.sk89q.worldedit.bukkit.adapter.BukkitImplLoader" -> WorldEdit::handleBukkitImplLoader;
             case "com.sk89q.worldedit.bukkit.adapter.Refraction" -> WorldEdit::handlePickName;
             case "com.sk89q.worldedit.bukkit.adapter.impl.v1_20_R1.PaperweightAdapter$SpigotWatchdog" -> WorldEdit::handleWatchdog;
+            case "com.sk89q.worldedit.bukkit.WorldEditPlugin" -> PluginFixManager::fixWorldEditPluginMaterialKeys;
+            case "com.sk89q.worldedit.registry.Registry" -> PluginFixManager::fixWorldEditRegistryRegister;
             case "com.comphenix.protocol.wrappers.WrappedChatComponent" -> PluginFixManager::fixProtocolLibWrappedChatComponent;
             case "nexus.slime.f3nperm.provider.ProtocolLibProvider" -> PluginFixManager::fixF3NPermProtocolLibProvider;
             case "itemsadder.m.aun" -> PluginFixManager::fixAdventureSerializerBuilderOptionsCompat;
@@ -1459,6 +1461,8 @@ public class PluginFixManager {
             case "com.willfp.libreforge.integrations.paper.impl.EffectElytraBoostSaveChance" -> PluginFixManager::fixLibreforgeElytraBoostSaveChance;
             case "com.sarry20.topminion.TopMinion" -> PluginFixManager::fixTopMinionMain;
             case "revxrsal.commands.bukkit.brigadier.MinecraftArgumentType" -> PluginFixManager::fixRevxrsalMinecraftArgumentType;
+            case "revxrsal.commands.bukkit.brigadier.BrigadierRegistryHook" -> PluginFixManager::fixRevxrsalBrigadierRegistryHook;
+            case "revxrsal.commands.bukkit.brigadier.BukkitBrigadierBridge" -> PluginFixManager::fixRevxrsalBukkitBrigadierBridge;
             case "fr.minuskube.inv.InventoryManager$InvListener" -> PluginFixManager::fixSmartInvsInvListener;
             case "fr.elias.npcs.server.listener.PotionInteractionListener" -> PluginFixManager::fixModeledNpcsPotionInteractionListener;
             case "me.ulrich.clans.library.scoreboardlibrary.implementation.packetAdapter.modern.PacketAccessors" -> PluginFixManager::fixUltimateClansPacketAccessors;
@@ -1613,6 +1617,61 @@ public class PluginFixManager {
             methodNode.tryCatchBlocks.clear();
             methodNode.maxStack = 3;
             methodNode.maxLocals = 0;
+            clearLocalDebugInfo(methodNode);
+        }
+    }
+
+    private static void fixWorldEditPluginMaterialKeys(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            boolean changed = false;
+            for (AbstractInsnNode insn = methodNode.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (!(insn instanceof MethodInsnNode methodInsnNode)) {
+                    continue;
+                }
+                if (methodInsnNode.getOpcode() != Opcodes.INVOKEVIRTUAL
+                        || !"org/bukkit/Material".equals(methodInsnNode.owner)
+                        || !"getKey".equals(methodInsnNode.name)
+                        || !"()Lorg/bukkit/NamespacedKey;".equals(methodInsnNode.desc)) {
+                    continue;
+                }
+                methodInsnNode.setOpcode(Opcodes.INVOKESTATIC);
+                methodInsnNode.owner = Type.getInternalName(PluginFixManager.class);
+                methodInsnNode.name = "materialGetKeyCompat";
+                methodInsnNode.desc = "(Lorg/bukkit/Material;)Lorg/bukkit/NamespacedKey;";
+                methodInsnNode.itf = false;
+                changed = true;
+            }
+            if (changed) {
+                clearLocalDebugInfo(methodNode);
+            }
+        }
+    }
+
+    private static void fixWorldEditRegistryRegister(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"register".equals(methodNode.name)
+                    || !"(Ljava/lang/String;Lcom/sk89q/worldedit/registry/Keyed;)Lcom/sk89q/worldedit/registry/Keyed;".equals(methodNode.desc)) {
+                continue;
+            }
+
+            InsnList replacement = new InsnList();
+            replacement.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            replacement.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            replacement.add(new VarInsnNode(Opcodes.ALOAD, 2));
+            replacement.add(new MethodInsnNode(
+                    Opcodes.INVOKESTATIC,
+                    Type.getInternalName(PluginFixManager.class),
+                    "worldEditRegistryRegisterCompat",
+                    "(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/Object;)Ljava/lang/Object;",
+                    false
+            ));
+            replacement.add(new org.objectweb.asm.tree.TypeInsnNode(
+                    Opcodes.CHECKCAST,
+                    "com/sk89q/worldedit/registry/Keyed"
+            ));
+            replacement.add(new InsnNode(ARETURN));
+            methodNode.instructions = replacement;
+            methodNode.tryCatchBlocks.clear();
             clearLocalDebugInfo(methodNode);
         }
     }
@@ -3581,6 +3640,77 @@ public class PluginFixManager {
         }
     }
 
+    private static void fixRevxrsalBrigadierRegistryHook(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"createBridge".equals(methodNode.name)
+                    || !"()Lrevxrsal/commands/bukkit/brigadier/BukkitBrigadierBridge;".equals(methodNode.desc)) {
+                continue;
+            }
+
+            InsnList replacement = new InsnList();
+            replacement.add(new org.objectweb.asm.tree.TypeInsnNode(
+                    Opcodes.NEW,
+                    "revxrsal/commands/bukkit/brigadier/ByReflection"
+            ));
+            replacement.add(new InsnNode(Opcodes.DUP));
+            replacement.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 0));
+            replacement.add(new org.objectweb.asm.tree.FieldInsnNode(
+                    Opcodes.GETFIELD,
+                    node.name,
+                    "plugin",
+                    "Lorg/bukkit/plugin/java/JavaPlugin;"
+            ));
+            replacement.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 0));
+            replacement.add(new org.objectweb.asm.tree.FieldInsnNode(
+                    Opcodes.GETFIELD,
+                    node.name,
+                    "argumentTypes",
+                    "Lrevxrsal/commands/brigadier/types/ArgumentTypes;"
+            ));
+            replacement.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 0));
+            replacement.add(new org.objectweb.asm.tree.FieldInsnNode(
+                    Opcodes.GETFIELD,
+                    node.name,
+                    "actorFactory",
+                    "Lrevxrsal/commands/bukkit/actor/ActorFactory;"
+            ));
+            replacement.add(new MethodInsnNode(
+                    Opcodes.INVOKESPECIAL,
+                    "revxrsal/commands/bukkit/brigadier/ByReflection",
+                    "<init>",
+                    "(Lorg/bukkit/plugin/java/JavaPlugin;Lrevxrsal/commands/brigadier/types/ArgumentTypes;Lrevxrsal/commands/bukkit/actor/ActorFactory;)V",
+                    false
+            ));
+            replacement.add(new InsnNode(ARETURN));
+            methodNode.instructions = replacement;
+            methodNode.tryCatchBlocks.clear();
+            clearLocalDebugInfo(methodNode);
+        }
+    }
+
+    private static void fixRevxrsalBukkitBrigadierBridge(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"getAliases".equals(methodNode.name)
+                    || !"(Lorg/bukkit/command/Command;)Ljava/util/List;".equals(methodNode.desc)) {
+                continue;
+            }
+
+            InsnList replacement = new InsnList();
+            replacement.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 0));
+            replacement.add(new MethodInsnNode(
+                    Opcodes.INVOKESTATIC,
+                    Type.getInternalName(PluginFixManager.class),
+                    "revxrsalGetAliasesCompat",
+                    "(Lorg/bukkit/command/Command;)Ljava/util/List;",
+                    false
+            ));
+            replacement.add(new InsnNode(ARETURN));
+            methodNode.instructions = replacement;
+            methodNode.tryCatchBlocks.clear();
+            clearLocalDebugInfo(methodNode);
+        }
+    }
+
     private static void fixSmartInvsInvListener(ClassNode node) {
         for (MethodNode methodNode : node.methods) {
             for (AbstractInsnNode insn = methodNode.instructions.getFirst(); insn != null; insn = insn.getNext()) {
@@ -3662,6 +3792,49 @@ public class PluginFixManager {
         } catch (Throwable ignored) {
             return createRevxrsalFallbackArgumentCompat(enumValueObj);
         }
+    }
+
+    public static java.util.List<String> revxrsalGetAliasesCompat(org.bukkit.command.Command command) {
+        if (command == null) {
+            return java.util.Collections.emptyList();
+        }
+
+        java.util.LinkedHashSet<String> aliases = new java.util.LinkedHashSet<>();
+        String label = command.getLabel();
+        if (label != null && !label.isBlank()) {
+            aliases.add(label);
+        }
+
+        try {
+            java.util.List<String> commandAliases = command.getAliases();
+            if (commandAliases != null) {
+                for (String alias : commandAliases) {
+                    if (alias != null && !alias.isBlank()) {
+                        aliases.add(alias);
+                    }
+                }
+            }
+        } catch (Throwable ignored) {
+        }
+
+        if (command instanceof org.bukkit.command.PluginCommand pluginCommand) {
+            try {
+                org.bukkit.plugin.Plugin plugin = pluginCommand.getPlugin();
+                if (plugin != null) {
+                    String prefix = plugin.getName();
+                    if (prefix != null) {
+                        prefix = prefix.toLowerCase(Locale.ROOT).trim();
+                        java.util.List<String> names = new java.util.ArrayList<>(aliases);
+                        for (String alias : names) {
+                            aliases.add(prefix + ":" + alias);
+                        }
+                    }
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+
+        return new java.util.ArrayList<>(aliases);
     }
 
     private static Object createRevxrsalFallbackArgumentCompat(Object enumValueObj) {
@@ -5300,6 +5473,67 @@ public class PluginFixManager {
 
     public static org.bukkit.NamespacedKey attributeGetKeyCompat(org.bukkit.attribute.Attribute attribute) {
         return attribute.getKey();
+    }
+
+    public static org.bukkit.NamespacedKey materialGetKeyCompat(org.bukkit.Material material) {
+        if (material == null) {
+            return null;
+        }
+        if (!material.isLegacy()) {
+            return material.getKey();
+        }
+
+        org.bukkit.Material modern = org.bukkit.craftbukkit.v1_20_R1.legacy.CraftLegacy.fromLegacy(material);
+        if (modern != null && !modern.isLegacy()) {
+            return modern.getKey();
+        }
+
+        String normalized = material.name();
+        if (normalized.startsWith("LEGACY_")) {
+            normalized = normalized.substring("LEGACY_".length());
+        }
+
+        org.bukkit.Material matched = org.bukkit.Material.matchMaterial(normalized, false);
+        if (matched != null && !matched.isLegacy()) {
+            return matched.getKey();
+        }
+
+        return org.bukkit.NamespacedKey.minecraft(normalized.toLowerCase(Locale.ROOT));
+    }
+
+    public static Object worldEditRegistryRegisterCompat(Object registryObj, String key, Object value) {
+        java.util.Objects.requireNonNull(key, "key");
+        java.util.Objects.requireNonNull(value, "value");
+
+        if (!key.equals(key.toLowerCase(Locale.ROOT))) {
+            throw new IllegalStateException("key must be lowercase: " + key);
+        }
+
+        try {
+            Field mapField = findFieldByNameCompat(registryObj.getClass(), "map");
+            if (mapField == null) {
+                throw new IllegalStateException("WorldEdit registry map field was not found");
+            }
+            mapField.setAccessible(true);
+
+            Object mapObj = mapField.get(registryObj);
+            if (!(mapObj instanceof java.util.Map<?, ?> rawMap)) {
+                throw new IllegalStateException("WorldEdit registry map field has unexpected type");
+            }
+
+            @SuppressWarnings("unchecked")
+            java.util.Map<String, Object> map = (java.util.Map<String, Object>) rawMap;
+            if (map.containsKey(key)) {
+                return map.get(key);
+            }
+
+            map.put(key, value);
+            return value;
+        } catch (RuntimeException runtimeException) {
+            throw runtimeException;
+        } catch (Throwable throwable) {
+            throw new RuntimeException("Failed to register WorldEdit key " + key, throwable);
+        }
     }
 
     public static org.bukkit.block.banner.PatternType patternTypeValueOfCompat(String name) {

@@ -134,12 +134,12 @@ public class SimpleHelpMap implements HelpMap {
             // Register a topic
             for (Class c : topicFactoryMap.keySet()) {
                 if (c.isAssignableFrom(command.getClass())) {
-                    HelpTopic t = topicFactoryMap.get(c).createTopic(command);
+                    HelpTopic t = createTopicSafely(topicFactoryMap.get(c), command);
                     if (t != null) addTopic(t);
                     continue outer;
                 }
                 if (command instanceof PluginCommand && c.isAssignableFrom(((PluginCommand) command).getExecutor().getClass())) {
-                    HelpTopic t = topicFactoryMap.get(c).createTopic(command);
+                    HelpTopic t = createTopicSafely(topicFactoryMap.get(c), command);
                     if (t != null) addTopic(t);
                     continue outer;
                 }
@@ -227,6 +227,18 @@ public class SimpleHelpMap implements HelpMap {
     public void registerHelpTopicFactory(Class commandClass, HelpTopicFactory factory) {
         Preconditions.checkArgument(Command.class.isAssignableFrom(commandClass) || CommandExecutor.class.isAssignableFrom(commandClass), "commandClass (%s) must implement either Command or CommandExecutor", commandClass.getName());
         topicFactoryMap.put(commandClass, factory);
+    }
+
+    private HelpTopic createTopicSafely(HelpTopicFactory<Command> factory, Command command) {
+        try {
+            return factory.createTopic(command);
+        } catch (Throwable throwable) {
+            String pluginName = getCommandPluginName(command);
+            String owner = pluginName != null ? pluginName : command.getClass().getName();
+            server.getLogger().warning("Skipping broken help topic for '/" + command.getLabel() + "' from " + owner + ": "
+                    + throwable.getClass().getSimpleName() + ": " + throwable.getMessage());
+            return new GenericCommandHelpTopic(command);
+        }
     }
 
     private class IsCommandTopicPredicate implements Predicate<HelpTopic> {

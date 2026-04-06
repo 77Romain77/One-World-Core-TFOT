@@ -146,6 +146,7 @@ import org.bukkit.entity.Skeleton;
 import org.bukkit.entity.SkeletonHorse;
 import org.bukkit.entity.Slime;
 import org.bukkit.entity.SmallFireball;
+import org.bukkit.entity.Sniffer;
 import org.bukkit.entity.Snowball;
 import org.bukkit.entity.Snowman;
 import org.bukkit.entity.SpectralArrow;
@@ -906,6 +907,8 @@ public abstract class CraftRegionAccessor implements RegionAccessor {
                 entity = net.minecraft.world.entity.EntityType.ALLAY.create(world);
             } else if (Frog.class.isAssignableFrom(clazz)) {
                 entity = net.minecraft.world.entity.EntityType.FROG.create(world);
+            } else if (Sniffer.class.isAssignableFrom(clazz)) {
+                entity = net.minecraft.world.entity.EntityType.SNIFFER.create(world);
             } else if (Warden.class.isAssignableFrom(clazz)) {
                 entity = net.minecraft.world.entity.EntityType.WARDEN.create(world);
             }

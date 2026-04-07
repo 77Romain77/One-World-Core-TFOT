@@ -810,6 +810,11 @@ public class PluginFixManager {
     }
 
     private static Method resolveRpgRegionsCommandSourceGetServerMethodCompat(java.util.function.Supplier<?> supplier) {
+        Method direct = resolveRpgRegionsDirectCommandSourceGetServerMethodCompat();
+        if (direct != null) {
+            return direct;
+        }
+
         Class<?> parserClass = null;
         ClassLoader contextLoader = Thread.currentThread().getContextClassLoader();
 
@@ -930,6 +935,43 @@ public class PluginFixManager {
             }
         }
 
+        if (commandSourceClass == null) {
+            return null;
+        }
+
+        return findCommandSourceGetServerMethodCompat(commandSourceClass, minecraftServerClass);
+    }
+
+    private static Method resolveRpgRegionsDirectCommandSourceGetServerMethodCompat() {
+        try {
+            Method method = findCommandSourceGetServerMethodCompat(
+                    net.minecraft.commands.CommandSourceStack.class,
+                    net.minecraft.server.MinecraftServer.class
+            );
+            if (method != null) {
+                return method;
+            }
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            Method method = net.minecraft.commands.CommandSourceStack.class.getDeclaredMethod("getServer");
+            method.setAccessible(true);
+            return method;
+        } catch (Throwable ignored) {
+        }
+
+        try {
+            Method method = net.minecraft.commands.CommandSourceStack.class.getDeclaredMethod("m_81377_");
+            method.setAccessible(true);
+            return method;
+        } catch (Throwable ignored) {
+        }
+
+        return null;
+    }
+
+    private static Method findCommandSourceGetServerMethodCompat(Class<?> commandSourceClass, Class<?> minecraftServerClass) {
         if (commandSourceClass == null) {
             return null;
         }
@@ -1365,8 +1407,8 @@ public class PluginFixManager {
         String normalizedClassName = className == null ? "" : className.replace('/', '.');
         List<Consumer<ClassNode>> handlers = null;
 
-        if (normalizedClassName.equals("itemsadder.m.yk")) {
-            return ItemsAdderClassPatcher.patchYkClass(clazz);
+        if (normalizedClassName.startsWith("itemsadder.")) {
+            return ItemsAdderClassPatcher.patchClass(normalizedClassName, clazz);
         }
 
         if (normalizedClassName.endsWith("PaperLib")) {
@@ -1433,6 +1475,7 @@ public class PluginFixManager {
             case "ia.sh.com.alessiodp.libby.LibraryManager" -> PluginFixManager::fixItemsAdderLibbyLibraryManager;
             case "ia.sh.com.alessiodp.libby.transitive.TransitiveDependencyHelper" -> PluginFixManager::fixItemsAdderLibbyTransitiveDependencyHelper;
             case "net.kyori.adventure.platform.bukkit.BukkitComponentSerializer" -> PluginFixManager::fixAdventureSerializerBuilderOptionsCompat;
+            case "net.kyori.adventure.platform.bukkit.MinecraftComponentSerializer" -> PluginFixManager::fixAdventureMinecraftComponentSerializerCompat;
             case "com.sk89q.worldedit.bukkit.adapter.impl.fawe.v1_20_R1.PaperweightFaweAdapter" -> PluginFixManager::fixFawePaperweightFaweAdapter;
             case "com.sk89q.worldedit.bukkit.adapter.impl.fawe.v1_20_R1.PaperweightBlockMaterial" -> PluginFixManager::fixFawePaperweightBlockMaterial;
             case "com.sk89q.worldedit.bukkit.adapter.impl.fawe.v1_20_R1.PaperweightPlatformAdapter" -> PluginFixManager::fixFawePaperweightPlatformAdapter;
@@ -1818,6 +1861,118 @@ public class PluginFixManager {
             if (patched) {
                 clearLocalDebugInfo(methodNode);
             }
+        }
+    }
+
+    private static void fixAdventureMinecraftComponentSerializerCompat(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"<clinit>".equals(methodNode.name) || !"()V".equals(methodNode.desc)) {
+                continue;
+            }
+
+            InsnList toInject = new InsnList();
+            toInject.add(new org.objectweb.asm.tree.TypeInsnNode(
+                    Opcodes.NEW,
+                    "net/kyori/adventure/platform/bukkit/MinecraftComponentSerializer"
+            ));
+            toInject.add(new InsnNode(Opcodes.DUP));
+            toInject.add(new MethodInsnNode(
+                    Opcodes.INVOKESPECIAL,
+                    "net/kyori/adventure/platform/bukkit/MinecraftComponentSerializer",
+                    "<init>",
+                    "()V",
+                    false
+            ));
+            toInject.add(new FieldInsnNode(
+                    Opcodes.PUTSTATIC,
+                    node.name,
+                    "INSTANCE",
+                    "Lnet/kyori/adventure/platform/bukkit/MinecraftComponentSerializer;"
+            ));
+
+            for (String fieldName : new String[]{
+                    "CLASS_JSON_DESERIALIZER",
+                    "CLASS_JSON_ELEMENT",
+                    "CLASS_JSON_PARSER",
+                    "CLASS_CHAT_COMPONENT",
+                    "CLASS_CRAFT_REGISTRY",
+                    "CLASS_REGISTRY_ACCESS"
+            }) {
+                toInject.add(new InsnNode(Opcodes.ACONST_NULL));
+                toInject.add(new FieldInsnNode(
+                        Opcodes.PUTSTATIC,
+                        node.name,
+                        fieldName,
+                        "Ljava/lang/Class;"
+                ));
+            }
+
+            for (String fieldName : new String[]{"PARSE_JSON", "GET_REGISTRY", "TEXT_SERIALIZER_DESERIALIZE", "TEXT_SERIALIZER_SERIALIZE", "TEXT_SERIALIZER_DESERIALIZE_TREE", "TEXT_SERIALIZER_SERIALIZE_TREE"}) {
+                toInject.add(new InsnNode(Opcodes.ACONST_NULL));
+                toInject.add(new FieldInsnNode(
+                        Opcodes.PUTSTATIC,
+                        node.name,
+                        fieldName,
+                        "Ljava/lang/invoke/MethodHandle;"
+                ));
+            }
+
+            toInject.add(new org.objectweb.asm.tree.TypeInsnNode(
+                    Opcodes.NEW,
+                    "java/util/concurrent/atomic/AtomicReference"
+            ));
+            toInject.add(new InsnNode(Opcodes.DUP));
+            toInject.add(new org.objectweb.asm.tree.TypeInsnNode(
+                    Opcodes.NEW,
+                    "java/lang/UnsupportedOperationException"
+            ));
+            toInject.add(new InsnNode(Opcodes.DUP));
+            toInject.add(new LdcInsnNode("Adventure platform Bukkit serializer is unsupported on this runtime"));
+            toInject.add(new MethodInsnNode(
+                    Opcodes.INVOKESPECIAL,
+                    "java/lang/UnsupportedOperationException",
+                    "<init>",
+                    "(Ljava/lang/String;)V",
+                    false
+            ));
+            toInject.add(new MethodInsnNode(
+                    Opcodes.INVOKESPECIAL,
+                    "java/util/concurrent/atomic/AtomicReference",
+                    "<init>",
+                    "(Ljava/lang/Object;)V",
+                    false
+            ));
+            toInject.add(new FieldInsnNode(
+                    Opcodes.PUTSTATIC,
+                    node.name,
+                    "INITIALIZATION_ERROR",
+                    "Ljava/util/concurrent/atomic/AtomicReference;"
+            ));
+
+            for (String fieldName : new String[]{"JSON_PARSER_INSTANCE", "MC_TEXT_GSON"}) {
+                toInject.add(new InsnNode(Opcodes.ACONST_NULL));
+                toInject.add(new FieldInsnNode(
+                        Opcodes.PUTSTATIC,
+                        node.name,
+                        fieldName,
+                        "Ljava/lang/Object;"
+                ));
+            }
+
+            toInject.add(new InsnNode(Opcodes.ICONST_0));
+            toInject.add(new FieldInsnNode(
+                    Opcodes.PUTSTATIC,
+                    node.name,
+                    "SUPPORTED",
+                    "Z"
+            ));
+            toInject.add(new InsnNode(Opcodes.RETURN));
+
+            methodNode.instructions = toInject;
+            methodNode.tryCatchBlocks.clear();
+            methodNode.maxStack = 4;
+            methodNode.maxLocals = 0;
+            clearLocalDebugInfo(methodNode);
         }
     }
 

@@ -9,16 +9,41 @@ import java.util.List;
 
 final class ItemsAdderClassPatcher {
 
+    private static final String CRAFTBUKKIT_R4_INTERNAL = "org/bukkit/craftbukkit/v1_20_R4";
+    private static final String CRAFTBUKKIT_R1_INTERNAL = "org/bukkit/craftbukkit/v1_20_R1";
+    private static final String CRAFTBUKKIT_R4_DOTTED = "org.bukkit.craftbukkit.v1_20_R4";
+    private static final String CRAFTBUKKIT_R1_DOTTED = "org.bukkit.craftbukkit.v1_20_R1";
     private static final int GETFIELD = 180;
+    private static final int ICONST_0 = 3;
+    private static final int ICONST_1 = 4;
     private static final int INVOKESTATIC = 184;
     private static final int INVOKEVIRTUAL = 182;
+    private static final int IRETURN = 172;
+    private static final int NOP = 0;
 
     private ItemsAdderClassPatcher() {
     }
 
-    static byte[] patchYkClass(byte[] basicClass) {
+    static byte[] patchClass(String normalizedClassName, byte[] basicClass) {
         try {
             ClassFile classFile = ClassFile.parse(basicClass);
+            boolean patched = false;
+
+            patched |= classFile.replaceUtf8(CRAFTBUKKIT_R4_INTERNAL, CRAFTBUKKIT_R1_INTERNAL);
+            patched |= classFile.replaceUtf8(CRAFTBUKKIT_R4_DOTTED, CRAFTBUKKIT_R1_DOTTED);
+            patched |= classFile.replaceUtf8(
+                    "net/minecraft/server/network/ServerCommonPacketListenerImpl",
+                    "net/minecraft/server/network/ServerGamePacketListenerImpl"
+            );
+
+            if ("itemsadder.m.ya".equals(normalizedClassName)) {
+                patched |= classFile.forceBooleanMethodReturn("qM", "()Z", true);
+            }
+
+            if (!"itemsadder.m.yk".equals(normalizedClassName)) {
+                return patched ? classFile.write() : basicClass;
+            }
+
             int getPlayerListRef = classFile.findMethodRef(
                     "net/minecraft/server/MinecraftServer",
                     "ah",
@@ -61,7 +86,7 @@ final class ItemsAdderClassPatcher {
                     "(Ljava/lang/Object;Lnet/minecraft/network/protocol/Packet;)V"
             );
 
-            boolean patched = classFile.patchCode(
+            patched |= classFile.patchCode(
                     getPlayerListRef,
                     compatPlayerListRef,
                     getRegistriesRef,
@@ -73,7 +98,7 @@ final class ItemsAdderClassPatcher {
             );
             return patched ? classFile.write() : basicClass;
         } catch (IOException exception) {
-            throw new IllegalStateException("Failed to patch ItemsAdder class", exception);
+            throw new IllegalStateException("Failed to patch ItemsAdder class " + normalizedClassName, exception);
         }
     }
 
@@ -251,6 +276,44 @@ final class ItemsAdderClassPatcher {
             }
             constantPool.add(new Utf8Entry(value.getBytes(StandardCharsets.UTF_8)));
             return constantPool.size() - 1;
+        }
+
+        boolean replaceUtf8(String search, String replacement) {
+            boolean patched = false;
+            for (int index = 1; index < constantPool.size(); index++) {
+                ConstantPoolEntry entry = constantPool.get(index);
+                if (!(entry instanceof Utf8Entry utf8Entry)) {
+                    continue;
+                }
+
+                String value = utf8Entry.value();
+                if (!value.contains(search)) {
+                    continue;
+                }
+
+                constantPool.set(index, new Utf8Entry(value.replace(search, replacement).getBytes(StandardCharsets.UTF_8)));
+                patched = true;
+            }
+            return patched;
+        }
+
+        boolean forceBooleanMethodReturn(String methodName, String descriptor, boolean returnValue) {
+            for (MethodInfo method : methods) {
+                if (!methodName.equals(utf8(method.nameIndex)) || !descriptor.equals(utf8(method.descriptorIndex))) {
+                    continue;
+                }
+
+                CodeAttribute codeAttribute = method.findCodeAttribute();
+                if (codeAttribute == null || codeAttribute.code.length < 2) {
+                    return false;
+                }
+
+                java.util.Arrays.fill(codeAttribute.code, (byte) NOP);
+                codeAttribute.code[0] = (byte) (returnValue ? ICONST_1 : ICONST_0);
+                codeAttribute.code[1] = (byte) IRETURN;
+                return true;
+            }
+            return false;
         }
 
         boolean patchCode(

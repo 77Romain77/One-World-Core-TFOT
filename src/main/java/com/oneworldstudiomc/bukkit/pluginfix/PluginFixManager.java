@@ -14,7 +14,9 @@ import java.util.function.IntConsumer;
 import net.minecraft.network.protocol.game.ClientboundEntityEventPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityDimensions;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.phys.AABB;
 import org.bukkit.entity.EntityType;
 import org.bukkit.craftbukkit.v1_20_R1.entity.CraftPlayer;
 import org.objectweb.asm.ClassReader;
@@ -1496,6 +1498,7 @@ public class PluginFixManager {
             case "io.lumine.mythic.bukkit.adapters.BukkitParticle" -> PluginFixManager::fixMythicBukkitParticleCompat;
             case "io.lumine.mythic.bukkit.entities.BukkitBabyZombieVillager" -> PluginFixManager::fixMythicBabyZombieVillager;
             case "io.lumine.mythic.core.volatilecode.v1_20_R1.VolatileAIHandlerImpl" -> PluginFixManager::fixMythicMobsAIHandler;
+            case "io.lumine.mythic.core.volatilecode.v1_20_R1.VolatileEntityHandlerImpl" -> PluginFixManager::fixMythicMobsEntityHandler;
             case "io.lumine.mythic.core.skills.mechanics.SoundEffect" -> PluginFixManager::fixFancyHologramsLocationAccessors;
             case "io.lumine.mythiccrucible.items.ItemManager" -> PluginFixManager::fixMythicCrucibleItemManager;
             case "io.lumine.mythiccrucible.items.recipes.crafting.recipes.vmp.VanillaInventoryMapping" -> PluginFixManager::fixMythicCrucibleVanillaInventoryMapping;
@@ -5231,6 +5234,31 @@ public class PluginFixManager {
         helloWorld(node, "c", "f_25345_");
     }
 
+    private static void fixMythicMobsEntityHandler(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"setHitBox".equals(methodNode.name)
+                    || !"(Lio/lumine/mythic/api/adapters/AbstractEntity;DD)V".equals(methodNode.desc)) {
+                continue;
+            }
+
+            InsnList replacement = new InsnList();
+            replacement.add(new VarInsnNode(Opcodes.ALOAD, 1));
+            replacement.add(new VarInsnNode(Opcodes.DLOAD, 2));
+            replacement.add(new VarInsnNode(Opcodes.DLOAD, 4));
+            replacement.add(new MethodInsnNode(
+                    Opcodes.INVOKESTATIC,
+                    Type.getInternalName(PluginFixManager.class),
+                    "mythicSetHitBoxCompat",
+                    "(Ljava/lang/Object;DD)V",
+                    false
+            ));
+            replacement.add(new InsnNode(Opcodes.RETURN));
+            methodNode.instructions = replacement;
+            methodNode.tryCatchBlocks.clear();
+            clearLocalDebugInfo(methodNode);
+        }
+    }
+
     private static void fixMythicCrucibleItemManager(ClassNode node) {
         for (java.util.Iterator<MethodNode> iterator = node.methods.iterator(); iterator.hasNext(); ) {
             MethodNode methodNode = iterator.next();
@@ -6786,6 +6814,52 @@ public class PluginFixManager {
             return zombieVillager;
         } catch (Throwable throwable) {
             throw new IllegalStateException("Could not spawn MythicMobs baby zombie villager", throwable);
+        }
+    }
+
+    public static void mythicSetHitBoxCompat(Object mythicAbstractEntity, double width, double height) {
+        if (mythicAbstractEntity == null) {
+            return;
+        }
+
+        try {
+            org.bukkit.entity.Entity bukkitEntity;
+            Object bukkitEntityObj = invokeNoArgs(mythicAbstractEntity, "getBukkitEntity");
+            if (bukkitEntityObj instanceof org.bukkit.entity.Entity entity) {
+                bukkitEntity = entity;
+            } else {
+                ClassLoader classLoader = mythicAbstractEntity.getClass().getClassLoader();
+                Class<?> abstractEntityClass = Class.forName("io.lumine.mythic.api.adapters.AbstractEntity", false, classLoader);
+                Class<?> bukkitAdapterClass = Class.forName("io.lumine.mythic.bukkit.BukkitAdapter", false, classLoader);
+                Method adaptMethod = bukkitAdapterClass.getMethod("adapt", abstractEntityClass);
+                Object adapted = adaptMethod.invoke(null, mythicAbstractEntity);
+                if (!(adapted instanceof org.bukkit.entity.Entity entity)) {
+                    return;
+                }
+                bukkitEntity = entity;
+            }
+
+            if (!(bukkitEntity instanceof org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity craftEntity)) {
+                return;
+            }
+
+            Entity handle = craftEntity.getHandle();
+            EntityDimensions dimensions = EntityDimensions.fixed((float) width, (float) height);
+            handle.setBoundingBox(dimensions.makeBoundingBox(handle.position()));
+
+            Field dimensionsField = findFieldByNameCompat(handle.getClass(), "dimensions");
+            if (dimensionsField != null) {
+                dimensionsField.setAccessible(true);
+                dimensionsField.set(handle, dimensions);
+            }
+
+            Field eyeHeightField = findFieldByNameCompat(handle.getClass(), "eyeHeight");
+            if (eyeHeightField != null) {
+                eyeHeightField.setAccessible(true);
+                eyeHeightField.setFloat(handle, (float) (height * 0.8D));
+            }
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Could not update MythicMobs entity hitbox", throwable);
         }
     }
 

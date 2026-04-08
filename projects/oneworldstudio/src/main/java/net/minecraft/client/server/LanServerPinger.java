@@ -34,22 +34,8 @@ public class LanServerPinger extends Thread {
       String s = createPingString(this.motd, this.serverAddress);
       byte[] abyte = s.getBytes(StandardCharsets.UTF_8);
 
-      while(!this.isInterrupted() && this.isRunning) {
-         try {
-            InetAddress inetaddress = InetAddress.getByName(MULTICAST_GROUP);
-            DatagramPacket datagrampacket = new DatagramPacket(abyte, abyte.length, inetaddress, 4445);
-            this.socket.send(datagrampacket);
-         } catch (IOException ioexception) {
-            LOGGER.warn("LanServerPinger: {}", (Object)ioexception.getMessage());
-            break;
-         }
-
-         try {
-            sleep(1500L);
-         } catch (InterruptedException interruptedexception) {
-         }
-      }
-
+      this.isRunning = false;
+      this.socket.close();
    }
 
    public void interrupt() {

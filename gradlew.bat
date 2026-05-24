@@ -39,6 +39,16 @@ set DEFAULT_JVM_OPTS="-Xmx64m" "-Xms64m"
 @rem Find java.exe
 if defined JAVA_HOME goto findJavaFromJavaHome
 
+@rem OneWorldCore: If JAVA_HOME is not set, try to read org.gradle.java.home from gradle.properties
+if exist "%APP_HOME%gradle.properties" (
+  for /f "usebackq tokens=1* delims==" %%A in ("%APP_HOME%gradle.properties") do (
+    if "%%A"=="org.gradle.java.home" (
+      set "JAVA_HOME=%%B"
+    )
+  )
+)
+if defined JAVA_HOME goto findJavaFromJavaHome
+
 set JAVA_EXE=java.exe
 %JAVA_EXE% -version >NUL 2>&1
 if %ERRORLEVEL% equ 0 goto execute

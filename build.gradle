@@ -4,6 +4,7 @@ import net.minecraftforge.gradle.common.tasks.*
 import net.minecraftforge.gradle.userdev.tasks.RenameJar
 import org.apache.tools.ant.filters.ReplaceTokens
 import org.gradle.plugins.ide.eclipse.model.SourceFolder
+import org.gradle.api.plugins.JavaPlugin
 
 import java.nio.file.Files
 import java.text.SimpleDateFormat
@@ -23,6 +24,16 @@ plugins {
 }
 
 init() //Init all our extension methods!
+
+allprojects { proj ->
+    proj.plugins.withType(JavaPlugin).configureEach {
+        proj.java {
+            toolchain {
+                languageVersion = JavaLanguageVersion.of(21)
+            }
+        }
+    }
+}
 
 def defaultCoreVersion = '1.0.0.0'
 def coreVersionFile = file('core-version.properties')

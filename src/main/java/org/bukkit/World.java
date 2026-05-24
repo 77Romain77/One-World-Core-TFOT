@@ -559,6 +559,17 @@ public interface World extends RegionAccessor, WorldInfo, PluginMessageRecipient
     @NotNull
     public Item dropItem(@NotNull Location location, @NotNull ItemStack item, @Nullable Consumer<Item> function);
 
+    // Paper compatibility - prefer java.util.function.Consumer
+    @NotNull
+    default Item dropItem(
+            @NotNull final Location location,
+            @NotNull final ItemStack item,
+            @Nullable final java.util.function.Consumer<Item> function
+    ) {
+        final org.bukkit.util.Consumer<Item> bukkitConsumer = function == null ? null : (org.bukkit.util.Consumer<Item>) function::accept;
+        return this.dropItem(location, item, bukkitConsumer);
+    }
+
     /**
      * Drops an item at the specified {@link Location} with a random offset
      *
@@ -580,6 +591,17 @@ public interface World extends RegionAccessor, WorldInfo, PluginMessageRecipient
      */
     @NotNull
     public Item dropItemNaturally(@NotNull Location location, @NotNull ItemStack item, @Nullable Consumer<Item> function);
+
+    // Paper compatibility - prefer java.util.function.Consumer
+    @NotNull
+    default Item dropItemNaturally(
+            @NotNull final Location location,
+            @NotNull final ItemStack item,
+            @Nullable final java.util.function.Consumer<Item> function
+    ) {
+        final org.bukkit.util.Consumer<Item> bukkitConsumer = function == null ? null : (org.bukkit.util.Consumer<Item>) function::accept;
+        return this.dropItemNaturally(location, item, bukkitConsumer);
+    }
 
     /**
      * Creates an {@link Arrow} entity at the given {@link Location}

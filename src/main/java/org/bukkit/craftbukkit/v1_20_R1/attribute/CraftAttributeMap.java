@@ -1,6 +1,5 @@
 package org.bukkit.craftbukkit.v1_20_R1.attribute;
 
-import com.google.common.base.Preconditions;
 import net.minecraft.core.registries.BuiltInRegistries;
 import org.bukkit.Registry;
 import org.bukkit.attribute.Attributable;
@@ -32,7 +31,9 @@ public class CraftAttributeMap implements Attributable {
 
     @Override
     public AttributeInstance getAttribute(Attribute attribute) {
-        Preconditions.checkArgument(attribute != null, "attribute");
+        if (attribute == null) {
+            return null;
+        }
         net.minecraft.world.entity.ai.attributes.AttributeInstance nms = handle.getInstance(toMinecraft(attribute));
 
         return (nms == null) ? null : new CraftAttributeInstance(nms, attribute);
@@ -41,7 +42,9 @@ public class CraftAttributeMap implements Attributable {
     // Paper start
     @Override
     public void registerAttribute(Attribute attribute) {
-        Preconditions.checkArgument(attribute != null, "attribute");
+        if (attribute == null) {
+            return;
+        }
         handle.registerAttribute(CraftAttributeMap.toMinecraft(attribute));
     }
     // Paper end

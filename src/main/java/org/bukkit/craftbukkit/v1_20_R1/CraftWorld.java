@@ -514,7 +514,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
 
     @Override
     public org.bukkit.entity.Item dropItem(Location loc, ItemStack item) {
-        return dropItem(loc, item, null);
+        return dropItem(loc, item, (Consumer<org.bukkit.entity.Item>) null);
     }
 
     @Override
@@ -534,7 +534,7 @@ public class CraftWorld extends CraftRegionAccessor implements World {
 
     @Override
     public org.bukkit.entity.Item dropItemNaturally(Location loc, ItemStack item) {
-        return dropItemNaturally(loc, item, null);
+        return dropItemNaturally(loc, item, (Consumer<org.bukkit.entity.Item>) null);
     }
 
     @Override

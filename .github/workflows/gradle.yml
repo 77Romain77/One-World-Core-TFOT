@@ -5,41 +5,47 @@
 # This workflow will build a Java project with Gradle and cache/restore any dependencies to improve the workflow execution time
 # For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-gradle
 
-name: Java CI with Gradle
+name: Build OneWorldCore
 
 on:
   push:
-    branches: [ "1.20.1" ]
+    branches: [ "main", "1.20.1" ]
   pull_request:
-    branches: [ "1.20.1" ]
+    branches: [ "main", "1.20.1" ]
+  workflow_dispatch:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 21
-      uses: actions/setup-java@v4
-      with:
-        java-version: '21'
-        distribution: 'temurin'
+      - name: Checkout
+        uses: actions/checkout@v4
 
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      run: |
-        chmod +x ./gradlew
-        ./gradlew setup packageLibraries
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
 
-    - name: Build with Gradle Wrapper
-      run: ./gradlew oneworldcoreJar
+      - name: Setup Gradle cache
+        uses: gradle/actions/setup-gradle@v4
 
-    - name: Upload a Build Artifact
-      uses: actions/upload-artifact@v4
-      with:
-        name: OneWorldCore-1.20.1-server
-        path: projects/oneworldstudio/build/libs/oneworldcore-*.jar
+      - name: Set CI core version
+        run: |
+          printf '#OneWorldCore GitHub Actions build version\ncoreVersion=20.2.1.%s\n' "${GITHUB_RUN_NUMBER}" > core-version.properties
+          cat core-version.properties
+
+      - name: Build OneWorldCore jar
+        run: |
+          chmod +x ./gradlew
+          ./gradlew :oneworldstudio:oneworldcoreJar
+
+      - name: Upload OneWorldCore jar
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneWorldCore-1.20.1-${{ github.run_number }}
+          path: projects/oneworldstudio/build/libs/oneworldcore-*.jar
+          if-no-files-found: error

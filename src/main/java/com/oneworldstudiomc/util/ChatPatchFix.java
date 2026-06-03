@@ -14,6 +14,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.player.ChatVisiblity;
 import org.bukkit.Bukkit;
+import org.bukkit.ChatColor;
 import org.bukkit.craftbukkit.v1_20_R1.util.LazyPlayerSet;
 import org.bukkit.craftbukkit.v1_20_R1.util.Waitable;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
@@ -169,7 +170,12 @@ public class ChatPatchFix {
                 source,
                 viewers,
                 ChatRenderer.viewerUnaware((viewerSource, viewerDisplayName, viewerMessage) -> LEGACY.deserialize(
-                        String.format(format, LEGACY.serialize(viewerDisplayName), LEGACY.serialize(viewerMessage))
+                        renderLegacyChatFormat(
+                                format,
+                                viewerSource.getName(),
+                                LEGACY.serialize(viewerDisplayName),
+                                LEGACY.serialize(viewerMessage)
+                        )
                 )),
                 messageComponent,
                 messageComponent,
@@ -187,5 +193,24 @@ public class ChatPatchFix {
 
         Audience console = Bukkit.getConsoleSender();
         console.sendMessage(paperEvent.renderer().render(source, sourceDisplayName, paperEvent.message(), console));
+    }
+
+    private static String renderLegacyChatFormat(String format, String playerName, String displayName, String message) {
+        String rendered;
+        if (format.indexOf('{') != -1) {
+            rendered = format
+                    .replace("{DISPLAYNAME}", displayName)
+                    .replace("{USERNAME}", playerName)
+                    .replace("{PLAYER}", playerName)
+                    .replace("{NAME}", playerName)
+                    .replace("{MESSAGE}", message);
+        } else {
+            try {
+                rendered = String.format(format, displayName, message);
+            } catch (RuntimeException ignored) {
+                rendered = displayName + ": " + message;
+            }
+        }
+        return ChatColor.translateAlternateColorCodes('&', rendered);
     }
 }

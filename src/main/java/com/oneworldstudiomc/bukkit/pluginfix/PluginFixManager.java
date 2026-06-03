@@ -1498,6 +1498,7 @@ public class PluginFixManager {
             case "io.lumine.mythic.bukkit.BukkitBootstrap" -> PluginFixManager::fixMythicBukkitBootstrap;
             case "io.lumine.mythic.bukkit.adapters.BukkitParticle" -> PluginFixManager::fixMythicBukkitParticleCompat;
             case "io.lumine.mythic.bukkit.entities.BukkitBabyZombieVillager" -> PluginFixManager::fixMythicBabyZombieVillager;
+            case "io.lumine.mythic.bukkit.commands.items.GiveCommand" -> PluginFixManager::fixMythicMobsGiveCommand;
             case "io.lumine.mythic.core.volatilecode.v1_20_R1.VolatileAIHandlerImpl" -> PluginFixManager::fixMythicMobsAIHandler;
             case "io.lumine.mythic.core.volatilecode.v1_20_R1.VolatileEntityHandlerImpl" -> PluginFixManager::fixMythicMobsEntityHandler;
             case "io.lumine.mythic.core.skills.mechanics.SoundEffect" -> PluginFixManager::fixFancyHologramsLocationAccessors;
@@ -3556,39 +3557,19 @@ public class PluginFixManager {
                 continue;
             }
 
-            org.objectweb.asm.tree.LabelNode hasTimings = new org.objectweb.asm.tree.LabelNode();
             InsnList toInject = new InsnList();
             toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
-            toInject.add(new FieldInsnNode(
-                    Opcodes.GETFIELD,
-                    node.name,
-                    "timingsHandler",
-                    "Lio/lumine/mythic/bukkit/clock/TimingsHandler;"
-            ));
-            toInject.add(new InsnNode(Opcodes.DUP));
-            toInject.add(new org.objectweb.asm.tree.JumpInsnNode(Opcodes.IFNONNULL, hasTimings));
-            toInject.add(new InsnNode(Opcodes.POP));
-            toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
-            toInject.add(new org.objectweb.asm.tree.TypeInsnNode(
-                    Opcodes.NEW,
-                    "io/lumine/mythic/bukkit/clock/TimingsHandler"
-            ));
-            toInject.add(new InsnNode(Opcodes.DUP));
             toInject.add(new MethodInsnNode(
-                    Opcodes.INVOKESPECIAL,
-                    "io/lumine/mythic/bukkit/clock/TimingsHandler",
-                    "<init>",
-                    "()V",
+                    Opcodes.INVOKESTATIC,
+                    Type.getInternalName(PluginFixManager.class),
+                    "mythicGetTimingsHandlerCompat",
+                    "(Ljava/lang/Object;)Ljava/lang/Object;",
                     false
             ));
-            toInject.add(new InsnNode(Opcodes.DUP_X1));
-            toInject.add(new FieldInsnNode(
-                    Opcodes.PUTFIELD,
-                    node.name,
-                    "timingsHandler",
-                    "Lio/lumine/mythic/bukkit/clock/TimingsHandler;"
+            toInject.add(new org.objectweb.asm.tree.TypeInsnNode(
+                    Opcodes.CHECKCAST,
+                    "io/lumine/mythic/bukkit/clock/TimingsHandler"
             ));
-            toInject.add(hasTimings);
             toInject.add(new InsnNode(Opcodes.ARETURN));
             methodNode.instructions = toInject;
             methodNode.tryCatchBlocks.clear();
@@ -3653,6 +3634,28 @@ public class PluginFixManager {
             toInject.add(new InsnNode(Opcodes.RETURN));
             methodNode.instructions = toInject;
             methodNode.tryCatchBlocks.clear();
+            clearLocalDebugInfo(methodNode);
+        }
+    }
+
+    private static void fixMythicMobsGiveCommand(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"onCommand".equals(methodNode.name)
+                    || !"(Lorg/bukkit/command/CommandSender;[Ljava/lang/String;)Z".equals(methodNode.desc)) {
+                continue;
+            }
+
+            InsnList toInject = new InsnList();
+            toInject.add(new VarInsnNode(Opcodes.ALOAD, 2));
+            toInject.add(new MethodInsnNode(
+                    Opcodes.INVOKESTATIC,
+                    Type.getInternalName(PluginFixManager.class),
+                    "mythicNormalizeGiveCommandArgs",
+                    "([Ljava/lang/String;)[Ljava/lang/String;",
+                    false
+            ));
+            toInject.add(new VarInsnNode(Opcodes.ASTORE, 2));
+            methodNode.instructions.insert(toInject);
             clearLocalDebugInfo(methodNode);
         }
     }
@@ -6142,6 +6145,47 @@ public class PluginFixManager {
         } catch (Throwable ignored) {
         }
         return false;
+    }
+
+    public static Object mythicGetTimingsHandlerCompat(Object mythicBukkit) {
+        if (mythicBukkit == null) {
+            return null;
+        }
+        try {
+            Field field = mythicBukkit.getClass().getDeclaredField("timingsHandler");
+            field.setAccessible(true);
+            Object timingsHandler = field.get(mythicBukkit);
+            if (timingsHandler != null) {
+                return timingsHandler;
+            }
+
+            ClassLoader classLoader = mythicBukkit.getClass().getClassLoader();
+            Class<?> timingsHandlerClass = Class.forName(
+                    "io.lumine.mythic.bukkit.clock.TimingsHandler",
+                    true,
+                    classLoader
+            );
+            Object created = timingsHandlerClass.getDeclaredConstructor().newInstance();
+            field.set(mythicBukkit, created);
+            return created;
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Could not initialize MythicMobs timings handler", throwable);
+        }
+    }
+
+    public static String[] mythicNormalizeGiveCommandArgs(String[] args) {
+        if (args == null || args.length < 3 || args[0] == null || args[1] == null) {
+            return args;
+        }
+        if (args[0].startsWith("-") || !args[1].startsWith("-")) {
+            return args;
+        }
+
+        String[] normalized = new String[args.length];
+        normalized[0] = args[1];
+        normalized[1] = args[0];
+        System.arraycopy(args, 2, normalized, 2, args.length - 2);
+        return normalized;
     }
 
     public static org.bukkit.inventory.ItemStack playerGetActiveItemCompat(org.bukkit.entity.Player player) {

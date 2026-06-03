@@ -343,8 +343,22 @@ public interface RegionAccessor extends Keyed { // Paper
     @NotNull
     <T extends Entity> T spawn(@NotNull Location location, @NotNull Class<T> clazz, @Nullable Consumer<T> function) throws IllegalArgumentException;
 
+    // Paper compatibility - prefer java.util.function.Consumer
+    @NotNull
+    default <T extends Entity> T spawn(@NotNull Location location, @NotNull Class<T> clazz, @Nullable java.util.function.Consumer<T> function) throws IllegalArgumentException {
+        final Consumer<T> bukkitConsumer = function == null ? null : (Consumer<T>) function::accept;
+        return this.spawn(location, clazz, bukkitConsumer);
+    }
+
     @NotNull
     <T extends Entity> T spawn(@NotNull Location location, EntityType entityType, @NotNull Class<T> clazz, @Nullable Consumer<T> function) throws IllegalArgumentException;
+
+    // Paper compatibility - prefer java.util.function.Consumer
+    @NotNull
+    default <T extends Entity> T spawn(@NotNull Location location, EntityType entityType, @NotNull Class<T> clazz, @Nullable java.util.function.Consumer<T> function) throws IllegalArgumentException {
+        final Consumer<T> bukkitConsumer = function == null ? null : (Consumer<T>) function::accept;
+        return this.spawn(location, entityType, clazz, bukkitConsumer);
+    }
 
     /**
      * Creates a new entity at the given {@link Location} with the supplied
@@ -383,6 +397,13 @@ public interface RegionAccessor extends Keyed { // Paper
      */
     @NotNull
     public <T extends Entity> T spawn(@NotNull Location location, @NotNull Class<T> clazz, boolean randomizeData, @Nullable Consumer<T> function) throws IllegalArgumentException;
+
+    // Paper compatibility - prefer java.util.function.Consumer
+    @NotNull
+    public default <T extends Entity> T spawn(@NotNull Location location, @NotNull Class<T> clazz, boolean randomizeData, @Nullable java.util.function.Consumer<T> function) throws IllegalArgumentException {
+        final Consumer<T> bukkitConsumer = function == null ? null : (Consumer<T>) function::accept;
+        return this.spawn(location, clazz, randomizeData, bukkitConsumer);
+    }
 
     /**
      * Gets the highest non-empty (impassable) coordinate at the given

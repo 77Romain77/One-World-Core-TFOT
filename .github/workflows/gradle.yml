@@ -31,6 +31,14 @@ jobs:
           distribution: 'temurin'
           cache: gradle
 
+      - name: Use GitHub Actions Java home
+        shell: pwsh
+        run: |
+          (Get-Content gradle.properties) |
+            Where-Object { $_ -notmatch '^org\.gradle\.java\.home=' } |
+            Set-Content gradle.properties -Encoding ASCII
+          "JAVA_HOME=$env:JAVA_HOME"
+
       - name: Set CI core version
         shell: pwsh
         run: |

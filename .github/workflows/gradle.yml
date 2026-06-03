@@ -16,7 +16,7 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: windows-latest
     permissions:
       contents: read
 
@@ -29,23 +29,21 @@ jobs:
         with:
           java-version: '21'
           distribution: 'temurin'
-
-      - name: Setup Gradle cache
-        uses: gradle/actions/setup-gradle@v4
-
-      - name: Prepare Forge workspace
-        run: |
-          chmod +x ./gradlew
-          ./gradlew setup packageLibraries --stacktrace
+          cache: gradle
 
       - name: Set CI core version
+        shell: pwsh
         run: |
-          printf '#OneWorldCore GitHub Actions build version\ncoreVersion=20.2.1.%s\n' "${GITHUB_RUN_NUMBER}" > core-version.properties
-          cat core-version.properties
+          @(
+            '#OneWorldCore GitHub Actions build version'
+            "coreVersion=20.2.1.${env:GITHUB_RUN_NUMBER}"
+          ) | Set-Content -Path core-version.properties -Encoding ASCII
+          Get-Content core-version.properties
 
       - name: Build OneWorldCore jar
+        shell: pwsh
         run: |
-          ./gradlew :oneworldstudio:oneworldcoreJar --stacktrace
+          .\gradlew.bat :oneworldstudio:oneworldcoreJar --stacktrace --no-daemon
 
       - name: Upload OneWorldCore jar
         uses: actions/upload-artifact@v4
@@ -53,3 +51,14 @@ jobs:
           name: OneWorldCore-1.20.1-${{ github.run_number }}
           path: projects/oneworldstudio/build/libs/oneworldcore-*.jar
           if-no-files-found: error
+
+      - name: Upload Gradle diagnostics
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: OneWorldCore-gradle-diagnostics-${{ github.run_number }}
+          path: |
+            **/build/reports/**
+            **/build/**/*.log
+            **/hs_err_pid*.log
+          if-no-files-found: ignore

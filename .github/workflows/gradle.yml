@@ -40,15 +40,23 @@ jobs:
           "JAVA_HOME=$env:JAVA_HOME"
 
       - name: Build OneWorldCore jar
+        id: build
         shell: pwsh
         run: |
           Get-Content core-version.properties
           .\gradlew.bat :oneworldstudio:oneworldcoreJar --stacktrace --no-daemon
+          $jar = Get-ChildItem projects/oneworldstudio/build/libs/oneworldcore-*.jar | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+          if (-not $jar) {
+            throw 'OneWorldCore jar was not produced'
+          }
+          $version = $jar.BaseName -replace '^oneworldcore-', ''
+          "jar_version=$version" >> $env:GITHUB_OUTPUT
+          "jar_path=$($jar.FullName)" >> $env:GITHUB_OUTPUT
 
       - name: Upload OneWorldCore jar
         uses: actions/upload-artifact@v4
         with:
-          name: OneWorldCore-1.20.1-${{ github.run_number }}
+          name: OneWorldCore-1.20.1-${{ steps.build.outputs.jar_version }}
           path: projects/oneworldstudio/build/libs/oneworldcore-*.jar
           if-no-files-found: error
 

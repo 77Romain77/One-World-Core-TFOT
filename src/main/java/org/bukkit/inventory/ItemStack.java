@@ -3,7 +3,10 @@ package org.bukkit.inventory;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.oneworldstudiomc.OneWorldCore;
+import com.oneworldstudiomc.paper.datacomponent.DataComponentType;
+import com.oneworldstudiomc.paper.datacomponent.DataComponentTypes;
 import com.oneworldstudiomc.paper.inventory.ItemRarity;
+import com.oneworldstudiomc.paper.persistence.PersistentDataContainerView;
 import java.util.List;
 import org.bukkit.Bukkit;
 import org.bukkit.Material;
@@ -14,6 +17,7 @@ import org.bukkit.enchantments.Enchantment;
 import org.bukkit.inventory.meta.Damageable;
 import org.bukkit.inventory.meta.ItemMeta;
 import org.bukkit.material.MaterialData;
+import org.bukkit.persistence.PersistentDataContainer;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -567,6 +571,53 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
         return !Bukkit.getItemFactory().equals(meta, null);
     }
 
+    public boolean hasData(@NotNull DataComponentType type) {
+        Preconditions.checkArgument(type != null, "Data component type cannot be null");
+        if (type == DataComponentTypes.CONSUMABLE) {
+            return this.type.isEdible()
+                    || this.type == Material.POTION
+                    || this.type == Material.MILK_BUCKET
+                    || this.type == Material.HONEY_BOTTLE;
+        }
+
+        ItemMeta itemMeta = getItemMeta();
+        if (itemMeta == null) {
+            return false;
+        }
+
+        if (type == DataComponentTypes.CUSTOM_MODEL_DATA) {
+            return itemMeta.hasCustomModelData();
+        }
+        if (type == DataComponentTypes.DAMAGE && itemMeta instanceof Damageable) {
+            return ((Damageable) itemMeta).hasDamage();
+        }
+        if (type == DataComponentTypes.REPAIR_COST && itemMeta instanceof org.bukkit.inventory.meta.Repairable) {
+            return ((org.bukkit.inventory.meta.Repairable) itemMeta).hasRepairCost();
+        }
+        if (type == DataComponentTypes.CAN_PLACE_ON) {
+            return itemMeta.hasPlaceableKeys();
+        }
+        if (type == DataComponentTypes.CAN_BREAK) {
+            return itemMeta.hasDestroyableKeys();
+        }
+
+        return false;
+    }
+
+    @NotNull
+    public PersistentDataContainerView getPersistentDataContainer() {
+        ItemMeta itemMeta = getItemMeta();
+        if (itemMeta == null) {
+            throw new IllegalStateException("Cannot get persistent data container on " + getType());
+        }
+
+        PersistentDataContainer container = itemMeta.getPersistentDataContainer();
+        if (container instanceof PersistentDataContainerView) {
+            return (PersistentDataContainerView) container;
+        }
+        throw new IllegalStateException("Persistent data container does not implement Paper view");
+    }
+
     /**
      * Set the ItemMeta of this ItemStack.
      *
@@ -963,4 +1014,3 @@ public class ItemStack implements Cloneable, ConfigurationSerializable, Translat
     }
     // Paper end
 }
-

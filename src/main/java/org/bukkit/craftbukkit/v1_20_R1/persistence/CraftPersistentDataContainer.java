@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.Set;
 
-public class CraftPersistentDataContainer implements PersistentDataContainer {
+public class CraftPersistentDataContainer implements PersistentDataContainer, com.oneworldstudiomc.paper.persistence.PersistentDataContainerView {
 
     private final Map<String, Tag> customDataTags = new HashMap<>();
     private final CraftPersistentDataTypeRegistry registry;

@@ -1494,6 +1494,7 @@ public class PluginFixManager {
             case "net.Zrips.CMILib.Reflections" -> node -> helloWorld(node, "bR", "f_36096_");
             case "net.coreprotect.listener.ListenerHandler" -> node -> helloWorld(node, "net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer", "mohist");
             case "io.lumine.mythic.bukkit.utils.version.ServerVersion" -> PluginFixManager::fixMythicMobsServerVersion;
+            case "io.lumine.mythic.bukkit.MythicBukkit" -> PluginFixManager::fixMythicBukkitTimingsHandler;
             case "io.lumine.mythic.bukkit.BukkitBootstrap" -> PluginFixManager::fixMythicBukkitBootstrap;
             case "io.lumine.mythic.bukkit.adapters.BukkitParticle" -> PluginFixManager::fixMythicBukkitParticleCompat;
             case "io.lumine.mythic.bukkit.entities.BukkitBabyZombieVillager" -> PluginFixManager::fixMythicBabyZombieVillager;
@@ -3546,6 +3547,53 @@ public class PluginFixManager {
                 || "(Lio/papermc/paper/datacomponent/DataComponentType$Valued;Ljava/lang/Object;)Ljava/lang/Object;".equals(descriptor)
                 || "(Lcom/oneworldstudiomc/paper/datacomponent/DataComponentType;Ljava/lang/Object;)Ljava/lang/Object;".equals(descriptor)
                 || "(Lcom/oneworldstudiomc/paper/datacomponent/DataComponentType$Valued;Ljava/lang/Object;)Ljava/lang/Object;".equals(descriptor);
+    }
+
+    private static void fixMythicBukkitTimingsHandler(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"getTimingsHandler".equals(methodNode.name)
+                    || !"()Lio/lumine/mythic/bukkit/clock/TimingsHandler;".equals(methodNode.desc)) {
+                continue;
+            }
+
+            org.objectweb.asm.tree.LabelNode hasTimings = new org.objectweb.asm.tree.LabelNode();
+            InsnList toInject = new InsnList();
+            toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            toInject.add(new FieldInsnNode(
+                    Opcodes.GETFIELD,
+                    node.name,
+                    "timingsHandler",
+                    "Lio/lumine/mythic/bukkit/clock/TimingsHandler;"
+            ));
+            toInject.add(new InsnNode(Opcodes.DUP));
+            toInject.add(new org.objectweb.asm.tree.JumpInsnNode(Opcodes.IFNONNULL, hasTimings));
+            toInject.add(new InsnNode(Opcodes.POP));
+            toInject.add(new VarInsnNode(Opcodes.ALOAD, 0));
+            toInject.add(new org.objectweb.asm.tree.TypeInsnNode(
+                    Opcodes.NEW,
+                    "io/lumine/mythic/bukkit/clock/TimingsHandler"
+            ));
+            toInject.add(new InsnNode(Opcodes.DUP));
+            toInject.add(new MethodInsnNode(
+                    Opcodes.INVOKESPECIAL,
+                    "io/lumine/mythic/bukkit/clock/TimingsHandler",
+                    "<init>",
+                    "()V",
+                    false
+            ));
+            toInject.add(new InsnNode(Opcodes.DUP_X1));
+            toInject.add(new FieldInsnNode(
+                    Opcodes.PUTFIELD,
+                    node.name,
+                    "timingsHandler",
+                    "Lio/lumine/mythic/bukkit/clock/TimingsHandler;"
+            ));
+            toInject.add(hasTimings);
+            toInject.add(new InsnNode(Opcodes.ARETURN));
+            methodNode.instructions = toInject;
+            methodNode.tryCatchBlocks.clear();
+            clearLocalDebugInfo(methodNode);
+        }
     }
 
     private static void fixMythicBukkitBootstrap(ClassNode node) {

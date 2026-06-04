@@ -7111,11 +7111,71 @@ public class PluginFixManager {
         }
 
         try {
+            String formattedTitle = animateMiniMessageGradientCompat(title);
             return net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().serialize(
-                    net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(title)
+                    net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(formattedTitle)
             );
         } catch (RuntimeException ignored) {
             return title;
+        }
+    }
+
+    private static String animateMiniMessageGradientCompat(String title) {
+        String lower = title.toLowerCase(java.util.Locale.ROOT);
+        if (!lower.contains("<gradient:")) {
+            return title;
+        }
+
+        double phase = ((System.currentTimeMillis() / 80L) % 200L) / 100.0D - 1.0D;
+        String phaseText = String.format(java.util.Locale.ROOT, "%.2f", phase);
+        StringBuilder result = new StringBuilder(title.length() + 8);
+        int cursor = 0;
+
+        while (cursor < title.length()) {
+            int start = lower.indexOf("<gradient:", cursor);
+            if (start < 0) {
+                result.append(title, cursor, title.length());
+                break;
+            }
+
+            int end = title.indexOf('>', start);
+            if (end < 0) {
+                result.append(title, cursor, title.length());
+                break;
+            }
+
+            result.append(title, cursor, start);
+            String tag = title.substring(start + 1, end);
+            result.append('<').append(withAnimatedGradientPhaseCompat(tag, phaseText)).append('>');
+            cursor = end + 1;
+        }
+
+        return result.toString();
+    }
+
+    private static String withAnimatedGradientPhaseCompat(String tag, String phaseText) {
+        String prefix = "gradient:";
+        if (!tag.regionMatches(true, 0, prefix, 0, prefix.length())) {
+            return tag;
+        }
+
+        String body = tag.substring(prefix.length());
+        String[] parts = body.split(":");
+        if (parts.length >= 3 && isGradientPhaseCompat(parts[parts.length - 1])) {
+            body = body.substring(0, body.length() - parts[parts.length - 1].length() - 1);
+        }
+        return prefix + body + ":" + phaseText;
+    }
+
+    private static boolean isGradientPhaseCompat(String value) {
+        if (value == null || value.isBlank()) {
+            return false;
+        }
+        try {
+            Double.parseDouble(value);
+            return true;
+        } catch (NumberFormatException ignored) {
+            return false;
         }
     }
 

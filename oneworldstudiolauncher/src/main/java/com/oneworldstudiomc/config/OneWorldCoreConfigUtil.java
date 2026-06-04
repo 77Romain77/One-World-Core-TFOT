@@ -36,6 +36,7 @@ public class OneWorldCoreConfigUtil {
     public static final File LEGACY_STUDIO_YML = new File("oneworldstudio-config", "oneworldstudio.yml");
     public static final File LEGACY_CORE_STUDIO_YML = new File("oneworldcore-config", "oneworldstudio.yml");
     public static final File CORE_YML = new File("oneworldcore-config", "oneworldcore.yml");
+    public static final File UPDATE_YML = new File("oneworldcore-config", "oneworldupdate.yml");
     public static YamlConfiguration yml = new YamlConfiguration();
 
     public static void init() {
@@ -58,25 +59,21 @@ public class OneWorldCoreConfigUtil {
     }
 
     public static boolean INSTALLATIONFINISHED() {
-        return !getBooleanCompat("oneworldcore.installation-finished", "oneworldstudio.installation-finished", "mohist.installation-finished", false);
+        return !getBooleanCompat("oneworldcore.installation-finished", "oneworldstudio.installation-finished", false);
     }
 
     public static boolean CHECK_UPDATE_AUTO_DOWNLOAD() {
-        boolean value = getBooleanCompat("oneworldcore.check_update_auto_download", "oneworldstudio.check_update_auto_download", "mohist.check_update_auto_download", false);
-        save();
-        return value;
+        return getUpdateBoolean("auto-download", false);
     }
 
     public static boolean CHECK_LIBRARIES() {
-        boolean value = getBooleanCompat("oneworldcore.libraries.check", "oneworldstudio.libraries.check", "mohist.libraries.check", true);
+        boolean value = getBooleanCompat("oneworldcore.libraries.check", "oneworldstudio.libraries.check", true);
         save();
         return value;
     }
 
     public static boolean CHECK_UPDATE() {
-        boolean value = getBooleanCompat("oneworldcore.check_update", "oneworldstudio.check_update", "mohist.check_update", true);
-        save();
-        return value;
+        return getUpdateBoolean("enabled", true);
     }
 
     public static boolean aBoolean(String key, boolean defaultReturn) {
@@ -85,14 +82,13 @@ public class OneWorldCoreConfigUtil {
             if (yml.get(studioKey) != null) {
                 return yml.getBoolean(studioKey, defaultReturn);
             }
-            String legacyKey = "mohist." + key.substring("oneworldcore.".length());
-            return yml.getBoolean(legacyKey, defaultReturn);
+            return defaultReturn;
         }
         return yml.getBoolean(key, defaultReturn);
     }
 
     public static void i18n() {
-        OneWorldCoreStart.i18n = new i18n(OneWorldCoreStart.class.getClassLoader(), MOHISTLANG());
+        OneWorldCoreStart.i18n = new i18n(OneWorldCoreStart.class.getClassLoader(), CORE_LANG());
     }
 
     public static void save() {
@@ -103,8 +99,8 @@ public class OneWorldCoreConfigUtil {
         }
     }
 
-    public static String MOHISTLANG() {
-        String value = getStringCompat("oneworldcore.lang", "oneworldstudio.lang", "mohist.lang", Locale.getDefault().toString());
+    public static String CORE_LANG() {
+        String value = getStringCompat("oneworldcore.lang", "oneworldstudio.lang", Locale.getDefault().toString());
         save();
         return value;
     }
@@ -238,6 +234,25 @@ public class OneWorldCoreConfigUtil {
         return value;
     }
 
+    private static boolean getBooleanCompat(String modernKey, String secondaryKey, boolean defaultValue) {
+        return getBooleanCompat(modernKey, secondaryKey, secondaryKey, defaultValue);
+    }
+
+    private static boolean getUpdateBoolean(String key, boolean defaultValue) {
+        YamlConfiguration updateConfig = YamlConfiguration.loadConfiguration(UPDATE_YML);
+        updateConfig.addDefault("enabled", true);
+        updateConfig.addDefault("auto-download", false);
+        updateConfig.options().copyDefaults(true);
+        try {
+            if (!UPDATE_YML.getParentFile().exists()) {
+                UPDATE_YML.getParentFile().mkdirs();
+            }
+            updateConfig.save(UPDATE_YML);
+        } catch (Exception ignored) {
+        }
+        return updateConfig.getBoolean(key, defaultValue);
+    }
+
     private static String getStringCompat(String modernKey, String secondaryKey, String legacyKey, String defaultValue) {
         String value;
         if (yml.get(modernKey) != null) {
@@ -252,7 +267,7 @@ public class OneWorldCoreConfigUtil {
     }
 
     private static String getStringCompat(String modernKey, String legacyKey, String defaultValue) {
-        return getStringCompat(modernKey, null, legacyKey, defaultValue);
+        return getStringCompat(modernKey, legacyKey, legacyKey, defaultValue);
     }
 
     private static void migrateLegacyMainConfig(File modernTarget, File... legacyFiles) {
@@ -308,6 +323,8 @@ public class OneWorldCoreConfigUtil {
                 }
                 yml.set(key, null);
             }
+            yml.set("mohist", null);
+            yml.set("oneworldstudio", null);
             save();
         } catch (Throwable ignored) {
         }

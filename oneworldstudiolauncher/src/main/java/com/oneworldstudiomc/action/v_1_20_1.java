@@ -6,7 +6,7 @@ import com.mohistmc.tools.FileUtils;
 import com.mohistmc.tools.JarTool;
 import com.mohistmc.tools.SHA256;
 import com.oneworldstudiomc.util.I18n;
-import com.oneworldstudiomc.util.MohistModuleManager;
+import com.oneworldstudiomc.util.OneWorldModuleManager;
 import java.io.File;
 import java.io.FileWriter;
 import java.net.URLDecoder;
@@ -55,7 +55,7 @@ public class v_1_20_1 {
         }
 
         private void install() throws Exception {
-            launchArgs.add(new File(URLDecoder.decode(MohistModuleManager.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), StandardCharsets.UTF_8)).getAbsolutePath());
+            launchArgs.add(new File(URLDecoder.decode(OneWorldModuleManager.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath(), StandardCharsets.UTF_8)).getAbsolutePath());
             launchArgs.addAll(OneWorldCoreStart.mainArgs);
             copyFileFromJar(lzma, "data/server.lzma");
             copyFileFromJar(fmlloader, "data/fmlloader-" + mcVer + "-" + forgeVer + ".jar");
@@ -70,7 +70,7 @@ public class v_1_20_1 {
 
             copyFileFromJar(universalJar, "data/forge-" + mcVer + "-" + forgeVer + "-universal.jar");
 
-            if (mohistVer == null || mcpVer == null) {
+            if (coreVer == null || mcpVer == null) {
                 System.out.println("[OneWorldCore] There is an error with the installation, the forge / mcp version is not set.");
                 System.exit(0);
             }
@@ -140,9 +140,9 @@ public class v_1_20_1 {
             }
 
             String storedServerSHA256 = null;
-            String storedMohistSHA256 = null;
+            String storedCoreSHA256 = null;
             String serverSHA256 = SHA256.as(serverJar);
-            String mohistSHA256 = SHA256.as(OneWorldCoreStart.jarTool.getFile());
+            String coreSHA256 = SHA256.as(OneWorldCoreStart.jarTool.getFile());
 
             if (installInfo.exists()) {
                 List<String> infoLines = Files.readAllLines(installInfo.toPath());
@@ -150,15 +150,15 @@ public class v_1_20_1 {
                     storedServerSHA256 = infoLines.get(0);
                 }
                 if (infoLines.size() > 1) {
-                    storedMohistSHA256 = infoLines.get(1);
+                    storedCoreSHA256 = infoLines.get(1);
                 }
             }
 
             if (!serverJar.exists()
                     || storedServerSHA256 == null
-                    || storedMohistSHA256 == null
+                    || storedCoreSHA256 == null
                     || !storedServerSHA256.equals(serverSHA256)
-                    || !storedMohistSHA256.equals(mohistSHA256)) {
+                    || !storedCoreSHA256.equals(coreSHA256)) {
                 mute();
                 run("net.minecraftforge.binarypatcher.ConsoleTool",
                         new String[]{"--clean", srg.getPath(), "--output", serverJar.getPath(), "--apply", lzma.getPath()});
@@ -168,7 +168,7 @@ public class v_1_20_1 {
 
             FileWriter fw = new FileWriter(installInfo);
             fw.write(serverSHA256 + "\n");
-            fw.write(mohistSHA256);
+            fw.write(coreSHA256);
             fw.close();
 
             System.out.println(I18n.as("installation.finished"));

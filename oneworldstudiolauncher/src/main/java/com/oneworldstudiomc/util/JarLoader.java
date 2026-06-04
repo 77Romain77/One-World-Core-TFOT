@@ -20,6 +20,7 @@ package com.oneworldstudiomc.util;
 
 import java.io.IOException;
 import java.lang.instrument.Instrumentation;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.jar.JarFile;
 
@@ -46,6 +47,10 @@ public class JarLoader {
             return;
         }
         try {
+            if (!Files.exists(path) || Files.size(path) <= 1) {
+                Files.deleteIfExists(path);
+                throw new IOException("Jar file is empty or missing: " + path.toAbsolutePath());
+            }
             inst.appendToSystemClassLoaderSearch(new JarFile(path.toFile()));
         } catch (IOException e) {
             throw new RuntimeException(e);

@@ -29,7 +29,7 @@ import com.mohistmc.tools.JarTool;
 import com.mohistmc.tools.MojangEulaUtil;
 import com.mohistmc.tools.ZipUtil;
 import com.oneworldstudiomc.util.DataParser;
-import com.oneworldstudiomc.util.MohistModuleManager;
+import com.oneworldstudiomc.util.OneWorldModuleManager;
 import cpw.mods.bootstraplauncher.BootstrapLauncher;
 import java.io.File;
 import java.io.IOException;
@@ -93,7 +93,7 @@ public class OneWorldCoreStart {
         }
 
         boolean showLogo = OneWorldCoreConfigUtil.aBoolean("oneworldcore.show_logo",
-                OneWorldCoreConfigUtil.aBoolean("oneworldstudio.show_logo", OneWorldCoreConfigUtil.aBoolean("mohist.show_logo", true)));
+                OneWorldCoreConfigUtil.aBoolean("oneworldstudio.show_logo", true));
         if (OneWorldCoreConfigUtil.INSTALLATIONFINISHED() && showLogo) {
             String welcomeMessage = resolveWelcomeMessage();
             System.out.printf("%n%s%n%s - %s, Java(%s) %s PID: %s%n",
@@ -142,7 +142,7 @@ public class OneWorldCoreStart {
             forgeArgs.add(arg.split(" ")[0]);
             forgeArgs.add(arg.split(" ")[1]);
         }
-        new MohistModuleManager(DataParser.launchArgs);
+        new OneWorldModuleManager(DataParser.launchArgs);
 
         if (!MojangEulaUtil.hasAcceptedEULA()) {
             System.out.println(i18n.as("eula"));

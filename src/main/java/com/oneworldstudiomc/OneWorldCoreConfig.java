@@ -231,7 +231,6 @@ public class OneWorldCoreConfig {
 
     public static boolean show_logo;
     public static String mohist_lang;
-    public static boolean check_update;
     public static int maximumRepairCost;
     public static boolean enchantment_fix;
     public static int max_enchantment_level;
@@ -316,22 +315,10 @@ public class OneWorldCoreConfig {
     public static boolean custom_raid_no_emerald;
     public static int custom_lava_speed_normal;
     public static int custom_lava_speed_nether;
-    public static String ping_status_version;
 
-    private static void mohist() {
+    private static void oneworldcore() {
         show_logo = getBooleanCompat("oneworldcore.show_logo", "oneworldstudio.show_logo", "mohist.show_logo", true);
         mohist_lang = getStringCompat("oneworldcore.lang", "oneworldstudio.lang", "mohist.lang", Locale.getDefault().toString());
-        check_update = getBooleanCompat("oneworldcore.check_update", "oneworldstudio.check_update", "mohist.check_update", true);
-        String detectedCoreVersion = OneWorldCore.version;
-        if (OneWorldCore.versionInfo != null && OneWorldCore.versionInfo.oneworldstudio() != null && !OneWorldCore.versionInfo.oneworldstudio().isEmpty()) {
-            detectedCoreVersion = OneWorldCore.versionInfo.oneworldstudio();
-        }
-        ping_status_version = getStringCompat(
-                "oneworldcore.ping_status_version",
-                "oneworldstudio.ping_status_version",
-                "mohist.ping_status_version",
-                "oneworldcore " + detectedCoreVersion
-        );
         watchdog_spigot = getBooleanCompat("oneworldcore.watchdog_spigot", "oneworldstudio.watchdog_spigot", "mohist.watchdog_spigot", true);
         watchdog_mohist = getBooleanCompat("oneworldcore.watchdog_core", "oneworldcore.watchdog_mohist", false);
         maximumRepairCost = getInt("anvilfix.maximumrepaircost", 40);
@@ -410,6 +397,17 @@ public class OneWorldCoreConfig {
         getBoolean("keepinventory.world.exp", false);
     }
 
+    private static void cleanupExternalUpdateSettings() {
+        config.set("oneworldcore.check_update", null);
+        config.set("oneworldcore.ping_status_version", null);
+        config.set("oneworldstudio.check_update", null);
+        config.set("oneworldstudio.ping_status_version", null);
+        config.set("mohist.check_update", null);
+        config.set("mohist.ping_status_version", null);
+        config.set("mohist", null);
+        config.set("oneworldstudio", null);
+    }
+
     private static boolean getBooleanCompat(String modernPath, String secondPath, String legacyPath, boolean def) {
         boolean value;
         if (config.contains(modernPath)) {
@@ -468,6 +466,3 @@ public class OneWorldCoreConfig {
         }
     }
 }
-
-
-

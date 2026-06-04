@@ -1,5 +1,6 @@
 package com.oneworldstudiomc;
 
+import com.oneworldstudiomc.util.ConfigPathResolver;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
@@ -16,7 +17,8 @@ import org.bukkit.configuration.file.YamlConfiguration;
 
 public final class OneWorldUpdater {
 
-    private static final Path CONFIG_PATH = Path.of("oneworldupdate.yml");
+    private static final Path LEGACY_CONFIG_PATH = Path.of("oneworldupdate.yml");
+    private static final Path CONFIG_PATH = ConfigPathResolver.resolve("oneworldupdate.yml").toPath();
     private static final Pattern TAG_PATTERN = Pattern.compile("\"tag_name\"\\s*:\\s*\"([^\"]+)\"");
     private static final Pattern JAR_ASSET_PATTERN = Pattern.compile("\"browser_download_url\"\\s*:\\s*\"([^\"]*oneworldcore[^\"]*\\.jar)\"", Pattern.CASE_INSENSITIVE);
     private static final Pattern JAR_VERSION_PATTERN = Pattern.compile("oneworldcore-([0-9][0-9A-Za-z._-]*)\\.jar", Pattern.CASE_INSENSITIVE);
@@ -29,7 +31,7 @@ public final class OneWorldUpdater {
     public static void checkOnStartup() {
         YamlConfiguration config = loadConfig();
         if (!config.getBoolean("enabled", true)) {
-            OneWorldCore.LOGGER.info("OneWorldCore auto update is disabled in oneworldupdate.yml");
+            OneWorldCore.LOGGER.info("OneWorldCore auto update is disabled in {}", CONFIG_PATH);
             return;
         }
 
@@ -39,6 +41,7 @@ public final class OneWorldUpdater {
     }
 
     private static YamlConfiguration loadConfig() {
+        migrateLegacyConfig();
         YamlConfiguration config = YamlConfiguration.loadConfiguration(CONFIG_PATH.toFile());
         config.addDefault("enabled", true);
         config.addDefault("check-url", "https://api.github.com/repos/OneWorldStudio/One-World-Core/releases/latest");
@@ -49,9 +52,28 @@ public final class OneWorldUpdater {
         try {
             config.save(CONFIG_PATH.toFile());
         } catch (IOException exception) {
-            OneWorldCore.LOGGER.warn("Could not save oneworldupdate.yml", exception);
+            OneWorldCore.LOGGER.warn("Could not save {}", CONFIG_PATH, exception);
         }
         return config;
+    }
+
+    private static void migrateLegacyConfig() {
+        try {
+            Path legacyPath = LEGACY_CONFIG_PATH.toAbsolutePath().normalize();
+            Path modernPath = CONFIG_PATH.toAbsolutePath().normalize();
+            if (!Files.exists(legacyPath) || legacyPath.equals(modernPath)) {
+                return;
+            }
+
+            Files.createDirectories(modernPath.getParent());
+            if (Files.exists(modernPath)) {
+                Files.deleteIfExists(legacyPath);
+                return;
+            }
+            Files.move(legacyPath, modernPath, StandardCopyOption.REPLACE_EXISTING);
+        } catch (IOException exception) {
+            OneWorldCore.LOGGER.warn("Could not migrate oneworldupdate.yml to {}", CONFIG_PATH, exception);
+        }
     }
 
     private static void runUpdateCheck(YamlConfiguration config) {
@@ -76,7 +98,7 @@ public final class OneWorldUpdater {
             }
 
             if (updateInfo.downloadUrl == null || updateInfo.downloadUrl.isBlank()) {
-                OneWorldCore.LOGGER.warn("OneWorldCore {} is available, but download-url is empty in oneworldupdate.yml", latestVersion);
+                OneWorldCore.LOGGER.warn("OneWorldCore {} is available, but download-url is empty in {}", latestVersion, CONFIG_PATH);
                 return;
             }
 

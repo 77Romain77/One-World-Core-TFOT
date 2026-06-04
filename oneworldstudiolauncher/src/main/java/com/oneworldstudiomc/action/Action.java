@@ -37,13 +37,15 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Files;
 import java.nio.file.StandardCopyOption;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class Action {
 
     private static final PrintStream origin = System.out;
-    public final String mohistVer;
+    public final String coreVer;
     public final String forgeVer;
     public final String mcpVer;
     public final String mcVer;
@@ -67,7 +69,7 @@ public abstract class Action {
 
     protected Action() {
         init();
-        this.mohistVer = DataParser.versionMap.get("oneworldstudio");
+        this.coreVer = DataParser.versionMap.get("oneworldstudio");
         this.forgeVer = DataParser.versionMap.get("forge");
         this.mcpVer = DataParser.versionMap.get("mcp");
         this.mcVer = DataParser.versionMap.get("minecraft");
@@ -128,8 +130,19 @@ public abstract class Action {
     }
 
     protected void copyFileFromJar(File file, String pathInJar) {
-        InputStream is = OneWorldCoreStart.class.getClassLoader().getResourceAsStream(pathInJar);
-        if (!file.exists() || !SHA256.is(file, SHA256.as(is)) || file.length() <= 1) {
+        String bundledSha256;
+        try (InputStream is = OneWorldCoreStart.class.getClassLoader().getResourceAsStream(pathInJar)) {
+            if (is == null) {
+                System.out.println("[OneWorldCore] The file " + file.getName() + " doesn't exist in the OneWorldCore jar!");
+                System.exit(0);
+                return;
+            }
+            bundledSha256 = sha256(is);
+        } catch (IOException exception) {
+            throw new RuntimeException(exception);
+        }
+
+        if (!isValidFile(file, bundledSha256)) {
             // Clear old version
             File parentfile = file.getParentFile();
             if (file.getPath().contains("minecraftforge")) {
@@ -141,13 +154,16 @@ public abstract class Action {
                 }
             }
             file.getParentFile().mkdirs();
-            if (is != null) {
-                try {
-                    file.createNewFile();
-                    Files.copy(is, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
-                } catch (IOException ignored) {
+            try (InputStream is = OneWorldCoreStart.class.getClassLoader().getResourceAsStream(pathInJar)) {
+                if (is == null) {
+                    System.out.println("[OneWorldCore] The file " + file.getName() + " doesn't exist in the OneWorldCore jar!");
+                    System.exit(0);
+                    return;
                 }
-            } else {
+                Files.copy(is, file.toPath(), StandardCopyOption.REPLACE_EXISTING);
+            } catch (IOException ignored) {
+            }
+            if (!isValidFile(file, bundledSha256)) {
                 System.out.println("[OneWorldCore] The file " + file.getName() + " doesn't exist in the OneWorldCore jar!");
                 System.exit(0);
             }
@@ -177,5 +193,34 @@ public abstract class Action {
         }
     }
 
-}
+    private static boolean isValidFile(File file, String expectedSha256) {
+        if (!file.exists() || file.length() <= 1) {
+            return false;
+        }
+        try (InputStream inputStream = Files.newInputStream(file.toPath())) {
+            return expectedSha256.equalsIgnoreCase(sha256(inputStream));
+        } catch (IOException ignored) {
+            return false;
+        }
+    }
 
+    private static String sha256(InputStream inputStream) throws IOException {
+        try {
+            MessageDigest digest = MessageDigest.getInstance("SHA-256");
+            byte[] buffer = new byte[8192];
+            int read;
+            while ((read = inputStream.read(buffer)) != -1) {
+                digest.update(buffer, 0, read);
+            }
+            byte[] hash = digest.digest();
+            StringBuilder builder = new StringBuilder(hash.length * 2);
+            for (byte value : hash) {
+                builder.append(String.format("%02x", value));
+            }
+            return builder.toString();
+        } catch (NoSuchAlgorithmException exception) {
+            throw new IllegalStateException("SHA-256 is not available", exception);
+        }
+    }
+
+}

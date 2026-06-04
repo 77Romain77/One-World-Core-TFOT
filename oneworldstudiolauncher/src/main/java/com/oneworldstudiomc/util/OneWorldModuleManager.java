@@ -1,5 +1,5 @@
 /*
- * Mohist - OneWorldCore
+ * OneWorldCore
  * Copyright (C) 2018-2024.
  *
  * This program is free software: you can redistribute it and/or modify
@@ -47,7 +47,7 @@ import java.util.stream.Collectors;
  * @version 0.1
  * @date 04/05/2022 22:57
  */
-public class MohistModuleManager {
+public class OneWorldModuleManager {
 
     private static final MethodHandles.Lookup IMPL_LOOKUP;
     private static String MODULE_PATH = null;
@@ -67,7 +67,7 @@ public class MohistModuleManager {
         }
     }
 
-    public MohistModuleManager(List<String> args) {
+    public OneWorldModuleManager(List<String> args) {
         this.applyLaunchArgs(args);
         OneWorldCoreConfigUtil.setInstallationFinished(false);
         OneWorldCoreConfigUtil.save();
@@ -255,4 +255,3 @@ public class MohistModuleManager {
     private record ParserData(String module, String packages, String target) {
     }
 }
-

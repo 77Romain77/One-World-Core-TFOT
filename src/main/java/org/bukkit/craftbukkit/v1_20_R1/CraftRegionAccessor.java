@@ -420,12 +420,14 @@ public abstract class CraftRegionAccessor implements RegionAccessor {
 
     @Override
     public Entity spawnEntity(Location location, EntityType entityType) {
+        Preconditions.checkArgument(entityType != null, "EntityType cannot be null");
         Function<Location, ? extends net.minecraft.world.entity.Entity> function = entityType.getFactory();
         if (function != null) {
             return addEntity(function.apply(location), CreatureSpawnEvent.SpawnReason.CUSTOM, null, false);
         }
         Class<? extends Entity> entityClass = entityType.getEntityClass();
-        return entityClass == null ? null : spawn(location, entityClass);
+        Preconditions.checkArgument(entityClass != null, "Cannot spawn entity type %s without a Bukkit entity class", entityType);
+        return spawn(location, entityType, entityClass, null, CreatureSpawnEvent.SpawnReason.CUSTOM, true);
     }
 
     @Override
@@ -435,22 +437,26 @@ public abstract class CraftRegionAccessor implements RegionAccessor {
 
     @Override
     public Entity spawnEntity(Location loc, EntityType type, boolean randomizeData) {
+        Preconditions.checkArgument(type != null, "EntityType cannot be null");
         Function<Location, ? extends net.minecraft.world.entity.Entity> function = type.getFactory();
         if (function != null) {
             return addEntity(function.apply(loc), CreatureSpawnEvent.SpawnReason.CUSTOM, null, randomizeData);
         }
         Class<? extends Entity> entityClass = type.getEntityClass();
-        return entityClass == null ? null : spawn(loc, entityClass, null, CreatureSpawnEvent.SpawnReason.CUSTOM, randomizeData);
+        Preconditions.checkArgument(entityClass != null, "Cannot spawn entity type %s without a Bukkit entity class", type);
+        return spawn(loc, type, entityClass, null, CreatureSpawnEvent.SpawnReason.CUSTOM, randomizeData);
     }
 
     @Override
     public Entity spawnEntity(Location loc, EntityType type, boolean randomizeData, CreatureSpawnEvent.SpawnReason reason) {
+        Preconditions.checkArgument(type != null, "EntityType cannot be null");
         Function<Location, ? extends net.minecraft.world.entity.Entity> function = type.getFactory();
         if (function != null) {
             return addEntity(function.apply(loc), reason, null, randomizeData);
         }
         Class<? extends Entity> entityClass = type.getEntityClass();
-        return entityClass == null ? null : spawn(loc, type, entityClass, null, reason, randomizeData);
+        Preconditions.checkArgument(entityClass != null, "Cannot spawn entity type %s without a Bukkit entity class", type);
+        return spawn(loc, type, entityClass, null, reason, randomizeData);
     }
 
     @Override
@@ -616,10 +622,12 @@ public abstract class CraftRegionAccessor implements RegionAccessor {
         @SuppressWarnings("unchecked")
     public net.minecraft.world.entity.Entity createEntity(Location location, EntityType entityType, Class<? extends Entity> clazz, boolean randomizeData) throws IllegalArgumentException {
         Preconditions.checkArgument(location != null, "Location cannot be null");
-        Preconditions.checkArgument(clazz != null, "Entity class cannot be null");
-        if (entityType != null && MohistModsEntity.class.isAssignableFrom(clazz)) {
-            return entityType.getFactory().apply(location);
+        if (entityType != null && entityType.getFactory() != null && (clazz == null || MohistModsEntity.class.isAssignableFrom(clazz))) {
+            net.minecraft.world.entity.Entity forgeEntity = entityType.getFactory().apply(location);
+            Preconditions.checkArgument(forgeEntity != null, "Cannot spawn null entity for type %s", entityType);
+            return forgeEntity;
         }
+        Preconditions.checkArgument(clazz != null, "Entity class cannot be null");
         net.minecraft.world.entity.Entity entity = null;
         net.minecraft.world.level.Level world = getHandle().getMinecraftWorld();
 

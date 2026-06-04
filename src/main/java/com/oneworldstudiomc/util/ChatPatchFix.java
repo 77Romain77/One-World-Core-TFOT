@@ -19,6 +19,8 @@ import org.bukkit.craftbukkit.v1_20_R1.util.LazyPlayerSet;
 import org.bukkit.craftbukkit.v1_20_R1.util.Waitable;
 import org.bukkit.event.player.AsyncPlayerChatEvent;
 import org.bukkit.event.player.PlayerChatEvent;
+import org.bukkit.plugin.Plugin;
+import org.bukkit.plugin.java.JavaPlugin;
 
 public class ChatPatchFix {
 
@@ -144,9 +146,11 @@ public class ChatPatchFix {
             String originalMessage
     ) {
         boolean hasPaperListeners = io.papermc.paper.event.player.AsyncChatEvent.getHandlerList().getRegisteredListeners().length != 0;
+        String essentialsChatFormat = getEssentialsChatFormat();
         if (!hasPaperListeners
                 && lazyRecipients
                 && !org.spigotmc.SpigotConfig.bungee
+                && essentialsChatFormat == null
                 && originalFormat.equals(format)
                 && originalMessage.equals(message)
                 && source.getName().equalsIgnoreCase(source.getDisplayName())) {
@@ -168,6 +172,7 @@ public class ChatPatchFix {
             return;
         }
 
+        String effectiveFormat = essentialsChatFormat == null ? format : essentialsChatFormat;
         Component sourceDisplayName = LEGACY.deserialize(source.getDisplayName());
         Component messageComponent = LEGACY.deserialize(message);
         io.papermc.paper.event.player.AsyncChatEvent paperEvent = new io.papermc.paper.event.player.AsyncChatEvent(
@@ -176,10 +181,11 @@ public class ChatPatchFix {
                 viewers,
                 ChatRenderer.viewerUnaware((viewerSource, viewerDisplayName, viewerMessage) -> LEGACY.deserialize(
                         renderLegacyChatFormat(
-                                format,
+                                effectiveFormat,
                                 viewerSource.getName(),
                                 LEGACY.serialize(viewerDisplayName),
-                                LEGACY.serialize(viewerMessage)
+                                LEGACY.serialize(viewerMessage),
+                                viewerSource.getWorld().getName()
                         )
                 )),
                 messageComponent,
@@ -206,22 +212,28 @@ public class ChatPatchFix {
             String message,
             Set<Audience> viewers
     ) {
-        Component formatted = LEGACY.deserialize(renderLegacyChatFormat(format, source.getName(), source.getDisplayName(), message));
+        Component formatted = LEGACY.deserialize(renderLegacyChatFormat(format, source.getName(), source.getDisplayName(), message, source.getWorld().getName()));
         for (Audience viewer : viewers) {
             viewer.sendMessage(formatted);
         }
         Bukkit.getConsoleSender().sendMessage(formatted);
     }
 
-    private static String renderLegacyChatFormat(String format, String playerName, String displayName, String message) {
+    private static String renderLegacyChatFormat(String format, String playerName, String displayName, String message, String worldName) {
         String rendered;
         if (format.indexOf('{') != -1) {
             rendered = format
                     .replace("{DISPLAYNAME}", displayName)
+                    .replace("{NICKNAME}", displayName)
                     .replace("{USERNAME}", playerName)
                     .replace("{PLAYER}", playerName)
                     .replace("{NAME}", playerName)
-                    .replace("{MESSAGE}", message);
+                    .replace("{MESSAGE}", message)
+                    .replace("{WORLDNAME}", worldName)
+                    .replace("{WORLD}", worldName)
+                    .replace("{GROUP}", "")
+                    .replace("{PREFIX}", "")
+                    .replace("{SUFFIX}", "");
         } else {
             try {
                 rendered = String.format(format, displayName, message);
@@ -230,5 +242,26 @@ public class ChatPatchFix {
             }
         }
         return ChatColor.translateAlternateColorCodes('&', rendered);
+    }
+
+    private static String getEssentialsChatFormat() {
+        Plugin essentialsChat = Bukkit.getPluginManager().getPlugin("EssentialsChat");
+        if (essentialsChat == null) {
+            essentialsChat = Bukkit.getPluginManager().getPlugin("EssentialsXChat");
+        }
+        if (essentialsChat == null || !essentialsChat.isEnabled()) {
+            return null;
+        }
+
+        Plugin essentials = Bukkit.getPluginManager().getPlugin("Essentials");
+        if (!(essentials instanceof JavaPlugin javaPlugin) || !javaPlugin.isEnabled()) {
+            return null;
+        }
+
+        String format = javaPlugin.getConfig().getString("chat.format");
+        if (format == null || format.isBlank()) {
+            format = javaPlugin.getConfig().getString("format");
+        }
+        return format == null || format.isBlank() ? null : format;
     }
 }

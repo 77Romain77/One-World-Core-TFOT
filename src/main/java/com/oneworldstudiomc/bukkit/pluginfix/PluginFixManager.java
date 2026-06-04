@@ -1525,6 +1525,7 @@ public class PluginFixManager {
             case "io.lumine.mythic.bukkit.adapters.BukkitParticle" -> PluginFixManager::fixMythicBukkitParticleCompat;
             case "io.lumine.mythic.bukkit.entities.BukkitHusk" -> PluginFixManager::fixMythicBukkitHusk;
             case "io.lumine.mythic.bukkit.entities.BukkitBabyZombieVillager" -> PluginFixManager::fixMythicBabyZombieVillager;
+            case "io.lumine.mythic.core.mobs.MobType" -> PluginFixManager::fixMythicMobType;
             case "io.lumine.mythic.core.mobs.ActiveMob" -> PluginFixManager::fixMythicActiveMob;
             case "io.lumine.mythic.bukkit.commands.items.GiveCommand" -> PluginFixManager::fixMythicMobsGiveCommand;
             case "io.lumine.mythic.core.volatilecode.v1_20_R1.VolatileAIHandlerImpl" -> PluginFixManager::fixMythicMobsAIHandler;
@@ -3727,6 +3728,98 @@ public class PluginFixManager {
                 clearLocalDebugInfo(methodNode);
             }
         }
+    }
+
+    private static void fixMythicMobType(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"<init>".equals(methodNode.name)) {
+                continue;
+            }
+
+            for (AbstractInsnNode insn = methodNode.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (!(insn instanceof LdcInsnNode ldcInsnNode) || !"Options.Invisible".equals(ldcInsnNode.cst)) {
+                    continue;
+                }
+
+                int configLocalIndex = findPreviousAloadLocalIndex(ldcInsnNode);
+                if (configLocalIndex < 0) {
+                    continue;
+                }
+
+                AbstractInsnNode insertAfter = findNextApplyInvisibilityPutField(ldcInsnNode);
+                if (insertAfter == null) {
+                    continue;
+                }
+
+                InsnList aliases = new InsnList();
+                addMythicApplyInvisibilityAliasRead(aliases, configLocalIndex, "Options.ApplyInvisibility");
+                addMythicApplyInvisibilityAliasRead(aliases, configLocalIndex, "Options.ApplyInvisiblity");
+                methodNode.instructions.insert(insertAfter, aliases);
+                clearLocalDebugInfo(methodNode);
+                return;
+            }
+        }
+    }
+
+    private static int findPreviousAloadLocalIndex(AbstractInsnNode start) {
+        for (AbstractInsnNode cursor = start.getPrevious(); cursor != null; cursor = cursor.getPrevious()) {
+            if (cursor instanceof VarInsnNode varInsnNode && varInsnNode.getOpcode() == Opcodes.ALOAD) {
+                return varInsnNode.var;
+            }
+        }
+        return -1;
+    }
+
+    private static AbstractInsnNode findNextApplyInvisibilityPutField(AbstractInsnNode start) {
+        for (AbstractInsnNode cursor = start; cursor != null; cursor = cursor.getNext()) {
+            if (cursor instanceof FieldInsnNode fieldInsnNode
+                    && fieldInsnNode.getOpcode() == Opcodes.PUTFIELD
+                    && "applyInvisibility".equals(fieldInsnNode.name)
+                    && "Ljava/lang/Boolean;".equals(fieldInsnNode.desc)) {
+                return cursor;
+            }
+        }
+        return null;
+    }
+
+    private static void addMythicApplyInvisibilityAliasRead(InsnList aliases, int configLocalIndex, String optionPath) {
+        aliases.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        aliases.add(new VarInsnNode(Opcodes.ALOAD, configLocalIndex));
+        aliases.add(new LdcInsnNode(optionPath));
+        aliases.add(new VarInsnNode(Opcodes.ALOAD, 0));
+        aliases.add(new FieldInsnNode(
+                Opcodes.GETFIELD,
+                "io/lumine/mythic/core/mobs/MobType",
+                "applyInvisibility",
+                "Ljava/lang/Boolean;"
+        ));
+        aliases.add(new MethodInsnNode(
+                Opcodes.INVOKEVIRTUAL,
+                "java/lang/Boolean",
+                "booleanValue",
+                "()Z",
+                false
+        ));
+        aliases.add(new MethodInsnNode(
+                Opcodes.INVOKEINTERFACE,
+                "io/lumine/mythic/api/config/MythicConfig",
+                "getBoolean",
+                "(Ljava/lang/String;Z)Z",
+                true
+        ));
+        aliases.add(new MethodInsnNode(
+                Opcodes.INVOKESTATIC,
+                "java/lang/Boolean",
+                "valueOf",
+                "(Z)Ljava/lang/Boolean;",
+                false
+        ));
+        aliases.add(new FieldInsnNode(
+                Opcodes.PUTFIELD,
+                "io/lumine/mythic/core/mobs/MobType",
+                "applyInvisibility",
+                "Ljava/lang/Boolean;"
+        ));
     }
 
     private static void fixMythicActiveMob(ClassNode node) {
@@ -7163,50 +7256,71 @@ public class PluginFixManager {
         }
 
         try {
-            String formattedTitle = animateMiniMessageGradientCompat(title);
+            String gradientTitle = renderMiniMessageGradientToLegacyCompat(title);
+            if (gradientTitle != null) {
+                return gradientTitle;
+            }
             return net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().serialize(
-                    net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(formattedTitle)
+                    net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(title)
             );
         } catch (RuntimeException ignored) {
             return title;
         }
     }
 
-    private static String animateMiniMessageGradientCompat(String title) {
+    private static String renderMiniMessageGradientToLegacyCompat(String title) {
         String lower = title.toLowerCase(java.util.Locale.ROOT);
         if (!lower.contains("<gradient:")) {
-            return title;
+            return null;
         }
 
-        StringBuilder result = new StringBuilder(title.length() + 8);
+        StringBuilder result = new StringBuilder(title.length() * 4);
         int cursor = 0;
+        boolean renderedGradient = false;
 
         while (cursor < title.length()) {
             int start = lower.indexOf("<gradient:", cursor);
             if (start < 0) {
-                result.append(title, cursor, title.length());
+                appendMiniMessageAsLegacyCompat(result, title.substring(cursor));
                 break;
             }
 
             int end = title.indexOf('>', start);
             if (end < 0) {
-                result.append(title, cursor, title.length());
+                appendMiniMessageAsLegacyCompat(result, title.substring(cursor));
                 break;
             }
 
-            result.append(title, cursor, start);
-            String tag = title.substring(start + 1, end);
-            result.append('<').append(withAnimatedGradientColorsCompat(tag)).append('>');
-            cursor = end + 1;
+            appendMiniMessageAsLegacyCompat(result, title.substring(cursor, start));
+            ParsedGradientTag gradient = parseGradientTagCompat(title.substring(start + 1, end));
+            if (gradient == null) {
+                result.append(title, start, end + 1);
+                cursor = end + 1;
+                continue;
+            }
+
+            int close = lower.indexOf("</gradient>", end + 1);
+            if (close < 0) {
+                result.append(title, start, end + 1);
+                cursor = end + 1;
+                continue;
+            }
+
+            appendGradientLegacyCompat(result, title.substring(end + 1, close), gradient.colors());
+            renderedGradient = true;
+            cursor = close + "</gradient>".length();
         }
 
-        return result.toString();
+        return renderedGradient ? result.toString() : null;
     }
 
-    private static String withAnimatedGradientColorsCompat(String tag) {
+    private record ParsedGradientTag(int[] colors) {
+    }
+
+    private static ParsedGradientTag parseGradientTagCompat(String tag) {
         String prefix = "gradient:";
         if (!tag.regionMatches(true, 0, prefix, 0, prefix.length())) {
-            return tag;
+            return null;
         }
 
         String body = tag.substring(prefix.length());
@@ -7215,40 +7329,86 @@ public class PluginFixManager {
             parts = java.util.Arrays.copyOf(parts, parts.length - 1);
         }
         if (parts.length < 2) {
-            return tag;
+            return null;
         }
 
         int[] colors = new int[parts.length];
         for (int index = 0; index < parts.length; index++) {
             Integer color = parseGradientHexColorCompat(parts[index]);
             if (color == null) {
-                return prefix + String.join(":", parts);
+                return null;
             }
             colors[index] = color;
         }
+        return new ParsedGradientTag(colors);
+    }
 
-        double blend = ((Math.sin(System.currentTimeMillis() / 450.0D) + 1.0D) / 2.0D) * 0.35D;
-        StringBuilder animated = new StringBuilder(prefix);
-        for (int index = 0; index < colors.length; index++) {
-            if (index > 0) {
-                animated.append(':');
-            }
-            animated.append(formatGradientHexColorCompat(blendGradientColorCompat(
-                    colors[index],
-                    colors[(index + 1) % colors.length],
-                    blend
-            )));
+    private static void appendMiniMessageAsLegacyCompat(StringBuilder result, String text) {
+        if (text == null || text.isEmpty()) {
+            return;
         }
-        return animated.toString();
+
+        try {
+            result.append(net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().serialize(
+                    net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(text)
+            ));
+        } catch (RuntimeException ignored) {
+            result.append(text);
+        }
+    }
+
+    private static void appendGradientLegacyCompat(StringBuilder result, String content, int[] colors) {
+        String plainContent;
+        try {
+            plainContent = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(
+                    net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(content)
+            );
+        } catch (RuntimeException ignored) {
+            plainContent = content;
+        }
+
+        int[] codePoints = plainContent.codePoints().toArray();
+        int visibleLength = codePoints.length;
+        if (visibleLength == 0) {
+            return;
+        }
+
+        for (int index = 0; index < visibleLength; index++) {
+            double position = visibleLength == 1 ? 0.0D : index / (double) (visibleLength - 1);
+            int color = interpolateGradientColorsCompat(colors, position);
+            appendLegacyHexColorCompat(result, color);
+            result.appendCodePoint(codePoints[index]);
+        }
+    }
+
+    private static int interpolateGradientColorsCompat(int[] colors, double position) {
+        if (colors.length == 1) {
+            return colors[0];
+        }
+
+        double clamped = Math.max(0.0D, Math.min(1.0D, position));
+        double scaled = clamped * (colors.length - 1);
+        int fromIndex = (int) Math.floor(scaled);
+        int toIndex = Math.min(fromIndex + 1, colors.length - 1);
+        double amount = scaled - fromIndex;
+        return blendGradientColorCompat(colors[fromIndex], colors[toIndex], amount);
+    }
+
+    private static void appendLegacyHexColorCompat(StringBuilder result, int color) {
+        String hex = formatGradientHexColorCompat(color).substring(1);
+        result.append('\u00A7').append('x');
+        for (int index = 0; index < hex.length(); index++) {
+            result.append('\u00A7').append(hex.charAt(index));
+        }
     }
 
     private static boolean isGradientPhaseCompat(String value) {
-        if (value == null || value.isBlank()) {
+        if (value == null || value.isEmpty()) {
             return false;
         }
         try {
-            Double.parseDouble(value);
-            return true;
+            double phase = Double.parseDouble(value);
+            return phase >= -1.0D && phase <= 1.0D;
         } catch (NumberFormatException ignored) {
             return false;
         }
@@ -7281,113 +7441,6 @@ public class PluginFixManager {
     private static String formatGradientHexColorCompat(int color) {
         return String.format(java.util.Locale.ROOT, "#%06X", color & 0xFFFFFF);
     }
-
-    public static org.bukkit.entity.Entity mythicApplyHuskOptionsCompat(Object mythicHusk, org.bukkit.entity.Entity entity) {
-        if (!(entity instanceof org.bukkit.entity.Husk husk)) {
-            return entity;
-        }
-
-        try {
-            husk.setBaby(false);
-        } catch (Throwable ignored) {
-        }
-
-        double reinforcementChance = -1.0D;
-        boolean preventConversion = false;
-        try {
-            Object chanceObj = readDeclaredFieldCompat(mythicHusk.getClass(), mythicHusk, "reinforcementChance");
-            if (chanceObj instanceof Number chance) {
-                reinforcementChance = chance.doubleValue();
-            }
-        } catch (Throwable ignored) {
-        }
-        try {
-            Object preventObj = readDeclaredFieldCompat(mythicHusk.getClass(), mythicHusk, "preventConversion");
-            if (preventObj instanceof Boolean prevent) {
-                preventConversion = prevent;
-            }
-        } catch (Throwable ignored) {
-        }
-
-        if (reinforcementChance >= 0.0D) {
-            try {
-                org.bukkit.attribute.AttributeInstance attribute =
-                        husk.getAttribute(org.bukkit.attribute.Attribute.ZOMBIE_SPAWN_REINFORCEMENTS);
-                if (attribute != null) {
-                    attribute.setBaseValue(reinforcementChance);
-                }
-            } catch (Throwable ignored) {
-            }
-        }
-
-        if (preventConversion) {
-            try {
-                husk.setConversionTime(Integer.MAX_VALUE);
-            } catch (Throwable ignored) {
-            }
-        }
-
-        return husk;
-    }
-
-    public static void mythicScheduleLoadedMobLoadRetryCompat(Object activeMob) {
-        if (activeMob == null) {
-            return;
-        }
-
-        try {
-            org.bukkit.plugin.Plugin plugin = org.bukkit.Bukkit.getPluginManager().getPlugin("MythicMobs");
-            if (plugin == null || !plugin.isEnabled()) {
-                return;
-            }
-
-            org.bukkit.Bukkit.getScheduler().runTaskLater(plugin, () -> mythicReplayLoadedMobLoadCompat(activeMob), 20L);
-            org.bukkit.Bukkit.getScheduler().runTaskLater(plugin, () -> mythicReplayLoadedMobLoadCompat(activeMob), 60L);
-        } catch (Throwable ignored) {
-        }
-    }
-
-    private static void mythicReplayLoadedMobLoadCompat(Object activeMob) {
-        if (activeMob == null) {
-            return;
-        }
-
-        try {
-            org.bukkit.plugin.Plugin plugin = org.bukkit.Bukkit.getPluginManager().getPlugin("MythicMobs");
-            if (plugin == null || !plugin.isEnabled()) {
-                return;
-            }
-
-            Method validateLoadedMob = activeMob.getClass().getMethod("validateLoadedMob");
-            Object valid = validateLoadedMob.invoke(activeMob);
-            if (!(valid instanceof Boolean validMob) || !validMob) {
-                return;
-            }
-
-            ClassLoader loader = activeMob.getClass().getClassLoader();
-            Class<?> mythicBukkitClass = Class.forName("io.lumine.mythic.bukkit.MythicBukkit", false, loader);
-            Object mythicBukkit = mythicBukkitClass.getMethod("inst").invoke(null);
-            Object skillManager = mythicBukkit.getClass().getMethod("getSkillManager").invoke(mythicBukkit);
-            Object eventBus = skillManager.getClass().getMethod("getEventBus").invoke(skillManager);
-
-            Class<?> skillTriggersClass = Class.forName("io.lumine.mythic.core.skills.SkillTriggers", false, loader);
-            Object loadTrigger = skillTriggersClass.getField("LOAD").get(null);
-            Method buildSkillMetadata = findMethodByNameAndParameterCountCompat(eventBus.getClass(), "buildSkillMetadata", 5);
-            Method processTriggerMechanics = findMethodByNameAndParameterCountCompat(eventBus.getClass(), "processTriggerMechanics", 1);
-            if (buildSkillMetadata == null || processTriggerMechanics == null) {
-                return;
-            }
-
-            buildSkillMetadata.setAccessible(true);
-            processTriggerMechanics.setAccessible(true);
-            Object metadata = buildSkillMetadata.invoke(eventBus, loadTrigger, activeMob, null, null, false);
-            if (metadata != null) {
-                processTriggerMechanics.invoke(eventBus, metadata);
-            }
-        } catch (Throwable ignored) {
-        }
-    }
-
     private static net.minecraft.network.chat.Component parseEntityCustomNameCompat(String customName) {
         if (customName == null) {
             return null;

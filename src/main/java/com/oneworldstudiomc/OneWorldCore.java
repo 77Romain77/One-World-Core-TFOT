@@ -35,6 +35,7 @@ public class OneWorldCore {
         LOGGER.info("All Rights Reserved - One World Studio 2019-2026");
         EventDispatcherRegistry.init();
         ProxySelector.setDefault(new MohistProxySelector(ProxySelector.getDefault()));
+        OneWorldUpdater.checkOnStartup();
     }
 
     public static void initVersion() {
@@ -63,4 +64,3 @@ public class OneWorldCore {
         return implementationVersion == null || implementationVersion.isBlank() ? "unknown" : implementationVersion;
     }
 }
-

@@ -550,6 +550,18 @@ public class CraftWorld extends CraftRegionAccessor implements World {
     }
 
     @Override
+    public <T extends Entity> T spawn(Location location, Class<T> clazz, java.util.function.Consumer<T> function) throws IllegalArgumentException {
+        Consumer<T> bukkitConsumer = function == null ? null : function::accept;
+        return this.spawn(location, clazz, bukkitConsumer);
+    }
+
+    @Override
+    public <T extends Entity> T spawn(Location location, Class<T> clazz, boolean randomizeData, java.util.function.Consumer<T> function) throws IllegalArgumentException {
+        Consumer<T> bukkitConsumer = function == null ? null : function::accept;
+        return this.spawn(location, clazz, randomizeData, bukkitConsumer);
+    }
+
+    @Override
     public Arrow spawnArrow(Location loc, Vector velocity, float speed, float spread) {
         return spawnArrow(loc, velocity, speed, spread, Arrow.class);
     }

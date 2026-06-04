@@ -1501,6 +1501,7 @@ public class PluginFixManager {
             case "io.lumine.mythic.bukkit.commands.items.GiveCommand" -> PluginFixManager::fixMythicMobsGiveCommand;
             case "io.lumine.mythic.core.volatilecode.v1_20_R1.VolatileAIHandlerImpl" -> PluginFixManager::fixMythicMobsAIHandler;
             case "io.lumine.mythic.core.volatilecode.v1_20_R1.VolatileEntityHandlerImpl" -> PluginFixManager::fixMythicMobsEntityHandler;
+            case "io.lumine.mythic.core.skills.mechanics.ParticleTornadoEffect$Animator" -> PluginFixManager::fixMythicParticleTornadoAnimator;
             case "io.lumine.mythic.core.skills.mechanics.SoundEffect" -> PluginFixManager::fixFancyHologramsLocationAccessors;
             case "io.lumine.mythiccrucible.items.ItemManager" -> PluginFixManager::fixMythicCrucibleItemManager;
             case "io.lumine.mythiccrucible.items.recipes.crafting.recipes.vmp.VanillaInventoryMapping" -> PluginFixManager::fixMythicCrucibleVanillaInventoryMapping;
@@ -3657,6 +3658,32 @@ public class PluginFixManager {
             toInject.add(new VarInsnNode(Opcodes.ASTORE, 2));
             methodNode.instructions.insert(toInject);
             clearLocalDebugInfo(methodNode);
+        }
+    }
+
+    private static void fixMythicParticleTornadoAnimator(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if (!"<init>".equals(methodNode.name)
+                    || !"(Lio/lumine/mythic/core/skills/mechanics/ParticleTornadoEffect;II)V".equals(methodNode.desc)) {
+                continue;
+            }
+
+            for (AbstractInsnNode insn = methodNode.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (!(insn instanceof MethodInsnNode methodInsnNode)
+                        || !"io/lumine/mythic/bukkit/utils/tasks/TaskScheduler".equals(methodInsnNode.owner)
+                        || !"runRepeating".equals(methodInsnNode.name)
+                        || !"(Ljava/lang/Runnable;JJ)Lio/lumine/mythic/bukkit/utils/tasks/Task;".equals(methodInsnNode.desc)) {
+                    continue;
+                }
+
+                for (AbstractInsnNode previous = insn.getPrevious(); previous != null; previous = previous.getPrevious()) {
+                    if (previous.getOpcode() == Opcodes.LCONST_0) {
+                        methodNode.instructions.set(previous, new InsnNode(Opcodes.LCONST_1));
+                        clearLocalDebugInfo(methodNode);
+                        return;
+                    }
+                }
+            }
         }
     }
 
@@ -6703,11 +6730,37 @@ public class PluginFixManager {
             return byName;
         }
 
-        return switch (name) {
+        String normalizedName = name.toUpperCase(java.util.Locale.ROOT);
+        return switch (normalizedName) {
+            case "ITEM" -> EntityType.DROPPED_ITEM;
+            case "EXPERIENCE_BOTTLE" -> EntityType.THROWN_EXP_BOTTLE;
+            case "EXPERIENCE_ORB" -> EntityType.EXPERIENCE_ORB;
+            case "END_CRYSTAL" -> EntityType.ENDER_CRYSTAL;
+            case "TNT" -> EntityType.PRIMED_TNT;
             case "SNOW_GOLEM" -> EntityType.SNOWMAN;
+            case "MOOSHROOM" -> EntityType.MUSHROOM_COW;
+            case "CHEST_MINECART" -> EntityType.MINECART_CHEST;
+            case "COMMAND_BLOCK_MINECART" -> EntityType.MINECART_COMMAND;
+            case "FURNACE_MINECART" -> EntityType.MINECART_FURNACE;
+            case "HOPPER_MINECART" -> EntityType.MINECART_HOPPER;
+            case "SPAWNER_MINECART" -> EntityType.MINECART_MOB_SPAWNER;
+            case "TNT_MINECART" -> EntityType.MINECART_TNT;
+            case "ACACIA_BOAT", "BAMBOO_RAFT", "BIRCH_BOAT", "CHERRY_BOAT", "DARK_OAK_BOAT",
+                    "JUNGLE_BOAT", "MANGROVE_BOAT", "OAK_BOAT", "SPRUCE_BOAT" -> EntityType.BOAT;
+            case "ACACIA_CHEST_BOAT", "BAMBOO_CHEST_RAFT", "BIRCH_CHEST_BOAT", "CHERRY_CHEST_BOAT",
+                    "DARK_OAK_CHEST_BOAT", "JUNGLE_CHEST_BOAT", "MANGROVE_CHEST_BOAT",
+                    "OAK_CHEST_BOAT", "SPRUCE_CHEST_BOAT" -> EntityType.CHEST_BOAT;
             case "BREEZE" -> EntityType.BLAZE;
             case "BOGGED" -> EntityType.SKELETON;
             case "ARMADILLO" -> EntityType.RABBIT;
+            case "CAMEL_HUSK" -> EntityType.CAMEL;
+            case "COPPER_GOLEM" -> EntityType.IRON_GOLEM;
+            case "CREAKING" -> EntityType.WARDEN;
+            case "HAPPY_GHAST" -> EntityType.GHAST;
+            case "MANNEQUIN" -> EntityType.ARMOR_STAND;
+            case "NAUTILUS" -> EntityType.SQUID;
+            case "PARCHED" -> EntityType.HUSK;
+            case "ZOMBIE_NAUTILUS" -> EntityType.DROWNED;
             case "WIND_CHARGE", "BREEZE_WIND_CHARGE" -> EntityType.SMALL_FIREBALL;
             default -> EntityType.UNKNOWN;
         };

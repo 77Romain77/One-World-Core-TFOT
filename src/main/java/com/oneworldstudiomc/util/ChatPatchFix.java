@@ -178,12 +178,11 @@ public class ChatPatchFix {
             viewers.addAll(recipients);
         }
 
-        if (!originalFormat.equals(format) || !originalMessage.equals(message)) {
-            sendLegacyFormattedChat(source, format, message, viewers);
+        if (!originalFormat.equals(format) || !originalMessage.equals(message) || essentialsChatFormat != null) {
+            sendLegacyFormattedChat(source, essentialsChatFormat == null ? format : essentialsChatFormat, message, viewers);
             return;
         }
 
-        String effectiveFormat = essentialsChatFormat == null ? format : essentialsChatFormat;
         Component sourceDisplayName = LEGACY.deserialize(source.getDisplayName());
         Component messageComponent = LEGACY.deserialize(message);
         io.papermc.paper.event.player.AsyncChatEvent paperEvent = new io.papermc.paper.event.player.AsyncChatEvent(
@@ -192,7 +191,7 @@ public class ChatPatchFix {
                 viewers,
                 ChatRenderer.viewerUnaware((viewerSource, viewerDisplayName, viewerMessage) -> LEGACY.deserialize(
                         renderLegacyChatFormat(
-                                effectiveFormat,
+                                format,
                                 viewerSource.getName(),
                                 LEGACY.serialize(viewerDisplayName),
                                 LEGACY.serialize(viewerMessage),
@@ -233,18 +232,17 @@ public class ChatPatchFix {
     private static String renderLegacyChatFormat(String format, String playerName, String displayName, String message, String worldName) {
         String rendered;
         if (format.indexOf('{') != -1) {
-            rendered = format
-                    .replace("{DISPLAYNAME}", displayName)
-                    .replace("{NICKNAME}", displayName)
-                    .replace("{USERNAME}", playerName)
-                    .replace("{PLAYER}", playerName)
-                    .replace("{NAME}", playerName)
-                    .replace("{MESSAGE}", message)
-                    .replace("{WORLDNAME}", worldName)
-                    .replace("{WORLD}", worldName)
-                    .replace("{GROUP}", "")
-                    .replace("{PREFIX}", "")
-                    .replace("{SUFFIX}", "");
+            rendered = replaceLegacyPlaceholder(format, "DISPLAYNAME", displayName);
+            rendered = replaceLegacyPlaceholder(rendered, "NICKNAME", displayName);
+            rendered = replaceLegacyPlaceholder(rendered, "USERNAME", playerName);
+            rendered = replaceLegacyPlaceholder(rendered, "PLAYER", playerName);
+            rendered = replaceLegacyPlaceholder(rendered, "NAME", playerName);
+            rendered = replaceLegacyPlaceholder(rendered, "MESSAGE", message);
+            rendered = replaceLegacyPlaceholder(rendered, "WORLDNAME", worldName);
+            rendered = replaceLegacyPlaceholder(rendered, "WORLD", worldName);
+            rendered = replaceLegacyPlaceholder(rendered, "GROUP", "");
+            rendered = replaceLegacyPlaceholder(rendered, "PREFIX", "");
+            rendered = replaceLegacyPlaceholder(rendered, "SUFFIX", "");
         } else {
             try {
                 rendered = String.format(format, displayName, message);
@@ -255,34 +253,42 @@ public class ChatPatchFix {
         return ChatColor.translateAlternateColorCodes('&', rendered);
     }
 
+    private static String replaceLegacyPlaceholder(String input, String placeholder, String value) {
+        return input
+                .replace("{" + placeholder + "}", value)
+                .replace("{" + placeholder.toLowerCase(java.util.Locale.ROOT) + "}", value);
+    }
+
     private static String getEssentialsChatFormat(org.bukkit.entity.Player player) {
-        Plugin essentialsChat = Bukkit.getPluginManager().getPlugin("EssentialsChat");
-        if (essentialsChat == null) {
-            essentialsChat = Bukkit.getPluginManager().getPlugin("EssentialsXChat");
-        }
-        if (essentialsChat == null || !essentialsChat.isEnabled()) {
-            return null;
+        for (String pluginName : new String[]{"Essentials", "EssentialsChat", "EssentialsXChat"}) {
+            Plugin plugin = Bukkit.getPluginManager().getPlugin(pluginName);
+            if (plugin instanceof JavaPlugin javaPlugin) {
+                String format = readEssentialsChatFormat(javaPlugin.getConfig(), player);
+                if (format == null) {
+                    format = readEssentialsChatFormat(loadPluginConfig(javaPlugin), player);
+                }
+                if (format != null) {
+                    return format;
+                }
+            }
         }
 
-        Plugin essentials = Bukkit.getPluginManager().getPlugin("Essentials");
-        String format = null;
-        if (essentials instanceof JavaPlugin javaPlugin && javaPlugin.isEnabled()) {
-            format = readEssentialsChatFormat(javaPlugin.getConfig(), player);
-            if (format == null) {
-                format = readEssentialsChatFormat(loadPluginConfig(javaPlugin), player);
+        File pluginsFolder = new File("plugins");
+        for (String pluginFolder : new String[]{"Essentials", "EssentialsChat", "EssentialsXChat"}) {
+            String format = readEssentialsChatFormat(loadConfigFile(new File(pluginsFolder, pluginFolder + File.separator + "config.yml")), player);
+            if (format != null) {
+                return format;
             }
         }
-        if (format == null && essentialsChat instanceof JavaPlugin javaPlugin) {
-            format = readEssentialsChatFormat(javaPlugin.getConfig(), player);
-            if (format == null) {
-                format = readEssentialsChatFormat(loadPluginConfig(javaPlugin), player);
-            }
-        }
-        return format;
+        return null;
     }
 
     private static FileConfiguration loadPluginConfig(JavaPlugin plugin) {
         File configFile = new File(plugin.getDataFolder(), "config.yml");
+        return loadConfigFile(configFile);
+    }
+
+    private static FileConfiguration loadConfigFile(File configFile) {
         return configFile.isFile() ? YamlConfiguration.loadConfiguration(configFile) : null;
     }
 

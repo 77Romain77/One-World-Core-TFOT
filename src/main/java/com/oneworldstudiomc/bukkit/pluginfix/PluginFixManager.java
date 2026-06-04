@@ -1496,7 +1496,9 @@ public class PluginFixManager {
             case "io.lumine.mythic.bukkit.utils.version.ServerVersion" -> PluginFixManager::fixMythicMobsServerVersion;
             case "io.lumine.mythic.bukkit.MythicBukkit" -> PluginFixManager::fixMythicBukkitTimingsHandler;
             case "io.lumine.mythic.bukkit.BukkitBootstrap" -> PluginFixManager::fixMythicBukkitBootstrap;
+            case "io.lumine.mythic.bukkit.adapters.bossbars.BukkitBossBar" -> PluginFixManager::fixMythicBukkitBossBar;
             case "io.lumine.mythic.bukkit.adapters.BukkitParticle" -> PluginFixManager::fixMythicBukkitParticleCompat;
+            case "io.lumine.mythic.bukkit.entities.BukkitHusk" -> PluginFixManager::fixMythicBukkitHusk;
             case "io.lumine.mythic.bukkit.entities.BukkitBabyZombieVillager" -> PluginFixManager::fixMythicBabyZombieVillager;
             case "io.lumine.mythic.bukkit.commands.items.GiveCommand" -> PluginFixManager::fixMythicMobsGiveCommand;
             case "io.lumine.mythic.core.volatilecode.v1_20_R1.VolatileAIHandlerImpl" -> PluginFixManager::fixMythicMobsAIHandler;
@@ -3589,6 +3591,13 @@ public class PluginFixManager {
                 ));
                 toInject.add(new InsnNode(Opcodes.DUP));
                 toInject.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 1));
+                toInject.add(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC,
+                        Type.getInternalName(PluginFixManager.class),
+                        "mythicBossBarTitleCompat",
+                        "(Ljava/lang/String;)Ljava/lang/String;",
+                        false
+                ));
                 toInject.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 2));
                 toInject.add(new org.objectweb.asm.tree.VarInsnNode(Opcodes.ALOAD, 3));
                 toInject.add(new MethodInsnNode(
@@ -3636,6 +3645,61 @@ public class PluginFixManager {
             methodNode.instructions = toInject;
             methodNode.tryCatchBlocks.clear();
             clearLocalDebugInfo(methodNode);
+        }
+    }
+
+    private static void fixMythicBukkitBossBar(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if ("setTitle".equals(methodNode.name) && "(Ljava/lang/String;)V".equals(methodNode.desc)) {
+                InsnList replacement = new InsnList();
+                replacement.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                replacement.add(new FieldInsnNode(
+                        Opcodes.GETFIELD,
+                        "io/lumine/mythic/bukkit/adapters/bossbars/BukkitBossBar",
+                        "bar",
+                        "Lorg/bukkit/boss/BossBar;"
+                ));
+                replacement.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                replacement.add(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC,
+                        Type.getInternalName(PluginFixManager.class),
+                        "mythicBossBarTitleCompat",
+                        "(Ljava/lang/String;)Ljava/lang/String;",
+                        false
+                ));
+                replacement.add(new MethodInsnNode(
+                        Opcodes.INVOKEINTERFACE,
+                        "org/bukkit/boss/BossBar",
+                        "setTitle",
+                        "(Ljava/lang/String;)V",
+                        true
+                ));
+                replacement.add(new InsnNode(Opcodes.RETURN));
+                methodNode.instructions = replacement;
+                methodNode.tryCatchBlocks.clear();
+                clearLocalDebugInfo(methodNode);
+            }
+        }
+    }
+
+    private static void fixMythicBukkitHusk(ClassNode node) {
+        for (MethodNode methodNode : node.methods) {
+            if ("applyOptions".equals(methodNode.name) && "(Lorg/bukkit/entity/Entity;)Lorg/bukkit/entity/Entity;".equals(methodNode.desc)) {
+                InsnList replacement = new InsnList();
+                replacement.add(new VarInsnNode(Opcodes.ALOAD, 0));
+                replacement.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                replacement.add(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC,
+                        Type.getInternalName(PluginFixManager.class),
+                        "mythicApplyHuskOptionsCompat",
+                        "(Ljava/lang/Object;Lorg/bukkit/entity/Entity;)Lorg/bukkit/entity/Entity;",
+                        false
+                ));
+                replacement.add(new InsnNode(Opcodes.ARETURN));
+                methodNode.instructions = replacement;
+                methodNode.tryCatchBlocks.clear();
+                clearLocalDebugInfo(methodNode);
+            }
         }
     }
 
@@ -5314,26 +5378,43 @@ public class PluginFixManager {
 
     private static void fixMythicMobsEntityHandler(ClassNode node) {
         for (MethodNode methodNode : node.methods) {
-            if (!"setHitBox".equals(methodNode.name)
-                    || !"(Lio/lumine/mythic/api/adapters/AbstractEntity;DD)V".equals(methodNode.desc)) {
+            if ("setCustomName".equals(methodNode.name)
+                    && "(Lio/lumine/mythic/api/adapters/AbstractEntity;Ljava/lang/String;)V".equals(methodNode.desc)) {
+                InsnList replacement = new InsnList();
+                replacement.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                replacement.add(new VarInsnNode(Opcodes.ALOAD, 2));
+                replacement.add(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC,
+                        Type.getInternalName(PluginFixManager.class),
+                        "mythicSetCustomNameCompat",
+                        "(Ljava/lang/Object;Ljava/lang/String;)V",
+                        false
+                ));
+                replacement.add(new InsnNode(Opcodes.RETURN));
+                methodNode.instructions = replacement;
+                methodNode.tryCatchBlocks.clear();
+                clearLocalDebugInfo(methodNode);
                 continue;
             }
 
-            InsnList replacement = new InsnList();
-            replacement.add(new VarInsnNode(Opcodes.ALOAD, 1));
-            replacement.add(new VarInsnNode(Opcodes.DLOAD, 2));
-            replacement.add(new VarInsnNode(Opcodes.DLOAD, 4));
-            replacement.add(new MethodInsnNode(
-                    Opcodes.INVOKESTATIC,
-                    Type.getInternalName(PluginFixManager.class),
-                    "mythicSetHitBoxCompat",
-                    "(Ljava/lang/Object;DD)V",
-                    false
-            ));
-            replacement.add(new InsnNode(Opcodes.RETURN));
-            methodNode.instructions = replacement;
-            methodNode.tryCatchBlocks.clear();
-            clearLocalDebugInfo(methodNode);
+            if ("setHitBox".equals(methodNode.name)
+                    && "(Lio/lumine/mythic/api/adapters/AbstractEntity;DD)V".equals(methodNode.desc)) {
+                InsnList replacement = new InsnList();
+                replacement.add(new VarInsnNode(Opcodes.ALOAD, 1));
+                replacement.add(new VarInsnNode(Opcodes.DLOAD, 2));
+                replacement.add(new VarInsnNode(Opcodes.DLOAD, 4));
+                replacement.add(new MethodInsnNode(
+                        Opcodes.INVOKESTATIC,
+                        Type.getInternalName(PluginFixManager.class),
+                        "mythicSetHitBoxCompat",
+                        "(Ljava/lang/Object;DD)V",
+                        false
+                ));
+                replacement.add(new InsnNode(Opcodes.RETURN));
+                methodNode.instructions = replacement;
+                methodNode.tryCatchBlocks.clear();
+                clearLocalDebugInfo(methodNode);
+            }
         }
     }
 
@@ -7006,6 +7087,118 @@ public class PluginFixManager {
         } catch (Throwable throwable) {
             throw new IllegalStateException("Could not update MythicMobs entity hitbox", throwable);
         }
+    }
+
+    public static void mythicSetCustomNameCompat(Object mythicAbstractEntity, String customName) {
+        if (mythicAbstractEntity == null) {
+            return;
+        }
+
+        try {
+            Object bukkitEntityObj = invokeNoArgs(mythicAbstractEntity, "getBukkitEntity");
+            if (!(bukkitEntityObj instanceof org.bukkit.craftbukkit.v1_20_R1.entity.CraftEntity craftEntity)) {
+                return;
+            }
+            craftEntity.getHandle().setCustomName(parseEntityCustomNameCompat(customName));
+        } catch (Throwable throwable) {
+            throw new IllegalStateException("Could not update MythicMobs entity custom name", throwable);
+        }
+    }
+
+    public static String mythicBossBarTitleCompat(String title) {
+        if (!looksLikeMiniMessageCompat(title)) {
+            return title;
+        }
+
+        try {
+            return net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer.legacySection().serialize(
+                    net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(title)
+            );
+        } catch (RuntimeException ignored) {
+            return title;
+        }
+    }
+
+    public static org.bukkit.entity.Entity mythicApplyHuskOptionsCompat(Object mythicHusk, org.bukkit.entity.Entity entity) {
+        if (!(entity instanceof org.bukkit.entity.Husk husk)) {
+            return entity;
+        }
+
+        try {
+            husk.setBaby(false);
+        } catch (Throwable ignored) {
+        }
+
+        double reinforcementChance = -1.0D;
+        boolean preventConversion = false;
+        try {
+            Object chanceObj = readDeclaredFieldCompat(mythicHusk.getClass(), mythicHusk, "reinforcementChance");
+            if (chanceObj instanceof Number chance) {
+                reinforcementChance = chance.doubleValue();
+            }
+        } catch (Throwable ignored) {
+        }
+        try {
+            Object preventObj = readDeclaredFieldCompat(mythicHusk.getClass(), mythicHusk, "preventConversion");
+            if (preventObj instanceof Boolean prevent) {
+                preventConversion = prevent;
+            }
+        } catch (Throwable ignored) {
+        }
+
+        if (reinforcementChance >= 0.0D) {
+            try {
+                org.bukkit.attribute.AttributeInstance attribute =
+                        husk.getAttribute(org.bukkit.attribute.Attribute.ZOMBIE_SPAWN_REINFORCEMENTS);
+                if (attribute != null) {
+                    attribute.setBaseValue(reinforcementChance);
+                }
+            } catch (Throwable ignored) {
+            }
+        }
+
+        if (preventConversion) {
+            try {
+                husk.setConversionTime(Integer.MAX_VALUE);
+            } catch (Throwable ignored) {
+            }
+        }
+
+        return husk;
+    }
+
+    private static net.minecraft.network.chat.Component parseEntityCustomNameCompat(String customName) {
+        if (customName == null) {
+            return null;
+        }
+        if (looksLikeMiniMessageCompat(customName)) {
+            try {
+                return com.oneworldstudiomc.paper.adventure.PaperAdventure.asVanilla(
+                        net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(customName)
+                );
+            } catch (RuntimeException ignored) {
+            }
+        }
+        return org.bukkit.craftbukkit.v1_20_R1.util.CraftChatMessage.fromStringOrNull(customName);
+    }
+
+    private static boolean looksLikeMiniMessageCompat(String text) {
+        if (text == null || text.indexOf('<') == -1 || text.indexOf('>') == -1) {
+            return false;
+        }
+        String lower = text.toLowerCase(java.util.Locale.ROOT);
+        return lower.contains("<gradient:")
+                || lower.contains("</gradient>")
+                || lower.contains("<rainbow")
+                || lower.contains("</rainbow>")
+                || lower.contains("<transition:")
+                || lower.contains("<#")
+                || lower.contains("<color:")
+                || lower.contains("<bold>")
+                || lower.contains("<italic>")
+                || lower.contains("<underlined>")
+                || lower.contains("<strikethrough>")
+                || lower.contains("<obfuscated>");
     }
 
     public static void loadZapperDependenciesCompat(Object dependencyManager) {

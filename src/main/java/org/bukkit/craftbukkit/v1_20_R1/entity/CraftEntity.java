@@ -795,7 +795,7 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
 
     @Override
     public void customName(final net.kyori.adventure.text.Component customName) {
-        this.getHandle().setCustomName(customName != null ? PaperAdventure.asVanilla(customName) : null);
+        this.getHandle().setCustomName(customName != null ? customNameToVanilla(customName) : null);
     }
 
     @Override
@@ -805,7 +805,50 @@ public abstract class CraftEntity implements org.bukkit.entity.Entity {
             name = name.substring(0, 256);
         }
 
-        getHandle().setCustomName(CraftChatMessage.fromStringOrNull(name));
+        getHandle().setCustomName(customNameToVanilla(name));
+    }
+
+    private static Component customNameToVanilla(final net.kyori.adventure.text.Component customName) {
+        String plainText = net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer.plainText().serialize(customName);
+        if (looksLikeMiniMessage(plainText)) {
+            try {
+                return PaperAdventure.asVanilla(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(plainText));
+            } catch (RuntimeException ignored) {
+            }
+        }
+        return PaperAdventure.asVanilla(customName);
+    }
+
+    private static Component customNameToVanilla(final String customName) {
+        if (customName == null) {
+            return null;
+        }
+        if (looksLikeMiniMessage(customName)) {
+            try {
+                return PaperAdventure.asVanilla(net.kyori.adventure.text.minimessage.MiniMessage.miniMessage().deserialize(customName));
+            } catch (RuntimeException ignored) {
+            }
+        }
+        return CraftChatMessage.fromStringOrNull(customName);
+    }
+
+    private static boolean looksLikeMiniMessage(final String text) {
+        if (text == null || text.indexOf('<') == -1 || text.indexOf('>') == -1) {
+            return false;
+        }
+        String lower = text.toLowerCase(java.util.Locale.ROOT);
+        return lower.contains("<gradient:")
+                || lower.contains("</gradient>")
+                || lower.contains("<rainbow")
+                || lower.contains("</rainbow>")
+                || lower.contains("<transition:")
+                || lower.contains("<#")
+                || lower.contains("<color:")
+                || lower.contains("<bold>")
+                || lower.contains("<italic>")
+                || lower.contains("<underlined>")
+                || lower.contains("<strikethrough>")
+                || lower.contains("<obfuscated>");
     }
 
     @Override

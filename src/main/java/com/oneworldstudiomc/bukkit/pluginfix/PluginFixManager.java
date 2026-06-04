@@ -3848,6 +3848,71 @@ public class PluginFixManager {
         }
     }
 
+    public static void mythicScheduleLoadedMobLoadRetryCompat(Object activeMob) {
+        if (activeMob == null || !mythicValidateLoadedMobCompat(activeMob)) {
+            return;
+        }
+
+        org.bukkit.plugin.Plugin mythicMobs = org.bukkit.Bukkit.getPluginManager().getPlugin("MythicMobs");
+        if (mythicMobs == null || !mythicMobs.isEnabled()) {
+            return;
+        }
+
+        org.bukkit.Bukkit.getScheduler().runTaskLater(mythicMobs, () -> mythicFireLoadedMobLoadTriggerCompat(activeMob), 20L);
+        org.bukkit.Bukkit.getScheduler().runTaskLater(mythicMobs, () -> mythicFireLoadedMobLoadTriggerCompat(activeMob), 60L);
+    }
+
+    private static boolean mythicValidateLoadedMobCompat(Object activeMob) {
+        try {
+            Object validated = invokeNoArgs(activeMob, "validateLoadedMob");
+            return !(validated instanceof Boolean valid) || valid;
+        } catch (Throwable ignored) {
+            return true;
+        }
+    }
+
+    private static void mythicFireLoadedMobLoadTriggerCompat(Object activeMob) {
+        try {
+            if (activeMob == null || !mythicValidateLoadedMobCompat(activeMob)) {
+                return;
+            }
+
+            Object entity = invokeNoArgs(activeMob, "getEntity");
+            if (entity == null) {
+                return;
+            }
+
+            Object mobType = invokeNoArgs(activeMob, "getType");
+            if (mobType == null) {
+                return;
+            }
+
+            ClassLoader mythicLoader = activeMob.getClass().getClassLoader();
+            Class<?> skillTriggerClass = Class.forName("io.lumine.mythic.api.skills.SkillTrigger", false, mythicLoader);
+            Class<?> skillCasterClass = Class.forName("io.lumine.mythic.api.skills.SkillCaster", false, mythicLoader);
+            Class<?> abstractEntityClass = Class.forName("io.lumine.mythic.api.adapters.AbstractEntity", false, mythicLoader);
+            Class<?> skillMetadataImplClass = Class.forName("io.lumine.mythic.core.skills.SkillMetadataImpl", false, mythicLoader);
+            Class<?> skillMetadataClass = Class.forName("io.lumine.mythic.api.skills.SkillMetadata", false, mythicLoader);
+
+            Object loadTrigger = skillTriggerClass.getMethod("get", String.class).invoke(null, "LOAD");
+            if (loadTrigger == null) {
+                loadTrigger = skillTriggerClass.getMethod("trigger", String.class).invoke(null, "LOAD");
+            }
+            if (loadTrigger == null) {
+                return;
+            }
+
+            Object metadata = skillMetadataImplClass
+                    .getConstructor(skillTriggerClass, skillCasterClass, abstractEntityClass)
+                    .newInstance(loadTrigger, activeMob, entity);
+
+            mobType.getClass()
+                    .getMethod("executeSkills", skillTriggerClass, skillMetadataClass)
+                    .invoke(mobType, loadTrigger, metadata);
+        } catch (Throwable ignored) {
+        }
+    }
+
     private static void fixMythicMobsGiveCommand(ClassNode node) {
         for (MethodNode methodNode : node.methods) {
             if (!"onCommand".equals(methodNode.name)
@@ -5098,6 +5163,23 @@ public class PluginFixManager {
 
     private static void fixMythicCrucibleSkillEventListeners(ClassNode node) {
         for (MethodNode methodNode : node.methods) {
+            for (AbstractInsnNode insn = methodNode.instructions.getFirst(); insn != null; insn = insn.getNext()) {
+                if (!(insn instanceof MethodInsnNode methodInsnNode)) {
+                    continue;
+                }
+                if (methodInsnNode.getOpcode() == Opcodes.INVOKEVIRTUAL
+                        && "org/bukkit/inventory/ItemStack".equals(methodInsnNode.owner)
+                        && "hasItemMeta".equals(methodInsnNode.name)
+                        && "()Z".equals(methodInsnNode.desc)) {
+                    methodInsnNode.setOpcode(Opcodes.INVOKESTATIC);
+                    methodInsnNode.owner = Type.getInternalName(PluginFixManager.class);
+                    methodInsnNode.name = "hasItemMetaSafeCompat";
+                    methodInsnNode.desc = "(Lorg/bukkit/inventory/ItemStack;)Z";
+                    methodInsnNode.itf = false;
+                    clearLocalDebugInfo(methodNode);
+                }
+            }
+
             boolean disableProtocolLibInit = "initProtocolLibListeners".equals(methodNode.name) && "()V".equals(methodNode.desc);
             boolean disableProtocolLibDropInit = "initProtocolLibDropListeners".equals(methodNode.name) && "()V".equals(methodNode.desc);
             boolean disableBrokenMythicTrigger = "onMythicTrigger".equals(methodNode.name) && "(Lio/lumine/mythic/bukkit/events/MythicTriggerEvent;)V".equals(methodNode.desc);
@@ -5111,6 +5193,10 @@ public class PluginFixManager {
             methodNode.instructions = toInject;
             methodNode.tryCatchBlocks.clear();
         }
+    }
+
+    public static boolean hasItemMetaSafeCompat(org.bukkit.inventory.ItemStack itemStack) {
+        return itemStack != null && itemStack.hasItemMeta();
     }
 
     private static void fixMythicCrucibleInventoryViewInvoke(ClassNode node) {

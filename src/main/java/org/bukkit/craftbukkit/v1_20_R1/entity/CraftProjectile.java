@@ -1,5 +1,6 @@
 package org.bukkit.craftbukkit.v1_20_R1.entity;
 
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import org.bukkit.craftbukkit.v1_20_R1.CraftServer;
 import org.bukkit.entity.Projectile;
@@ -12,7 +13,18 @@ public abstract class CraftProjectile extends AbstractProjectile implements Proj
 
     @Override
     public ProjectileSource getShooter() {
-        return getHandle().projectileSource;
+        ProjectileSource source = getHandle().projectileSource;
+        if (source != null) {
+            return source;
+        }
+
+        Entity owner = getHandle().getOwner();
+        if (owner != null && owner.getBukkitEntity() instanceof ProjectileSource projectileSource) {
+            getHandle().projectileSource = projectileSource;
+            return projectileSource;
+        }
+
+        return null;
     }
 
     @Override

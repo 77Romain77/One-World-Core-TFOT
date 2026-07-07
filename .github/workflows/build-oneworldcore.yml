@@ -73,23 +73,29 @@ jobs:
           $text = Get-Content $path -Raw
 
           if ($text -notmatch 'OWC/MythicDamageDebug') {
-            $needle = @'
-        event.setCancelled(cancelled);
-        callEvent(event);
-
-        if (!event.isCancelled()) {
-'@
-            $replacement = @'
-        event.setCancelled(cancelled);
-        org.bukkit.entity.Entity debugDamager = event instanceof org.bukkit.event.entity.EntityDamageByEntityEvent debugByEntity ? debugByEntity.getDamager() : null;
-        Object debugShooter = debugDamager instanceof org.bukkit.entity.Projectile debugProjectile ? debugProjectile.getShooter() : null;
-        com.oneworldstudiomc.OneWorldCore.LOGGER.info("[OWC/MythicDamageDebug] BEFORE {} cause={} cancelled={} damage={} finalDamage={} damagee={} damager={} shooter={}", event.getClass().getSimpleName(), event.getCause(), event.isCancelled(), event.getDamage(), event.getFinalDamage(), event.getEntity(), debugDamager, debugShooter);
-        callEvent(event);
-        com.oneworldstudiomc.OneWorldCore.LOGGER.info("[OWC/MythicDamageDebug] AFTER {} cause={} cancelled={} damage={} finalDamage={} damagee={} damager={} shooter={}", event.getClass().getSimpleName(), event.getCause(), event.isCancelled(), event.getDamage(), event.getFinalDamage(), event.getEntity(), debugDamager, debugShooter);
-
-        if (!event.isCancelled()) {
-'@
+            $nl = [Environment]::NewLine
+            $needle = [string]::Join($nl, @(
+              '        event.setCancelled(cancelled);',
+              '        callEvent(event);',
+              '',
+              '        if (!event.isCancelled()) {'
+            ))
+            $replacement = [string]::Join($nl, @(
+              '        event.setCancelled(cancelled);',
+              '        org.bukkit.entity.Entity debugDamager = event instanceof org.bukkit.event.entity.EntityDamageByEntityEvent debugByEntity ? debugByEntity.getDamager() : null;',
+              '        Object debugShooter = debugDamager instanceof org.bukkit.entity.Projectile debugProjectile ? debugProjectile.getShooter() : null;',
+              '        com.oneworldstudiomc.OneWorldCore.LOGGER.info("[OWC/MythicDamageDebug] BEFORE {} cause={} cancelled={} damage={} finalDamage={} damagee={} damager={} shooter={}", event.getClass().getSimpleName(), event.getCause(), event.isCancelled(), event.getDamage(), event.getFinalDamage(), event.getEntity(), debugDamager, debugShooter);',
+              '        callEvent(event);',
+              '        com.oneworldstudiomc.OneWorldCore.LOGGER.info("[OWC/MythicDamageDebug] AFTER {} cause={} cancelled={} damage={} finalDamage={} damagee={} damager={} shooter={}", event.getClass().getSimpleName(), event.getCause(), event.isCancelled(), event.getDamage(), event.getFinalDamage(), event.getEntity(), debugDamager, debugShooter);',
+              '',
+              '        if (!event.isCancelled()) {'
+            ))
             $patched = $text.Replace($needle, $replacement)
+            if ($patched -eq $text) {
+              $needle = $needle.Replace($nl, "`n")
+              $replacement = $replacement.Replace($nl, "`n")
+              $patched = $text.Replace($needle, $replacement)
+            }
             if ($patched -eq $text) {
               throw 'Unable to inject Mythic damage diagnostics into CraftEventFactory.'
             }

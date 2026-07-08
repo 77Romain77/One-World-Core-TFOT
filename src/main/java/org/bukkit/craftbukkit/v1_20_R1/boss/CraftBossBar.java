@@ -47,6 +47,10 @@ public class CraftBossBar implements BossBar {
         this.initialize();
     }
 
+    public ServerBossEvent getHandle() {
+        return handle;
+    }
+
     private void initialize() {
         this.flags = new HashMap<>();
         this.flags.put(BarFlag.DARKEN_SKY, new FlagContainer(handle::shouldDarkenScreen, handle::setDarkenScreen));

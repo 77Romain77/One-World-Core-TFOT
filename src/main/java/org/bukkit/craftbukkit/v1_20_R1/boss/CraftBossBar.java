@@ -27,7 +27,7 @@ public class CraftBossBar implements BossBar {
 
     public CraftBossBar(String title, BarColor color, BarStyle style, BarFlag... flags) {
         handle = new ServerBossEvent(
-                CraftChatMessage.fromBossBarString(title, true)[0],
+                CraftChatMessage.fromString(title, true)[0],
                 convertColor(color),
                 convertStyle(style)
         );
@@ -45,10 +45,6 @@ public class CraftBossBar implements BossBar {
     public CraftBossBar(ServerBossEvent bossBattleServer) {
         this.handle = bossBattleServer;
         this.initialize();
-    }
-
-    public ServerBossEvent getHandle() {
-        return handle;
     }
 
     private void initialize() {
@@ -107,7 +103,7 @@ public class CraftBossBar implements BossBar {
 
     @Override
     public void setTitle(String title) {
-        handle.name = CraftChatMessage.fromBossBarString(title, true)[0];
+        handle.name = CraftChatMessage.fromString(title, true)[0];
         handle.broadcast(ClientboundBossEventPacket::createUpdateNamePacket);
     }
 
@@ -222,12 +218,16 @@ public class CraftBossBar implements BossBar {
 
     private final class FlagContainer {
 
-        private final Supplier<Boolean> get;
-        private final Consumer<Boolean> set;
+        private Supplier<Boolean> get;
+        private Consumer<Boolean> set;
 
         private FlagContainer(Supplier<Boolean> get, Consumer<Boolean> set) {
             this.get = get;
             this.set = set;
         }
+    }
+
+    public ServerBossEvent getHandle() {
+        return handle;
     }
 }

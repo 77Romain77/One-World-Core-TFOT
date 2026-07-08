@@ -2,7 +2,6 @@ package org.bukkit.craftbukkit.v1_20_R1.boss;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.ChatFormatting;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.network.chat.Style;
@@ -124,25 +123,39 @@ public class CraftBossBar implements BossBar {
                 String hex = readLegacyHex(title, i);
                 if (hex != null) {
                     appendBossBarText(root, text, state.style());
-                    state.color = TextColor.parseColor(hex);
+                    state.color = TextColor.fromRgb(Integer.parseInt(hex.substring(1), 16));
                     i += 12;
                     continue;
                 }
             }
 
-            ChatFormatting formatting = ChatFormatting.getByCode(code);
-            if (formatting == null) {
-                text.append(ChatColor.COLOR_CHAR).append(code);
-                continue;
-            }
-
             appendBossBarText(root, text, state.style());
-            if (formatting == ChatFormatting.RESET) {
-                state.reset();
-            } else if (formatting.isColor()) {
-                state.color = TextColor.fromLegacyFormat(formatting);
-            } else if (formatting.isFormat()) {
-                state.apply(formatting);
+            switch (code) {
+                case '0': state.color = TextColor.fromRgb(0x000000); break;
+                case '1': state.color = TextColor.fromRgb(0x0000AA); break;
+                case '2': state.color = TextColor.fromRgb(0x00AA00); break;
+                case '3': state.color = TextColor.fromRgb(0x00AAAA); break;
+                case '4': state.color = TextColor.fromRgb(0xAA0000); break;
+                case '5': state.color = TextColor.fromRgb(0xAA00AA); break;
+                case '6': state.color = TextColor.fromRgb(0xFFAA00); break;
+                case '7': state.color = TextColor.fromRgb(0xAAAAAA); break;
+                case '8': state.color = TextColor.fromRgb(0x555555); break;
+                case '9': state.color = TextColor.fromRgb(0x5555FF); break;
+                case 'a': state.color = TextColor.fromRgb(0x55FF55); break;
+                case 'b': state.color = TextColor.fromRgb(0x55FFFF); break;
+                case 'c': state.color = TextColor.fromRgb(0xFF5555); break;
+                case 'd': state.color = TextColor.fromRgb(0xFF55FF); break;
+                case 'e': state.color = TextColor.fromRgb(0xFFFF55); break;
+                case 'f': state.color = TextColor.fromRgb(0xFFFFFF); break;
+                case 'k': state.obfuscated = true; break;
+                case 'l': state.bold = true; break;
+                case 'm': state.strikethrough = true; break;
+                case 'n': state.underlined = true; break;
+                case 'o': state.italic = true; break;
+                case 'r': state.reset(); break;
+                default:
+                    text.append(ChatColor.COLOR_CHAR).append(code);
+                    break;
             }
         }
 
@@ -156,8 +169,8 @@ public class CraftBossBar implements BossBar {
         }
 
         StringBuilder hex = new StringBuilder("#");
-        for (int i = 1; i <= 6; i++) {
-            int sectionIndex = xIndex + (i * 2) - 1;
+        for (int digitNumber = 1; digitNumber <= 6; digitNumber++) {
+            int sectionIndex = xIndex + (digitNumber * 2) - 1;
             int digitIndex = sectionIndex + 1;
             if (title.charAt(sectionIndex) != ChatColor.COLOR_CHAR) {
                 return null;
@@ -186,28 +199,6 @@ public class CraftBossBar implements BossBar {
         private boolean underlined;
         private boolean strikethrough;
         private boolean obfuscated;
-
-        private void apply(ChatFormatting formatting) {
-            switch (formatting) {
-                case BOLD:
-                    this.bold = true;
-                    break;
-                case ITALIC:
-                    this.italic = true;
-                    break;
-                case UNDERLINE:
-                    this.underlined = true;
-                    break;
-                case STRIKETHROUGH:
-                    this.strikethrough = true;
-                    break;
-                case OBFUSCATED:
-                    this.obfuscated = true;
-                    break;
-                default:
-                    break;
-            }
-        }
 
         private Style style() {
             Style style = Style.EMPTY;

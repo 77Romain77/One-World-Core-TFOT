@@ -2,10 +2,16 @@ package org.bukkit.craftbukkit.v1_20_R1.boss;
 
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.ChatFormatting;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
+import net.minecraft.network.chat.TextColor;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.BossEvent;
+import org.bukkit.ChatColor;
 import org.bukkit.boss.BarColor;
 import org.bukkit.boss.BarFlag;
 import org.bukkit.boss.BarStyle;
@@ -27,7 +33,7 @@ public class CraftBossBar implements BossBar {
 
     public CraftBossBar(String title, BarColor color, BarStyle style, BarFlag... flags) {
         handle = new ServerBossEvent(
-                CraftChatMessage.fromString(title, true)[0],
+                fromBossBarTitle(title),
                 convertColor(color),
                 convertStyle(style)
         );
@@ -96,6 +102,146 @@ public class CraftBossBar implements BossBar {
         }
     }
 
+    private static Component fromBossBarTitle(String title) {
+        if (title == null || title.indexOf(ChatColor.COLOR_CHAR) < 0) {
+            return CraftChatMessage.fromString(title, true)[0];
+        }
+
+        MutableComponent root = Component.empty();
+        StringBuilder text = new StringBuilder();
+        StyleState state = new StyleState();
+        int length = title.length();
+
+        for (int i = 0; i < length; i++) {
+            char current = title.charAt(i);
+            if (current != ChatColor.COLOR_CHAR || i + 1 >= length) {
+                text.append(current);
+                continue;
+            }
+
+            char code = Character.toLowerCase(title.charAt(++i));
+            if (code == 'x') {
+                String hex = readLegacyHex(title, i);
+                if (hex != null) {
+                    appendBossBarText(root, text, state.style());
+                    state.color = TextColor.parseColor(hex);
+                    i += 12;
+                    continue;
+                }
+            }
+
+            ChatFormatting formatting = ChatFormatting.getByCode(code);
+            if (formatting == null) {
+                text.append(ChatColor.COLOR_CHAR).append(code);
+                continue;
+            }
+
+            appendBossBarText(root, text, state.style());
+            if (formatting == ChatFormatting.RESET) {
+                state.reset();
+            } else if (formatting.isColor()) {
+                state.color = TextColor.fromLegacyFormat(formatting);
+            } else if (formatting.isFormat()) {
+                state.apply(formatting);
+            }
+        }
+
+        appendBossBarText(root, text, state.style());
+        return root;
+    }
+
+    private static String readLegacyHex(String title, int xIndex) {
+        if (xIndex + 12 >= title.length()) {
+            return null;
+        }
+
+        StringBuilder hex = new StringBuilder("#");
+        for (int i = 1; i <= 6; i++) {
+            int sectionIndex = xIndex + (i * 2) - 1;
+            int digitIndex = sectionIndex + 1;
+            if (title.charAt(sectionIndex) != ChatColor.COLOR_CHAR) {
+                return null;
+            }
+            char digit = title.charAt(digitIndex);
+            if (Character.digit(digit, 16) == -1) {
+                return null;
+            }
+            hex.append(digit);
+        }
+        return hex.toString();
+    }
+
+    private static void appendBossBarText(MutableComponent root, StringBuilder text, Style style) {
+        if (text.length() == 0) {
+            return;
+        }
+        root.append(Component.literal(text.toString()).setStyle(style));
+        text.setLength(0);
+    }
+
+    private static final class StyleState {
+        private TextColor color;
+        private boolean bold;
+        private boolean italic;
+        private boolean underlined;
+        private boolean strikethrough;
+        private boolean obfuscated;
+
+        private void apply(ChatFormatting formatting) {
+            switch (formatting) {
+                case BOLD:
+                    this.bold = true;
+                    break;
+                case ITALIC:
+                    this.italic = true;
+                    break;
+                case UNDERLINE:
+                    this.underlined = true;
+                    break;
+                case STRIKETHROUGH:
+                    this.strikethrough = true;
+                    break;
+                case OBFUSCATED:
+                    this.obfuscated = true;
+                    break;
+                default:
+                    break;
+            }
+        }
+
+        private Style style() {
+            Style style = Style.EMPTY;
+            if (this.color != null) {
+                style = style.withColor(this.color);
+            }
+            if (this.bold) {
+                style = style.withBold(true);
+            }
+            if (this.italic) {
+                style = style.withItalic(true);
+            }
+            if (this.underlined) {
+                style = style.withUnderlined(true);
+            }
+            if (this.strikethrough) {
+                style = style.withStrikethrough(true);
+            }
+            if (this.obfuscated) {
+                style = style.withObfuscated(true);
+            }
+            return style;
+        }
+
+        private void reset() {
+            this.color = null;
+            this.bold = false;
+            this.italic = false;
+            this.underlined = false;
+            this.strikethrough = false;
+            this.obfuscated = false;
+        }
+    }
+
     @Override
     public String getTitle() {
         return CraftChatMessage.fromComponent(handle.name);
@@ -103,7 +249,7 @@ public class CraftBossBar implements BossBar {
 
     @Override
     public void setTitle(String title) {
-        handle.name = CraftChatMessage.fromString(title, true)[0];
+        handle.name = fromBossBarTitle(title);
         handle.broadcast(ClientboundBossEventPacket::createUpdateNamePacket);
     }
 
@@ -218,16 +364,12 @@ public class CraftBossBar implements BossBar {
 
     private final class FlagContainer {
 
-        private Supplier<Boolean> get;
-        private Consumer<Boolean> set;
+        private final Supplier<Boolean> get;
+        private final Consumer<Boolean> set;
 
         private FlagContainer(Supplier<Boolean> get, Consumer<Boolean> set) {
             this.get = get;
             this.set = set;
         }
-    }
-
-    public ServerBossEvent getHandle() {
-        return handle;
     }
 }

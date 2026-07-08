@@ -56,15 +56,9 @@ public final class CraftChatMessage {
         private int currentIndex;
         private StringBuilder hex;
         private final String message;
-        private final boolean preserveFormattingOnColor;
 
         private StringMessage(String message, boolean keepNewlines, boolean plain) {
-            this(message, keepNewlines, plain, false);
-        }
-
-        private StringMessage(String message, boolean keepNewlines, boolean plain, boolean preserveFormattingOnColor) {
             this.message = message;
-            this.preserveFormattingOnColor = preserveFormattingOnColor;
             if (message == null) {
                 output = new Component[]{currentChatComponent};
                 return;
@@ -95,7 +89,7 @@ public final class CraftChatMessage {
                         hex.append(c);
 
                         if (hex.length() == 7) {
-                            modifier = withColor(TextColor.parseColor(hex.toString()));
+                            modifier = RESET.withColor(TextColor.parseColor(hex.toString()));
                             hex = null;
                         }
                     } else if (format.isFormat() && format != ChatFormatting.RESET) {
@@ -118,8 +112,8 @@ public final class CraftChatMessage {
                         default:
                             throw new AssertionError("Unexpected message format");
                         }
-                    } else { // Color resets formatting, except in bossbar titles where gradients must keep active formats.
-                        modifier = withColor(format);
+                    } else { // Color resets formatting
+                        modifier = RESET.withColor(format);
                     }
                     needsAdd = true;
                     break;
@@ -150,14 +144,6 @@ public final class CraftChatMessage {
             }
 
             output = list.toArray(new Component[list.size()]);
-        }
-
-        private Style withColor(ChatFormatting format) {
-            return (preserveFormattingOnColor ? modifier : RESET).withColor(format);
-        }
-
-        private Style withColor(TextColor color) {
-            return (preserveFormattingOnColor ? modifier : RESET).withColor(color);
         }
 
         private void appendNewComponent(int index) {
@@ -193,10 +179,6 @@ public final class CraftChatMessage {
 
     public static Component[] fromString(String message, boolean keepNewlines, boolean plain) {
         return new StringMessage(message, keepNewlines, plain).getOutput();
-    }
-
-    public static Component[] fromBossBarString(String message, boolean keepNewlines) {
-        return new StringMessage(message, keepNewlines, false, true).getOutput();
     }
 
     public static String toJSON(Component component) {

@@ -609,8 +609,32 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
       this.nextTickTime = Util.getMillis();
       if (serverlevel.keepSpawnInMemory) {
          serverchunkcache.addRegionTicket(TicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
-         while (serverchunkcache.getTickingGenerated() != 441) {
+         int targetGeneratedChunks = 441;
+         long spawnLoadStart = Util.getMillis();
+         long nextSpawnLoadLog = spawnLoadStart + 5000L;
+         int generatedChunks = serverchunkcache.getTickingGenerated();
+
+         while (generatedChunks < targetGeneratedChunks) {
             this.executeModerately();
+            long now = Util.getMillis();
+            generatedChunks = serverchunkcache.getTickingGenerated();
+
+            if (now >= nextSpawnLoadLog) {
+               LOGGER.info("[Spawn loading] dimension={} generated={}/{} elapsed={}s",
+                       serverlevel.dimension().location(), generatedChunks, targetGeneratedChunks, (now - spawnLoadStart) / 1000L);
+               nextSpawnLoadLog = now + 5000L;
+            }
+
+            if (generatedChunks < targetGeneratedChunks && now - spawnLoadStart >= 120000L) {
+               LOGGER.error("Timed out while preparing spawn for dimension {}: generated={}/{} after {} seconds. Continuing startup to avoid an indefinite freeze.",
+                       serverlevel.dimension().location(), generatedChunks, targetGeneratedChunks, (now - spawnLoadStart) / 1000L);
+               break;
+            }
+         }
+
+         if (generatedChunks > targetGeneratedChunks) {
+            LOGGER.warn("Spawn chunk counter exceeded target for dimension {}: generated={}/{}. Continuing startup.",
+                    serverlevel.dimension().location(), generatedChunks, targetGeneratedChunks);
          }
       }
 

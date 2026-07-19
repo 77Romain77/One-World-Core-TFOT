@@ -185,7 +185,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
    private static final int MAX_STATUS_PLAYER_SAMPLE = 12;
    public static final int START_CHUNK_RADIUS = 11;
    private static final int START_TICKING_CHUNK_COUNT = 441;
-   private static final String TUTORIAL_SPAWN_DIMENSION_PATH = "spawn_tuto";
    private static final int AUTOSAVE_INTERVAL = 6000;
    private static final int MAX_TICK_LATENCY = 3;
    public static final int ABSOLUTE_MAX_WORLD_SIZE = 29999984;
@@ -625,7 +624,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
          int generatedChunks = serverchunkcache.getTickingGenerated();
 
          while (generatedChunks < targetGeneratedChunks) {
-            this.executeModerately();
+            this.executeOneTaskDuringSpawnPreparation();
             long now = Util.getMillis();
             generatedChunks = serverchunkcache.getTickingGenerated();
 
@@ -648,15 +647,20 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
          }
       }
 
-      this.executeModerately();
       p_129941_.stop();
       serverlevel.setSpawnSettings(this.isSpawningMonsters(), this.isSpawningAnimals());
       this.forceTicks = false;
    }
 
+   private void executeOneTaskDuringSpawnPreparation() {
+      if (!this.pollTask()) {
+         java.util.concurrent.locks.LockSupport.parkNanos("waiting for spawn chunks", 100000L);
+      }
+   }
+
    private boolean shouldPrepareStartRegion(ServerLevel serverlevel) {
       return Level.OVERWORLD.equals(serverlevel.dimension())
-              || TUTORIAL_SPAWN_DIMENSION_PATH.equals(serverlevel.dimension().location().getPath());
+              || "spawn_tuto".equals(serverlevel.dimension().location().getPath());
    }
 
    private void skipStartRegionPreparation(ChunkProgressListener progressListener, ServerLevel serverlevel) {

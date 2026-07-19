@@ -185,6 +185,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
    private static final int MAX_STATUS_PLAYER_SAMPLE = 12;
    public static final int START_CHUNK_RADIUS = 11;
    private static final int START_TICKING_CHUNK_COUNT = 441;
+   private static final String TUTORIAL_SPAWN_DIMENSION_PATH = "spawn_tuto";
    private static final int AUTOSAVE_INTERVAL = 6000;
    private static final int MAX_TICK_LATENCY = 3;
    public static final int ABSOLUTE_MAX_WORLD_SIZE = 29999984;
@@ -442,14 +443,24 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
             worldborder.addListener(new BorderChangeListener.DelegateBorderChangeListener(serverlevel1.getWorldBorder()));
             this.levels.put(resourcekey1, serverlevel1);
             this.initWorld(serverlevel1, derivedleveldata, worldData, worldoptions); // CraftBukkit
-            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.level.LevelEvent.Load(levels.get(resourcekey)));
+            net.minecraftforge.common.MinecraftForge.EVENT_BUS.post(new net.minecraftforge.event.level.LevelEvent.Load(serverlevel1));
          }
       }
 
       worldborder.applySettings(serverleveldata.getWorldBorder());
 
       for (ServerLevel worldserver : this.getAllLevels()) {
-         this.prepareLevels(worldserver.getChunkSource().chunkMap.progressListener, worldserver);
+         ChunkProgressListener progressListener = worldserver.getChunkSource().chunkMap.progressListener;
+         if (this.shouldPrepareStartRegion(worldserver)) {
+            this.prepareLevels(progressListener, worldserver);
+         } else {
+            this.skipStartRegionPreparation(progressListener, worldserver);
+         }
+      }
+
+      this.reinstateForcedChunks();
+
+      for (ServerLevel worldserver : this.getAllLevels()) {
          worldserver.entityManager.tick(); // SPIGOT-6526: Load pending entities so they are available to the API
          this.server.getPluginManager().callEvent(new org.bukkit.event.world.WorldLoadEvent(worldserver.getWorld()));
       }
@@ -600,7 +611,6 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
    public void prepareLevels(ChunkProgressListener p_129941_) {
       this.markWorldsDirty();
       ServerLevel serverlevel = prepareLevels$serverlevel.getAndSet(this.overworld());
-      MinecraftForge.EVENT_BUS.post(new LevelEvent.Load(serverlevel));
       this.forceTicks = true;
       LOGGER.info("Preparing start region for dimension {}", (Object)serverlevel.dimension().location());
       BlockPos blockpos = serverlevel.getSharedSpawnPos();
@@ -609,7 +619,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
       this.nextTickTime = Util.getMillis();
       if (serverlevel.keepSpawnInMemory) {
          serverchunkcache.addRegionTicket(TicketType.START, new ChunkPos(blockpos), 11, Unit.INSTANCE);
-         int targetGeneratedChunks = 441;
+         int targetGeneratedChunks = START_TICKING_CHUNK_COUNT;
          long spawnLoadStart = Util.getMillis();
          long nextSpawnLoadLog = spawnLoadStart + 5000L;
          int generatedChunks = serverchunkcache.getTickingGenerated();
@@ -639,6 +649,26 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
       }
 
       this.executeModerately();
+      p_129941_.stop();
+      serverlevel.setSpawnSettings(this.isSpawningMonsters(), this.isSpawningAnimals());
+      this.forceTicks = false;
+   }
+
+   private boolean shouldPrepareStartRegion(ServerLevel serverlevel) {
+      return Level.OVERWORLD.equals(serverlevel.dimension())
+              || TUTORIAL_SPAWN_DIMENSION_PATH.equals(serverlevel.dimension().location().getPath());
+   }
+
+   private void skipStartRegionPreparation(ChunkProgressListener progressListener, ServerLevel serverlevel) {
+      LOGGER.info("Skipping start region preparation for dimension {}; chunks will load on demand",
+              (Object)serverlevel.dimension().location());
+      progressListener.updateSpawnPos(new ChunkPos(serverlevel.getSharedSpawnPos()));
+      progressListener.stop();
+      serverlevel.setSpawnSettings(this.isSpawningMonsters(), this.isSpawningAnimals());
+   }
+
+   private void reinstateForcedChunks() {
+      this.executeModerately();
       for (ServerLevel serverLevel : this.levels.values()) {
          ForcedChunksSavedData forcedchunkssaveddata = serverLevel.getDataStorage().get(ForcedChunksSavedData::load, "chunks");
          if (forcedchunkssaveddata != null) {
@@ -653,14 +683,7 @@ public abstract class MinecraftServer extends ReentrantBlockableEventLoop<TickTa
          }
       }
 
-      // CraftBukkit start
       this.executeModerately();
-      // CraftBukkit end
-      p_129941_.stop();
-      // CraftBukkit start
-      serverlevel.setSpawnSettings(this.isSpawningMonsters(), this.isSpawningAnimals());
-      this.forceTicks = false;
-      // CraftBukkit end
    }
 
    public GameType getDefaultGameType() {

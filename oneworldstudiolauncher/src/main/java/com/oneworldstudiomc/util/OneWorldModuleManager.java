@@ -156,7 +156,7 @@ public class OneWorldModuleManager {
         List<String> opens = new ArrayList<>();
         List<String> exports = new ArrayList<>();
 
-        args.parallelStream().forEach(arg -> {
+        args.forEach(arg -> {
             if (arg.startsWith("-p ")) {
                 MODULE_PATH = arg.substring(2).trim();
             } else if (arg.startsWith("--add-opens")) {

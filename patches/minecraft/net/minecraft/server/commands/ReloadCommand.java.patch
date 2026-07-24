@@ -1,6 +1,18 @@
 --- a/net/minecraft/server/commands/ReloadCommand.java
 +++ b/net/minecraft/server/commands/ReloadCommand.java
-@@ -54,4 +_,14 @@
+@@ -16,7 +_,10 @@
+    private static final Logger f_138220_ = LogUtils.getLogger();
+ 
+    public static void m_138235_(Collection<String> p_138236_, CommandSourceStack p_138237_) {
+-      p_138237_.m_81377_().m_129861_(p_138236_).exceptionally((p_138234_) -> {
++      p_138237_.m_81377_().m_129861_(p_138236_).thenRun(() -> {
++         org.bukkit.Bukkit.getPluginManager().callEvent(new com.oneworldstudiomc.paper.event.server.ServerResourcesReloadedEvent(
++                 com.oneworldstudiomc.paper.event.server.ServerResourcesReloadedEvent.Cause.COMMAND));
++      }).exceptionally((p_138234_) -> {
+          f_138220_.warn("Failed to execute reload", p_138234_);
+          p_138237_.m_81352_(Component.m_237115_("commands.reload.failure"));
+          return null;
+@@ -54,4 +_,17 @@
           return 0;
        }));
     }
@@ -11,7 +23,10 @@
 +      WorldData savedata = minecraftserver.m_129910_();
 +      Collection<String> collection = resourcepackrepository.m_10523_();
 +      Collection<String> collection1 = m_138222_(resourcepackrepository, savedata, collection);
-+      minecraftserver.m_129861_(collection1);
++      minecraftserver.m_129861_(collection1).thenRun(() -> {
++         org.bukkit.Bukkit.getPluginManager().callEvent(new com.oneworldstudiomc.paper.event.server.ServerResourcesReloadedEvent(
++                 com.oneworldstudiomc.paper.event.server.ServerResourcesReloadedEvent.Cause.PLUGIN));
++      });
 +   }
 +   // CraftBukkit end
  }

@@ -5,6 +5,7 @@ import com.google.common.io.ByteStreams;
 import com.oneworldstudiomc.OneWorldCore;
 import com.oneworldstudiomc.bukkit.pluginfix.PluginFixManager;
 import com.oneworldstudiomc.bukkit.remapping.ClassLoaderRemapper;
+import com.oneworldstudiomc.bukkit.remapping.GlobalClassRepo;
 import com.oneworldstudiomc.bukkit.remapping.Remapper;
 import com.oneworldstudiomc.bukkit.remapping.RemappingClassLoader;
 import com.oneworldstudiomc.plugins.PluginHooks;
@@ -37,6 +38,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
@@ -58,6 +60,7 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
     private JavaPlugin pluginInit;
     private IllegalStateException pluginState;
     private final Set<String> seenIllegalAccess = Collections.newSetFromMap(new ConcurrentHashMap<>());
+    private final Set<String> directJarFallbackLogged = Collections.newSetFromMap(new ConcurrentHashMap<>());
 
     static {
         ClassLoader.registerAsParallelCapable();
@@ -228,53 +231,35 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
 
         if (result == null) {
             String path = name.replace('.', '/').concat(".class");
-            URL url = this.findResource(path);
+            URL resourceUrl = this.findResource(path);
+            Product2<byte[], CodeSource> classBytes = null;
 
-            if (url != null) {
+            if (resourceUrl != null) {
                 final boolean bypassProtocolLibRemap = shouldBypassRemapPipeline();
 
                 URLConnection connection;
                 Callable<byte[]> byteSource;
                 try {
-                    connection = url.openConnection();
+                    connection = resourceUrl.openConnection();
                     connection.connect();
                     byteSource = () -> {
                         try (InputStream is = connection.getInputStream()) {
-                            byte[] classBytes = ByteStreams.toByteArray(is);
-                            if (!bypassProtocolLibRemap) {
-                                classBytes = Remapper.SWITCH_TABLE_FIXER.apply(classBytes);
-                                classBytes = Bukkit.getUnsafe().processClass(description, path, classBytes);
-                            }
-                            classBytes = PluginFixManager.injectPluginFix(name, classBytes); // Mohist - Inject plugin fix
-                            return classBytes;
+                            return processClassBytes(name, path, ByteStreams.toByteArray(is), bypassProtocolLibRemap);
                         }
                     };
                 } catch (IOException e) {
                     throw new ClassNotFoundException(name, e);
                 }
 
-                Product2<byte[], CodeSource> classBytes = bypassProtocolLibRemap
+                classBytes = bypassProtocolLibRemap
                         ? loadUnmappedClass(name, byteSource, connection)
                         : this.getRemapper().remapClass(name, byteSource, connection);
+            } else {
+                classBytes = loadClassDirectlyFromJar(name, path);
+            }
 
-                int dot = name.lastIndexOf('.');
-                if (dot != -1) {
-                    String pkgName = name.substring(0, dot);
-                    if (getPackage(pkgName) == null) {
-                        try {
-                            if (manifest != null) {
-                                definePackage(pkgName, manifest, url);
-                            } else {
-                                definePackage(pkgName, null, null, null, null, null, null, null);
-                            }
-                        } catch (IllegalArgumentException ex) {
-                            if (getPackage(pkgName) == null) {
-                                throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.30", pkgName));
-                            }
-                        }
-                    }
-                }
-
+            if (classBytes != null) {
+                definePackageIfNeeded(name, resourceUrl != null ? resourceUrl : this.url);
                 result = defineClass(name, classBytes._1, 0, classBytes._1.length, classBytes._2);
             }
 
@@ -287,6 +272,62 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
         }
 
         return result;
+    }
+
+    private byte[] processClassBytes(String className, String path, byte[] classBytes, boolean bypassProtocolLibRemap) {
+        if (!bypassProtocolLibRemap) {
+            classBytes = Remapper.SWITCH_TABLE_FIXER.apply(classBytes);
+            classBytes = Bukkit.getUnsafe().processClass(description, path, classBytes);
+        }
+        return PluginFixManager.injectPluginFix(className, classBytes);
+    }
+
+    @Nullable
+    private Product2<byte[], CodeSource> loadClassDirectlyFromJar(String className, String path) throws ClassNotFoundException {
+        JarEntry entry = this.jar.getJarEntry(path);
+        if (entry == null || entry.isDirectory()) {
+            return null;
+        }
+
+        final boolean bypassProtocolLibRemap = shouldBypassRemapPipeline();
+        try (InputStream input = this.jar.getInputStream(entry)) {
+            byte[] classBytes = processClassBytes(className, path, ByteStreams.toByteArray(input), bypassProtocolLibRemap);
+            if (!bypassProtocolLibRemap) {
+                classBytes = this.getRemapper().remapClassFile(classBytes, GlobalClassRepo.INSTANCE);
+            }
+
+            if (directJarFallbackLogged.add(className)) {
+                OneWorldCore.LOGGER.warn("Recovered plugin class {} directly from {} after URL resource lookup failed", className, this.file.getName());
+            }
+
+            return Product.of(classBytes, new CodeSource(this.url, entry.getCodeSigners()));
+        } catch (Exception e) {
+            throw new ClassNotFoundException(className, e);
+        }
+    }
+
+    private void definePackageIfNeeded(String className, URL sourceUrl) {
+        int dot = className.lastIndexOf('.');
+        if (dot == -1) {
+            return;
+        }
+
+        String packageName = className.substring(0, dot);
+        if (getPackage(packageName) != null) {
+            return;
+        }
+
+        try {
+            if (manifest != null) {
+                definePackage(packageName, manifest, sourceUrl);
+            } else {
+                definePackage(packageName, null, null, null, null, null, null, null);
+            }
+        } catch (IllegalArgumentException ex) {
+            if (getPackage(packageName) == null) {
+                throw new IllegalStateException(OneWorldCore.i18n.as("mohist.i18n.30", packageName));
+            }
+        }
     }
 
     private boolean shouldBypassRemapPipeline() {

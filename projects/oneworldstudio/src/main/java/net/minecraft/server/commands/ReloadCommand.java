@@ -16,7 +16,10 @@ public class ReloadCommand {
    private static final Logger LOGGER = LogUtils.getLogger();
 
    public static void reloadPacks(Collection<String> p_138236_, CommandSourceStack p_138237_) {
-      p_138237_.getServer().reloadResources(p_138236_).exceptionally((p_138234_) -> {
+      p_138237_.getServer().reloadResources(p_138236_).thenRun(() -> {
+         org.bukkit.Bukkit.getPluginManager().callEvent(new com.oneworldstudiomc.paper.event.server.ServerResourcesReloadedEvent(
+                 com.oneworldstudiomc.paper.event.server.ServerResourcesReloadedEvent.Cause.COMMAND));
+      }).exceptionally((p_138234_) -> {
          LOGGER.warn("Failed to execute reload", p_138234_);
          p_138237_.sendFailure(Component.translatable("commands.reload.failure"));
          return null;
@@ -61,7 +64,10 @@ public class ReloadCommand {
       WorldData savedata = minecraftserver.getWorldData();
       Collection<String> collection = resourcepackrepository.getSelectedIds();
       Collection<String> collection1 = discoverNewPacks(resourcepackrepository, savedata, collection);
-      minecraftserver.reloadResources(collection1);
+      minecraftserver.reloadResources(collection1).thenRun(() -> {
+         org.bukkit.Bukkit.getPluginManager().callEvent(new com.oneworldstudiomc.paper.event.server.ServerResourcesReloadedEvent(
+                 com.oneworldstudiomc.paper.event.server.ServerResourcesReloadedEvent.Cause.PLUGIN));
+      });
    }
    // CraftBukkit end
 }

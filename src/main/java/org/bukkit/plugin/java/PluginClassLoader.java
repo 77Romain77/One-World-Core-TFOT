@@ -367,7 +367,7 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
     }
 
     synchronized void initialize(@NotNull JavaPlugin javaPlugin) {
-        Preconditions.checkArgument(javaPlugin != null, "Initializing plugin with null");
+        Preconditions.checkArgument(javaPlugin != null, "Initializing plugin cannot be null");
         Preconditions.checkArgument(javaPlugin.getClass().getClassLoader() == this, "Cannot initialize plugin outside of this class loader");
         if (this.plugin != null || this.pluginInit != null) {
             throw new IllegalArgumentException("Plugin already initialized!", pluginState);
@@ -375,6 +375,7 @@ public final class PluginClassLoader extends URLClassLoader implements Remapping
 
         pluginState = new IllegalStateException("Initial initialization");
         this.pluginInit = javaPlugin;
+
         javaPlugin.init(loader, loader.server, description, dataFolder, file, this);
     }
 }

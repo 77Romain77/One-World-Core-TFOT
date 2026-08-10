@@ -6,7 +6,6 @@ on:
     branches:
       - main
       - 1.20.1
-      - agent/fix-spigot-hunger-config
   pull_request:
     branches:
       - main
@@ -97,5 +96,3 @@ jobs:
             **/build/**/*.log
             **/hs_err_pid*.log
           if-no-files-found: ignore
-
-# hunger test branch rebuild trigger

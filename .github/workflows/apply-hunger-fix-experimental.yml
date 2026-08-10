@@ -1,0 +1,74 @@
+name: Apply experimental Spigot hunger wiring
+
+on:
+  push:
+    branches:
+      - agent/fix-spigot-hunger-config
+
+permissions:
+  contents: write
+
+jobs:
+  apply:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Wire Spigot hunger settings
+        shell: pwsh
+        run: |
+          function Replace-Exact {
+            param(
+              [string]$Path,
+              [string]$Old,
+              [string]$New,
+              [int]$ExpectedCount
+            )
+
+            $content = Get-Content $Path -Raw
+            $count = ([regex]::Matches($content, [regex]::Escape($Old))).Count
+            if ($count -ne $ExpectedCount) {
+              throw "Expected $ExpectedCount occurrence(s) of '$Old' in $Path, found $count"
+            }
+            $content = $content.Replace($Old, $New)
+            Set-Content $Path -Value $content -NoNewline
+          }
+
+          $playerPatch = 'patches/minecraft/net/minecraft/world/entity/player/Player.java.patch'
+          Replace-Exact $playerPatch 'this.m_36399_(0.2F);' 'this.m_36399_(this.m_9236_().spigotConfig.jumpSprintExhaustion);' 1
+          Replace-Exact $playerPatch 'this.m_36399_(0.05F);' 'this.m_36399_(this.m_9236_().spigotConfig.jumpWalkExhaustion);' 1
+          Replace-Exact $playerPatch 'this.m_36399_(0.01F * (float)' 'this.m_36399_(this.m_9236_().spigotConfig.swimMultiplier * (float)' 3
+          Replace-Exact $playerPatch 'this.m_36399_(0.1F * (float)l * 0.01F);' 'this.m_36399_(this.m_9236_().spigotConfig.sprintMultiplier * (float)l * 0.01F);' 1
+          Replace-Exact $playerPatch 'this.m_36399_(0.0F * (float)l * 0.01F);' 'this.m_36399_(this.m_9236_().spigotConfig.otherMultiplier * (float)l * 0.01F);' 2
+
+          $foodPatch = 'patches/minecraft/net/minecraft/world/food/FoodData.java.patch'
+          Replace-Exact $foodPatch 'p_38711_.m_36399_(6.0f);' 'p_38711_.m_36399_(p_38711_.m_9236_().spigotConfig.regenExhaustion);' 1
+
+          $playerSource = 'projects/oneworldstudio/src/main/java/net/minecraft/world/entity/player/Player.java'
+          Replace-Exact $playerSource 'this.causeFoodExhaustion(0.2F);' 'this.causeFoodExhaustion(this.level().spigotConfig.jumpSprintExhaustion);' 1
+          Replace-Exact $playerSource 'this.causeFoodExhaustion(0.05F);' 'this.causeFoodExhaustion(this.level().spigotConfig.jumpWalkExhaustion);' 1
+          Replace-Exact $playerSource 'this.causeFoodExhaustion(0.01F * (float)' 'this.causeFoodExhaustion(this.level().spigotConfig.swimMultiplier * (float)' 3
+          Replace-Exact $playerSource 'this.causeFoodExhaustion(0.1F * (float)l * 0.01F);' 'this.causeFoodExhaustion(this.level().spigotConfig.sprintMultiplier * (float)l * 0.01F);' 1
+          Replace-Exact $playerSource 'this.causeFoodExhaustion(0.0F * (float)l * 0.01F);' 'this.causeFoodExhaustion(this.level().spigotConfig.otherMultiplier * (float)l * 0.01F);' 2
+
+          $foodSource = 'projects/oneworldstudio/src/main/java/net/minecraft/world/food/FoodData.java'
+          Replace-Exact $foodSource 'p_38711_.causeFoodExhaustion(6.0f);' 'p_38711_.causeFoodExhaustion(p_38711_.level().spigotConfig.regenExhaustion);' 1
+
+          git diff --check
+
+      - name: Commit experimental fix
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git rm .github/workflows/apply-hunger-fix-experimental.yml
+          git add patches/minecraft/net/minecraft/world/entity/player/Player.java.patch
+          git add patches/minecraft/net/minecraft/world/food/FoodData.java.patch
+          git add projects/oneworldstudio/src/main/java/net/minecraft/world/entity/player/Player.java
+          git add projects/oneworldstudio/src/main/java/net/minecraft/world/food/FoodData.java
+          git commit -m "Fix Spigot hunger config wiring [skip ci]"
+          git push origin HEAD:agent/fix-spigot-hunger-config

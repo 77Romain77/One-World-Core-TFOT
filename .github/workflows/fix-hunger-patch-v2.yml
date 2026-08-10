@@ -1,0 +1,51 @@
+name: Fix hunger patch markers v2
+
+on:
+  push:
+    branches:
+      - agent/fix-spigot-hunger-config
+    paths:
+      - .github/workflows/fix-hunger-patch-v2.yml
+
+jobs:
+  fix:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - name: Repair patch markers
+        shell: python
+        run: |
+          from pathlib import Path
+
+          p = Path('patches/minecraft/net/minecraft/world/entity/player/Player.java.patch')
+          s = p.read_text(encoding='utf-8')
+
+          replacements = {
+              ' -         this.m_36399_(0.2F)\n': '-         this.m_36399_(0.2F);\n',
+              ' -         this.m_36399_(0.05F);\n': '-         this.m_36399_(0.05F);\n',
+              ' -               this.m_36399_(0.01F * (float)i * 0.01F);\n': '-               this.m_36399_(0.01F * (float)i * 0.01F);\n',
+              ' -               this.m_36399_(0.01F * (float)j * 0.01F);\n': '-               this.m_36399_(0.01F * (float)j * 0.01F);\n',
+              ' -               this.m_36399_(0.01F * (float)k * 0.01F);\n': '-               this.m_36399_(0.01F * (float)k * 0.01F);\n',
+              ' -                  this.m_36399_(0.1F * (float)l * 0.01F);\n': '-                  this.m_36399_(0.1F * (float)l * 0.01F);\n',
+              ' -                  this.m_36399_(0.0F * (float)l * 0.01F);\n': '-                  this.m_36399_(0.0F * (float)l * 0.01F);\n',
+          }
+
+          for old, new in replacements.items():
+              if old not in s:
+                  raise SystemExit(f'Missing expected patch line: {old!r}')
+              s = s.replace(old, new)
+
+          p.write_text(s, encoding='utf-8', newline='\n')
+      - name: Validate and commit
+        run: |
+          git diff --check
+          grep -n '^ -.*m_36399_' patches/minecraft/net/minecraft/world/entity/player/Player.java.patch && exit 1 || true
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add patches/minecraft/net/minecraft/world/entity/player/Player.java.patch
+          git commit -m "Repair hunger patch deletion markers [skip ci]"
+          git push

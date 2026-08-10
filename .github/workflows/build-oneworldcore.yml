@@ -97,3 +97,5 @@ jobs:
             **/build/**/*.log
             **/hs_err_pid*.log
           if-no-files-found: ignore
+
+# hunger test branch rebuild trigger

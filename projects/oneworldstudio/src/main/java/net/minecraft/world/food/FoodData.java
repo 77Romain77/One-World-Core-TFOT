@@ -106,7 +106,7 @@ public class FoodData {
             p_38711_.regainReason0.set(EntityRegainHealthEvent.RegainReason.SATIATED);
             p_38711_.heal(1.0F);
             p_38711_.exhaustionReason(org.bukkit.event.entity.EntityExhaustionEvent.ExhaustionReason.REGEN); // CraftBukkit - EntityExhaustionEvent
-            p_38711_.causeFoodExhaustion(6.0f);
+            p_38711_.causeFoodExhaustion(p_38711_.level().spigotConfig.regenExhaustion);
             this.tickTimer = 0;
          }
       } else if (this.foodLevel <= 0) {

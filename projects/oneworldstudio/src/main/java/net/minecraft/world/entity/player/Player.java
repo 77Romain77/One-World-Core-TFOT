@@ -1552,10 +1552,10 @@ public abstract class Player extends LivingEntity implements net.minecraftforge.
       this.awardStat(Stats.JUMP);
       if (this.isSprinting()) {
          this.exhaustionReason(EntityExhaustionEvent.ExhaustionReason.JUMP_SPRINT); // CraftBukkit - EntityExhaustionEvent
-         this.causeFoodExhaustion(0.2F);
+         this.causeFoodExhaustion(this.level().spigotConfig.jumpSprintExhaustion);
       } else {
          this.exhaustionReason(EntityExhaustionEvent.ExhaustionReason.JUMP); // CraftBukkit - EntityExhaustionEvent
-         this.causeFoodExhaustion(0.05F);
+         this.causeFoodExhaustion(this.level().spigotConfig.jumpWalkExhaustion);
       }
 
    }
@@ -1615,21 +1615,21 @@ public abstract class Player extends LivingEntity implements net.minecraftforge.
             if (i > 0) {
                this.awardStat(Stats.SWIM_ONE_CM, i);
                this.exhaustionReason(EntityExhaustionEvent.ExhaustionReason.SWIM);
-               this.causeFoodExhaustion(0.01F * (float)i * 0.01F);
+               this.causeFoodExhaustion(this.level().spigotConfig.swimMultiplier * (float)i * 0.01F);
             }
          } else if (this.isEyeInFluid(FluidTags.WATER)) {
             int j = Math.round((float)Math.sqrt(p_36379_ * p_36379_ + p_36380_ * p_36380_ + p_36381_ * p_36381_) * 100.0F);
             if (j > 0) {
                this.awardStat(Stats.WALK_UNDER_WATER_ONE_CM, j);
                this.exhaustionReason(EntityExhaustionEvent.ExhaustionReason.WALK_UNDERWATER);
-               this.causeFoodExhaustion(0.01F * (float)j * 0.01F);
+               this.causeFoodExhaustion(this.level().spigotConfig.swimMultiplier * (float)j * 0.01F);
             }
          } else if (this.isInWater()) {
             int k = Math.round((float)Math.sqrt(p_36379_ * p_36379_ + p_36381_ * p_36381_) * 100.0F);
             if (k > 0) {
                this.awardStat(Stats.WALK_ON_WATER_ONE_CM, k);
                this.exhaustionReason(EntityExhaustionEvent.ExhaustionReason.WALK_ON_WATER);
-               this.causeFoodExhaustion(0.01F * (float)k * 0.01F);
+               this.causeFoodExhaustion(this.level().spigotConfig.swimMultiplier * (float)k * 0.01F);
             }
          } else if (this.onClimbable()) {
             if (p_36380_ > 0.0D) {
@@ -1641,15 +1641,15 @@ public abstract class Player extends LivingEntity implements net.minecraftforge.
                if (this.isSprinting()) {
                   this.awardStat(Stats.SPRINT_ONE_CM, l);
                   this.exhaustionReason(EntityExhaustionEvent.ExhaustionReason.SPRINT);
-                  this.causeFoodExhaustion(0.1F * (float)l * 0.01F);
+                  this.causeFoodExhaustion(this.level().spigotConfig.sprintMultiplier * (float)l * 0.01F);
                } else if (this.isCrouching()) {
                   this.awardStat(Stats.CROUCH_ONE_CM, l);
                   this.exhaustionReason(EntityExhaustionEvent.ExhaustionReason.CROUCH);
-                  this.causeFoodExhaustion(0.0F * (float)l * 0.01F);
+                  this.causeFoodExhaustion(this.level().spigotConfig.otherMultiplier * (float)l * 0.01F);
                } else {
                   this.awardStat(Stats.WALK_ONE_CM, l);
                   this.exhaustionReason(EntityExhaustionEvent.ExhaustionReason.WALK);
-                  this.causeFoodExhaustion(0.0F * (float)l * 0.01F);
+                  this.causeFoodExhaustion(this.level().spigotConfig.otherMultiplier * (float)l * 0.01F);
                }
             }
          } else if (this.isFallFlying()) {

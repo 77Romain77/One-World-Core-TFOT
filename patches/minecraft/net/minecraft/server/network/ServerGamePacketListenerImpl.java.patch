@@ -474,7 +474,7 @@
 +                      ServerGamePacketListenerImpl.this.f_9745_.scheduleOnMain(new Runnable() {
 +                          @Override
 +                          public void run() { // This needs to be on main
-+                              ParseResults<CommandSourceStack> parseresults = ServerGamePacketListenerImpl.this.f_9745_.m_129892_().m_82094_().parse(stringreader, ServerGamePacketListenerImpl.this.f_9743_.m_20203_());
++                              ParseResults<CommandSourceStack> parseresults = ServerGamePacketListenerImpl.this.f_9745_.m_129892_().parseCommand(stringreader, ServerGamePacketListenerImpl.this.f_9743_.m_20203_());
 +
 +                              ServerGamePacketListenerImpl.this.f_9745_.m_129892_().m_82094_().getCompletionSuggestions(parseresults).thenAccept((p_238197_) -> {
 +                                  if (p_238197_.isEmpty())
@@ -1250,6 +1250,12 @@
     }
  
     private void m_246889_(SignedMessageChain.DecodeException p_252068_) {
+@@ -1257,4 +_,3 @@
+    private ParseResults<CommandSourceStack> m_242658_(String p_242938_) {
+-      CommandDispatcher<CommandSourceStack> commanddispatcher = this.f_9745_.m_129892_().m_82094_();
+-      return commanddispatcher.parse(p_242938_, this.f_9743_.m_20203_());
++      return this.f_9745_.m_129892_().parseCommand(p_242938_, this.f_9743_.m_20203_());
+    }
 @@ -1266,7 +_,7 @@
           return Optional.empty();
        } else {

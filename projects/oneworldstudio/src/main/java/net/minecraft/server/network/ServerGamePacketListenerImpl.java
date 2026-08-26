@@ -765,7 +765,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
                       ServerGamePacketListenerImpl.this.server.scheduleOnMain(new Runnable() {
                           @Override
                           public void run() { // This needs to be on main
-                              ParseResults<CommandSourceStack> parseresults = ServerGamePacketListenerImpl.this.server.getCommands().getDispatcher().parse(stringreader, ServerGamePacketListenerImpl.this.player.createCommandSourceStack());
+                              ParseResults<CommandSourceStack> parseresults = ServerGamePacketListenerImpl.this.server.getCommands().parseCommand(stringreader, ServerGamePacketListenerImpl.this.player.createCommandSourceStack());
 
                               ServerGamePacketListenerImpl.this.server.getCommands().getDispatcher().getCompletionSuggestions(parseresults).thenAccept((p_238197_) -> {
                                   if (p_238197_.isEmpty())
@@ -1940,8 +1940,7 @@ public class ServerGamePacketListenerImpl implements ServerPlayerConnection, Tic
    }
 
    private ParseResults<CommandSourceStack> parseCommand(String p_242938_) {
-      CommandDispatcher<CommandSourceStack> commanddispatcher = this.server.getCommands().getDispatcher();
-      return commanddispatcher.parse(p_242938_, this.player.createCommandSourceStack());
+      return this.server.getCommands().parseCommand(p_242938_, this.player.createCommandSourceStack());
    }
 
    private Optional<LastSeenMessages> tryHandleChat(String p_251364_, Instant p_248959_, LastSeenMessages.Update p_249613_) {

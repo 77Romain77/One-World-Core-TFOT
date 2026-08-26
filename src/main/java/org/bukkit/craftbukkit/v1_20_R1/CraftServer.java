@@ -965,7 +965,7 @@ public final class CraftServer implements Server {
         if (stringreader.canRead() && stringreader.peek() == '/') {
             stringreader.skip();
         }
-        ParseResults<CommandSourceStack> parse = ServerAPI.getNMSServer().getCommands().getDispatcher().parse(stringreader, commandSource);
+        ParseResults<CommandSourceStack> parse = ServerAPI.getNMSServer().getCommands().parseCommand(stringreader, commandSource);
         CommandEvent event = new CommandEvent(parse);
         if (MinecraftForge.EVENT_BUS.post(event)) {
             return null;

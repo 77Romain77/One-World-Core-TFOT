@@ -64,7 +64,27 @@ public class CommandSourceStack implements SharedSuggestionProvider, net.minecra
    private final CommandSigningContext signingContext;
    private final TaskChainer chatMessageChainer;
    private final IntConsumer returnValueConsumer;
-   public volatile CommandNode currentCommand; // CraftBukkit
+   public volatile CommandNode currentCommand; // CraftBukkit - legacy binary compatibility
+   private final java.util.Map<Thread, CommandNode<CommandSourceStack>> currentCommands = new java.util.concurrent.ConcurrentHashMap<>(); // Paper - thread-safe command permission context
+
+   @Nullable
+   public CommandNode<CommandSourceStack> getCurrentCommand() {
+      CommandNode<CommandSourceStack> contextualCommand = this.currentCommands.get(Thread.currentThread());
+      return contextualCommand != null ? contextualCommand : this.currentCommand;
+   }
+
+   @Nullable
+   CommandNode<CommandSourceStack> getContextualCommand() {
+      return this.currentCommands.get(Thread.currentThread());
+   }
+
+   public void setCurrentCommand(@Nullable CommandNode<CommandSourceStack> command) {
+      if (command == null) {
+         this.currentCommands.remove(Thread.currentThread());
+      } else {
+         this.currentCommands.put(Thread.currentThread(), command);
+      }
+   }
 
    public boolean bypassSelectorPermissions = false; // Paper
 
@@ -180,7 +200,7 @@ public class CommandSourceStack implements SharedSuggestionProvider, net.minecra
 
    public boolean hasPermission(int p_81370_) {
       // CraftBukkit start
-      CommandNode currentCommand = this.currentCommand;
+      CommandNode<CommandSourceStack> currentCommand = this.getCurrentCommand();
       if (currentCommand != null) {
          String cmd = VanillaCommandWrapper.getPermission(currentCommand);
          if (OneWorldCoreConfig.permissions_debug_console) {

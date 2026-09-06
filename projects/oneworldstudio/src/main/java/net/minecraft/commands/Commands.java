@@ -290,8 +290,27 @@ public class Commands {
 
    public int performPrefixedCommand(CommandSourceStack commandlistenerwrapper, String s, String label) {
       s = s.startsWith("/") ? s.substring(1) : s;
-      return this.performCommand(this.dispatcher.parse(s, commandlistenerwrapper), s, label);
+      return this.performCommand(this.parseCommand(s, commandlistenerwrapper), s, label);
       // CraftBukkit end
+   }
+
+   public ParseResults<CommandSourceStack> parseCommand(String command, CommandSourceStack source) {
+      return this.parseCommand(new StringReader(command), source);
+   }
+
+   public ParseResults<CommandSourceStack> parseCommand(StringReader reader, CommandSourceStack source) {
+      int cursor = reader.getCursor();
+      String rootName = reader.readUnquotedString();
+      reader.setCursor(cursor);
+      CommandNode<CommandSourceStack> previousCommand = source.getContextualCommand();
+      CommandNode<CommandSourceStack> rootCommand = this.dispatcher.getRoot().getChild(rootName);
+
+      try {
+         source.setCurrentCommand(rootCommand);
+         return this.dispatcher.parse(reader, source);
+      } finally {
+         source.setCurrentCommand(previousCommand);
+      }
    }
 
    // Mohist start - add field to compat with mods
@@ -433,11 +452,12 @@ public class Commands {
 
    public static <S> boolean canUse(CommandNode<S> node, S source) {
       if (source instanceof CommandSourceStack s) {
+         CommandNode<CommandSourceStack> previousCommand = s.getContextualCommand();
          try {
-            s.currentCommand = node;
+            s.setCurrentCommand((CommandNode<CommandSourceStack>) node);
             return node.canUse(source);
          } finally {
-            s.currentCommand = null;
+            s.setCurrentCommand(previousCommand);
          }
       } else {
          return node.canUse(source);

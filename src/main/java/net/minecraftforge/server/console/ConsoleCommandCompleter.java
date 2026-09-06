@@ -55,7 +55,7 @@ final class ConsoleCommandCompleter implements Completer
 
         try
         {
-            ParseResults<CommandSourceStack> results = this.server.getCommands().getDispatcher().parse(stringReader, this.server.createCommandSourceStack());
+            ParseResults<CommandSourceStack> results = this.server.getCommands().parseCommand(stringReader, this.server.createCommandSourceStack());
             Suggestions tabComplete = this.server.getCommands().getDispatcher().getCompletionSuggestions(results).get();
             for (Suggestion suggestion : tabComplete.getList())
             {
@@ -79,4 +79,3 @@ final class ConsoleCommandCompleter implements Completer
     }
 
 }
-

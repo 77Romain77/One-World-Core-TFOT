@@ -52,7 +52,7 @@ public final class VanillaCommandWrapper extends BukkitCommand {
         Preconditions.checkArgument(alias != null, "Alias cannot be null");
 
         CommandSourceStack icommandlistener = getListener(sender);
-        ParseResults<CommandSourceStack> parsed = dispatcher.getDispatcher().parse(toDispatcher(args, getName()), icommandlistener);
+        ParseResults<CommandSourceStack> parsed = dispatcher.parseCommand(toDispatcher(args, getName()), icommandlistener);
 
         List<String> results = new ArrayList<>();
         dispatcher.getDispatcher().getCompletionSuggestions(parsed).thenAccept((suggestions) -> {

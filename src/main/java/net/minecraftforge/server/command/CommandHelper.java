@@ -47,7 +47,7 @@ public final class CommandHelper
         sourceToResult.put(sourceNode, resultNode);
         for (CommandNode<S> sourceChild : sourceNode.getChildren())
         {
-            if (sourceChild.canUse(canUse))
+            if (net.minecraft.commands.Commands.canUse(sourceChild, canUse))
             {
                 resultNode.addChild(toResult(sourceChild, sourceToResult, canUse, execute, sourceToResultSuggestion));
             }
@@ -109,4 +109,3 @@ public final class CommandHelper
         return resultNode;
     }
 }
-
